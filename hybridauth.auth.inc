@@ -1,19 +1,36 @@
 <?php
 
 function hybridauth_get_providers() {
-  return array(
-    'OpenID'      => 'OpenID',
-    'Facebook'    => 'Facebook',
-    'Twitter'     => 'Twitter',
-    'LinkedIn'    => 'LinkedIn',
-    'MySpace'     => 'MySpace',
-    'Google'      => 'Google',
-    'Yahoo'       => 'Yahoo',
-    'YahooOAuth'  => 'Yahoo (OAuth)',
-    'Foursquare'  => 'Foursquare',
-    'AOL'         => 'AOL',
-    'Live'        => 'Windows Live',
-  );
+  $providers = &drupal_static(__FUNCTION__, NULL);
+  
+  if (!isset($providers)) {
+    $raw_providers = array(
+      'OpenID'      => 'OpenID',
+      'Facebook'    => 'Facebook',
+      'Twitter'     => 'Twitter',
+      'LinkedIn'    => 'LinkedIn',
+      'MySpace'     => 'MySpace',
+      'Google'      => 'Google',
+      'Yahoo'       => 'Yahoo',
+      'YahooOAuth'  => 'Yahoo (OAuth)',
+      'Foursquare'  => 'Foursquare',
+      'AOL'         => 'AOL',
+      'Live'        => 'Windows Live',
+    );
+    $providers = array();
+    $weights = array();
+    
+    foreach ($raw_providers as $provider_id => $provider_name) {
+      $weights[$provider_id] = variable_get('hybridauth_provider_' . $provider_id . '_weight', 0);
+    }
+    asort($weights);
+    
+    foreach ($weights as $provider_id => $weight) {
+      $providers[$provider_id] = $raw_providers[$provider_id];
+    }
+  }
+  
+  return $providers;
 }
 
 function hybridauth_get_enabled_providers() {

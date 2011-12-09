@@ -5,7 +5,7 @@ define('HYBRIDAUTH_MINIMUM_PHP', '5.2.0');
 /**
  * Implements hook_permission().
  */
-function rpx_ui_permission() {
+function hybridauth_permission() {
   $permissions = array(
     'administer hybridauth' =>  array(
       'title' => t('Administer HybridAuth settings'),
@@ -36,6 +36,14 @@ function hybridauth_menu() {
   $items['admin/config/people/hybridauth/general'] = array(
     'title' => 'General Settings',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+  );
+  $items['admin/config/people/hybridauth/provider/%'] = array(
+    'title callback' => 'hybridauth_admin_format_provider_title',
+    'title arguments' => array(5),
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('hybridauth_admin_provider_settings', 5),
+    'file' => 'hybridauth.admin.inc',
+    'access arguments' => array('administer hybridauth'),
   );
   
   $items['hybridauth/endpoint'] = array(
@@ -82,6 +90,14 @@ function hybridauth_menu() {
 }
 
 /**
+ * Display a text format form title.
+ */
+function hybridauth_admin_format_provider_title($provider_id) {
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  return hybridauth_get_provider_name($provider_id);
+}
+
+/**
  * Menu item access callback - users should be allowed to 'manage own
  * identities' and edit user data for the account.
  */
@@ -95,7 +111,7 @@ function _hybridauth_own_identities_access($account) {
  * Prefills the registration form with values acquired via HybridAuth.
  */
 function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
-  // Only alter if the user is signing in using HybridAuth (the rpx session may
+  // Only alter if the user is signing in using HybridAuth (the HybridAuth session may
   // still be set if admin has signed in using HybridAuth and is adding a user, so
   // check that this is not the case).
   if (!isset($_SESSION) || !isset($_SESSION['hybridauth']) || $_SESSION['hybridauth']['stat'] != 'ok' || user_access('administer users')) {
@@ -119,7 +135,7 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
   /*
   if (!empty($profile['verifiedEmail']) ||
       !variable_get('user_email_verification', TRUE) ||
-      variable_get('rpx_bypass_email_verification', FALSE)) {
+      variable_get('hybridauth_bypass_email_verification', FALSE)) {
 
     $form['account']['pass']['#type'] = 'hidden';
     $form['account']['pass']['#value'] = user_password();
@@ -169,7 +185,7 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
         if (is_array($category)) {
           foreach ($category as $field_key => $field) {
             if (substr($field_key, 0, 8) == 'profile_' && isset($map[$field_key])) {
-              $form[$category_key][$field_key]['#default_value'] = _rpx_data_map($_SESSION['rpx'], $map[$field_key]);
+              $form[$category_key][$field_key]['#default_value'] = _hybridauth_data_map($_SESSION['hybridauth'], $map[$field_key]);
             }
           }
         }
@@ -195,7 +211,7 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
     if(!empty($map)) {
       foreach (field_info_instances('profile2') as $bundle => $fields) {
         foreach ($fields as $field => $array) {
-          if (isset($map[$bundle.$field]) && $mapped_value = _rpx_data_map($_SESSION['rpx'], $map[$bundle.$field])) {
+          if (isset($map[$bundle.$field]) && $mapped_value = _hybridauth_data_map($_SESSION['hybridauth'], $map[$bundle.$field])) {
             $form['profile_' . $bundle][$field][LANGUAGE_NONE][0]['value']['#default_value'] = $mapped_value;
           }
         }
@@ -218,7 +234,7 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
   if(!empty($map)) {
     foreach (field_info_instances('user') as $bundle => $fields) {
       foreach ($fields as $field => $array) {
-        if (isset($map[$field]) && $mapped_value = _rpx_data_map($_SESSION['rpx'], $map[$field])) {
+        if (isset($map[$field]) && $mapped_value = _hybridauth_data_map($_SESSION['hybridauth'], $map[$field])) {
           $form[$field][LANGUAGE_NONE][0]['value']['#default_value'] = $mapped_value;
         }
       }
@@ -333,7 +349,7 @@ function hybridauth_user_register_submit($form, &$form_state) {
   
   // If no email verification required, log the user in immediately.
   if ((!variable_get('user_email_verification', TRUE) ||
-       variable_get('rpx_bypass_email_verification', FALSE) ||
+       variable_get('hybridauth_bypass_email_verification', FALSE) ||
        !empty($_SESSION['hybridauth']['profile']['verifiedEmail']) &&
        strtolower($account->mail) == strtolower($_SESSION['hybridauth']['profile']['verifiedEmail'])) &&
       $account->status) {
@@ -438,9 +454,9 @@ function hybridauth_mail($key, &$message, $params) {
 }
 
 /**
- * Returns a mail string for rpx_confirm_email_*.
+ * Returns a mail string for hybridauth_confirm_email_*.
  *
- * Used by rpx_core_mail() and the settings forms to retrieve mail strings.
+ * Used by hybridauth_core_mail() and the settings forms to retrieve mail strings.
  */
 function _hybridauth_mail_text($key, $language = NULL, $variables = array(), $replace = TRUE) {
   $langcode = isset($language) ? $language->language : NULL;
@@ -483,6 +499,10 @@ After confirming your email address, you will be able to log in to [site:name] u
  */
 function hybridauth_theme($existing, $type, $theme, $path) {
   return array(
+    'hybridauth_admin_settings' => array(
+      'render element' => 'form',
+      'file' => 'hybridauth.admin.inc',
+    ),
     'hybridauth_icon' => array(
       'variables' => array('provider' => NULL, 'size' => 'small', 'style' => NULL),
     ),
