@@ -12,7 +12,6 @@ function hybridauth_get_providers() {
       'MySpace'     => 'MySpace',
       'Google'      => 'Google',
       'Yahoo'       => 'Yahoo',
-      'YahooOAuth'  => 'Yahoo (OAuth)',
       'Foursquare'  => 'Foursquare',
       'AOL'         => 'AOL',
       'Live'        => 'Windows Live',

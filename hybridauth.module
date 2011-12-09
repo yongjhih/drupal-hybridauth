@@ -33,9 +33,26 @@ function hybridauth_menu() {
     'file' => 'hybridauth.admin.inc',
     'access arguments' => array('administer hybridauth'),
   );
-  $items['admin/config/people/hybridauth/general'] = array(
-    'title' => 'General Settings',
+  $items['admin/config/people/hybridauth/providers'] = array(
+    'title' => 'Providers',
     'type' => MENU_DEFAULT_LOCAL_TASK,
+    'weight' => -20,
+  );
+  $items['admin/config/people/hybridauth/profile'] = array(
+    'title' => 'Profile',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('hybridauth_admin_profile_settings'),
+    'file' => 'hybridauth.admin.inc',
+    'access arguments' => array('administer hybridauth'),
+  );
+  $items['admin/config/people/hybridauth/widget'] = array(
+    'title' => 'Widget',
+    'type' => MENU_LOCAL_TASK,
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('hybridauth_admin_widget_settings'),
+    'file' => 'hybridauth.admin.inc',
+    'access arguments' => array('administer hybridauth'),
   );
   $items['admin/config/people/hybridauth/provider/%'] = array(
     'title callback' => 'hybridauth_admin_format_provider_title',
@@ -103,6 +120,39 @@ function hybridauth_admin_format_provider_title($provider_id) {
  */
 function _hybridauth_own_identities_access($account) {
   return user_access('manage own identities') && user_edit_access($account);
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function hybridauth_form_user_login_block_alter(&$form, &$form_state) {
+  if (variable_get('hybridauth_widget_attach_loginform', FALSE)) {
+    _hybridauth_widget_user_login_form_alter($form, $form_state);
+  }
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function hybridauth_form_user_login_alter(&$form, &$form_state) {
+  if (variable_get('hybridauth_widget_attach_loginform', FALSE)) {
+    _hybridauth_widget_user_login_form_alter($form, $form_state);
+  }
+}
+
+/**
+ * Adds Engage sign-in link to the form.
+ */
+function _hybridauth_widget_user_login_form_alter(&$form, &$form_state) {
+  $form['hybridauth_widget_wrapper'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Or log in with...'),
+    
+    'hybridauth_widget_wrapper' => array(
+      '#theme' => 'hybridauth_widget',
+      '#weight' => variable_get('hybridauth_widget_loginform_weight', 150),
+    ),
+  );
 }
 
 /**
@@ -258,7 +308,7 @@ function _hybridauth_populate_user_record(&$account, $payload) {
  */
 function _hybridauth_save_profile_picture(&$account) {
   // Should we bother?
-  if (!variable_get('hybridauth_import_profile_photo', FALSE) ||
+  if (!variable_get('hybridauth_profile_import_photo', FALSE) ||
       !variable_get('user_pictures', 0) ||
       !isset($account->data['hybridauth_data']['profile']['photoURL'])) {
     return $account;
@@ -494,6 +544,20 @@ After confirming your email address, you will be able to log in to [site:name] u
   return $text;
 }
 
+function _hybridauth_add_widget_css() {
+  $done = &drupal_static(__FUNCTION__, FALSE);
+  if (!$done) {
+    drupal_add_css(drupal_get_path('module', 'hybridauth') . '/hybridauth.widget.css');
+  }
+}
+
+function _hybridauth_add_icon_css() {
+  $done = &drupal_static(__FUNCTION__, FALSE);
+  if (!$done) {
+    drupal_add_css(drupal_get_path('module', 'hybridauth') . '/hybridauth.icons.css');
+  }
+}
+
 /**
  * Implements hook_theme().
  */
@@ -503,8 +567,13 @@ function hybridauth_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
       'file' => 'hybridauth.admin.inc',
     ),
-    'hybridauth_icon' => array(
-      'variables' => array('provider' => NULL, 'size' => 'small', 'style' => NULL),
+    'hybridauth_widget' => array(
+      'variables' => array('size' => '64'),
+      'template' => 'hybridauth-widget',
+      'file' => 'hybridauth.widget.inc',
+    ),
+    'hybridauth_provider_icon' => array(
+      'variables' => array('provider_id' => NULL, 'size' => '64', 'style' => NULL),
     ),
   );
 }
@@ -515,17 +584,25 @@ function hybridauth_theme($existing, $type, $theme, $path) {
  * An image sprite with all Engage provider icons is included in the images
  * directory for custom theming purposes.
  */
-function theme_hybridauth_icon($variables) {
-  $provider = $variables['provider'];
+function theme_hybridauth_provider_icon($variables) {
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  
+  $provider_id = $variables['provider_id'];
+  $provider_name = hybridauth_get_provider_name($provider_id);
+  
   $style = array(
+    drupal_html_class('hybridauth-icon'),
     drupal_html_class('hybridauth-icon-' . $variables['size']),
-    drupal_html_class('hybridauth-' . $provider . '-' . $variables['size']),
+    drupal_html_class('hybridauth-' . $provider_id),
+    drupal_html_class('hybridauth-' . $provider_id . '-' . $variables['size']),
   );
   if ($variables['style']) {
     $style[] = drupal_html_class($variables['style']);
   }
-
-  return '<div' . drupal_attributes(array('class' => $style, 'id' => drupal_html_id('hybridauth-' . $provider))) . '></div>';
+  
+  _hybridauth_add_icon_css();
+  
+  return '<span' . drupal_attributes(array('class' => $style, 'id' => drupal_html_id('hybridauth-' . $provider_id), 'title' => $provider_name)) . '></span>';
 }
 
 /**

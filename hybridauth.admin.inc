@@ -12,13 +12,6 @@ function hybridauth_admin_settings() {
     '#default_value' => variable_get('hybridauth_debug', FALSE),
   );
   
-  $form['hybridauth_import_profile_photo'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Import Profile Photo'),
-    '#description' => t('When a user first registers using a social login, should we import a profile photo, if available.'),
-    '#default_value' => variable_get('hybridauth_import_profile_photo', FALSE),
-  );
-  
   $form['providers'] = array(
     '#type' => 'fieldset',
     '#title' => t('Providers'),
@@ -31,6 +24,12 @@ function hybridauth_admin_settings() {
     $form['providers'][$provider_id]['id'] = array(
       '#type' => 'hidden',
       '#value' => $provider_id,
+    );
+    $form['providers'][$provider_id]['icon'] = array(
+      '#theme' => 'hybridauth_provider_icon',
+      '#provider_id' => $provider_id,
+      '#size' => 32,
+      '#style' => 'hybridauth-icon-inline',
     );
     $form['providers'][$provider_id]['name'] = array(
       '#markup' => drupal_placeholder($provider_name),
@@ -164,12 +163,53 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   return $form;
 }
 
+function hybridauth_admin_profile_settings() {
+  $form = array();
+  
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  
+  $form['hybridauth_profile_import_photo'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Import Profile Photo'),
+    '#description' => t('When a user first registers using a social login, should we import a profile photo, if available.'),
+    '#default_value' => variable_get('hybridauth_profile_import_photo', FALSE),
+  );
+  
+  return system_settings_form($form);
+}
+
+function hybridauth_admin_widget_settings() {
+  $form = array();
+  
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  
+  $form['hybridauth_widget_attach_loginform'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Attach login widget to login form'),
+    '#description' => t('Should we add the social login widget to the login forms?'),
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform', FALSE),
+  );
+  
+  $form['hybridauth_widget_icon_size'] = array(
+    '#type' => 'select',
+    '#title' => t('Icon Size'),
+    '#options' => array(
+      '32' => '32px x 32px',
+      '48' => '48px x 48px',
+      '64' => '64px x 64px',
+    ),
+    '#default_value' => variable_get('hybridauth_widget_icon_size', '64'),
+  );
+  
+  return system_settings_form($form);
+}
+
 function theme_hybridauth_admin_settings($vars) {
   $form = $vars['form'];
   
   //Define your table headers
   $header = array(
-    t('Name'),
+    array('data' => t('Name'), 'colspan' => 2),
     t('Enabled'),
     t('Weight'),
     array('data' => t('Operations'), 'colspan' => 2),
@@ -185,6 +225,7 @@ function theme_hybridauth_admin_settings($vars) {
       
       $row = array(
         drupal_render($form['providers'][$provider_id]['name']),
+        drupal_render($form['providers'][$provider_id]['icon']),
         drupal_render($form['providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_enabled']),
         drupal_render($form['providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight']),
         drupal_render($form['providers'][$provider_id]['settings']),
@@ -198,7 +239,7 @@ function theme_hybridauth_admin_settings($vars) {
   }
    
   //Finally, output the sortable table. Make sure the id variable is the same as the table id in drupal_add_tabledrag
-  $form['providers']['#children'] = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'hybridauth-providers')));
+  $form['providers']['#children'] = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE, 'attributes' => array('id' => 'hybridauth-providers')));
   $output = drupal_render_children($form);
   
   //This function is the instantiator of the sorter. Make sure the 0th paramater is the id of your table, and the 3rd paramater is the class of your weight variable

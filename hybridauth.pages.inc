@@ -300,7 +300,7 @@ function hybridauth_user_identities($account) {
     $provider_name = hybridauth_get_provider_name($provider_id);
     
     $rows[] = array(
-      theme('hybridauth_icon', array('provider' => $provider_id, 'style' => 'hybridauth-icon-inline')) . '<span' . drupal_attributes(array('class' => 'hybridauth-provider-name')) . '>' . $provider_name .  '</span>',
+      theme('hybridauth_provider_icon', array('provider_id' => $provider_id, 'style' => 'hybridauth-icon-inline')) . '<span' . drupal_attributes(array('class' => 'hybridauth-provider-name')) . '>' . $provider_name .  '</span>',
       check_plain(_hybridauth_get_authmap_identfier($identity->authname)),
       l(t('Delete'), 'user/' . $account->uid . '/hybridauth/delete/' . $identity->aid),
     );

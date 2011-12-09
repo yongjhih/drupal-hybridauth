@@ -1,0 +1,117 @@
+
+.hybridauth-icon {
+  display: block;
+  float: left;
+}
+.hybridauth-icon-inline {
+  display: inline-block;
+  float: none;
+}
+
+.hybridauth-icon-64 {
+  background: transparent url(images/icons_64.png) 0px 0px no-repeat;
+  width: 64px;
+  height: 64px;
+}
+.hybridauth-openid-64 {
+  background-position: 0px 0px;
+}
+.hybridauth-foursquare-64 {
+  background-position: -64px 0px;
+}
+.hybridauth-live-64 {
+  background-position: -128px 0px;
+}
+.hybridauth-aol-64 {
+  background-position: -192px 0px;
+}
+.hybridauth-facebook-64 {
+  background-position: -256px 0px;
+}
+.hybridauth-google-64 {
+  background-position: -320px 0px;
+}
+.hybridauth-linkedin-64 {
+  background-position: -384px 0px;
+}
+.hybridauth-myspace-64 {
+  background-position: -448px 0px;
+}
+.hybridauth-twitter-64 {
+  background-position: -512px 0px;
+}
+.hybridauth-yahoo-64 {
+  background-position: -576px 0px;
+}
+
+.hybridauth-icon-48 {
+  background: transparent url(images/icons_48.png) 0px 0px no-repeat;
+  width: 48px;
+  height: 48px;
+}
+.hybridauth-openid-48 {
+  background-position: 0px 0px;
+}
+.hybridauth-foursquare-48 {
+  background-position: -48px 0px;
+}
+.hybridauth-live-48 {
+  background-position: -96px 0px;
+}
+.hybridauth-aol-48 {
+  background-position: -144px 0px;
+}
+.hybridauth-facebook-48 {
+  background-position: -192px 0px;
+}
+.hybridauth-google-48 {
+  background-position: -240px 0px;
+}
+.hybridauth-linkedin-48 {
+  background-position: -288px 0px;
+}
+.hybridauth-myspace-48 {
+  background-position: -336px 0px;
+}
+.hybridauth-twitter-48 {
+  background-position: -384px 0px;
+}
+.hybridauth-yahoo-48 {
+  background-position: -432px 0px;
+}
+
+.hybridauth-icon-32 {
+  background: transparent url(images/icons_32.png) 0px 0px no-repeat;
+  width: 32px;
+  height: 32px;
+}
+.hybridauth-openid-32 {
+  background-position: 0px 0px;
+}
+.hybridauth-foursquare-32 {
+  background-position: -32px 0px;
+}
+.hybridauth-live-32 {
+  background-position: -64px 0px;
+}
+.hybridauth-aol-32 {
+  background-position: -96px 0px;
+}
+.hybridauth-facebook-32 {
+  background-position: -128px 0px;
+}
+.hybridauth-google-32 {
+  background-position: -160px 0px;
+}
+.hybridauth-linkedin-32 {
+  background-position: -192px 0px;
+}
+.hybridauth-myspace-32 {
+  background-position: -224px 0px;
+}
+.hybridauth-twitter-32 {
+  background-position: -256px 0px;
+}
+.hybridauth-yahoo-32 {
+  background-position: -288px 0px;
+}
