@@ -1,0 +1,103 @@
+<?php
+
+/**
+ * Implementation of hook_requirements().
+ */
+function hybridauth_requirements($phase) {
+  $requirements = array();
+  // Ensure translations don't break at install time
+  $t = get_t();
+  
+  if ($phase == 'runtime') {
+    $lib_path = libraries_get_path('hybridauth', FALSE);
+    if ($lib_path) {
+      try {
+        require_once($lib_path . '/Hybrid/Auth.php');
+      
+        $requirements['hybridauth'] = array(
+          'title' => $t('HybridAuth'),
+          'value' => Hybrid_Auth::$version,
+          'severity' => REQUIREMENT_INFO,
+        );
+      }
+      catch(Exception $e) {
+        $requirements['hybridauth'] = array(
+          'title' => $t('HybridAuth'),
+          'value' => $e->getMessage(),
+          'severity' => REQUIREMENT_ERROR,
+        );
+      }
+    }
+    else {
+      $requirements['hybridauth'] = array(
+        'title' => $t('HybridAuth'),
+        'value' => $t('library is missing'),
+        'severity' => REQUIREMENT_ERROR,
+      );
+    }
+  }
+  
+  return $requirements;
+}
+
+/**
+ * Implementation of hook_schema().
+ */
+function hybridauth_schema() {
+  $schema = array();
+  
+  $schema['hybridauth_account'] = array(
+    'description' => 'Stores linked account information to be used with views, stats, etc.',
+    'fields' => array(
+      'aid' => array(
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'description' => 'Authmap ID from the authmap table.',
+      ),
+      'provider_id' => array(
+        'type' => 'varchar',
+        'length' => 30,
+        'not null' => TRUE,
+        'description' => 'The provider\'s ID.',
+      ),
+      'created' => array(
+        'description' => 'The last time this entry was updated',
+        'type' => 'int',
+        'length' => 10,
+        'not null' => TRUE,
+      ),
+    ),
+    'primary key' => array('aid'),
+  );
+  
+  return $schema;
+}
+
+/**
+ * Set us at schema rev 7000 as a base version.
+ */
+function hybridauth_update_7000() {
+}
+
+/**
+ * Implements hook_install().
+ */
+function hybridauth_install() {
+}
+
+/**
+ * Implements hook_uninstall().
+ */
+function hybridauth_uninstall() {
+  variable_del('hybridauth_debug');
+  
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  foreach (hybridauth_get_providers() as $provider_id => $provider_name) {
+    variable_del('hybridauth_provider_' . $provider_id . '_enabled');
+    variable_del('hybridauth_provider_' . $provider_id . '_keys_id');
+    variable_del('hybridauth_provider_' . $provider_id . '_keys_key');
+    variable_del('hybridauth_provider_' . $provider_id . '_keys_secret');
+    variable_del('hybridauth_provider_' . $provider_id . '_scope');
+  }
+}

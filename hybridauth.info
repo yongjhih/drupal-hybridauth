@@ -1,0 +1,13 @@
+name = HybridAuth
+description = Provides HybridAuth social sign-on.
+core = 7.x
+php = 5.2
+;package = "Other"
+configure = admin/config/people/hybridauth
+dependencies[] = libraries
+;files[] = views/views_plugin_style_kwicks.inc
+;files[] = panels.module
+;files[] = includes/common.inc
+;files[] = includes/legacy.inc
+;files[] = includes/plugins.inc
+;files[] = plugins/views/panels_views_plugin_row_fields.inc
