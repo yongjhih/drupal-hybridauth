@@ -16,7 +16,7 @@ function template_preprocess_hybridauth_widget(&$vars) {
       array(
         'html' => TRUE,
         'query' => array('provider' => $provider_id) + drupal_get_destination(),
-        'attributes' => array('id' => $icon_id, 'class' => 'hybridauth-widget-provider'),
+        'attributes' => array('id' => $icon_id, 'class' => array('hybridauth-widget-provider')),
       )
     );
   }
