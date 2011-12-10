@@ -85,6 +85,8 @@ function hybridauth_get_config() {
     $config = array(
       'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE)),
       'providers' => array(),
+      'debug_mode' => variable_get('hybridauth_debug', FALSE),
+      'debug_file' => file_directory_temp() . '/hybridauth.debug.log',
     );
     
     foreach (hybridauth_get_providers() as $provider_id => $provider_name) {
@@ -109,6 +111,7 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
           'secret' => variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', ''),
         ),
         'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
+        'hauth_return_to' => url('hybridauth/endpoint'),
       );
     }
   }
