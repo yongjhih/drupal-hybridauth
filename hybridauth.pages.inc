@@ -27,6 +27,17 @@ function hybridauth_router() {
     drupal_exit();
   }
   
+  // OpenID requires extra params so we use a special form
+  if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+    unset($_GET['destination']);
+    
+    $query = drupal_get_query_parameters();
+    $query['destination'] = $destination;
+    
+    drupal_goto('hybridauth/router/openid', array('query' => $query));
+  }
+  
   // Make sure it's Drupal that starts the session.
   drupal_session_start();
   
@@ -38,8 +49,13 @@ function hybridauth_router() {
     $_SESSION['hybridauth'] = array();
     $_SESSION['hybridauth']['stat'] = 'ok';
     
+    $params = NULL;
+    if (isset($_GET['openid_identifier'])) {
+      $params = array('openid_identifier' => $_GET['openid_identifier']);
+    }
+    
     try {
-      $adapter = $hybridauth->authenticate($provider_id);
+      $adapter = $hybridauth->authenticate($provider_id, $params);
       $profile = (array) ($adapter->getUserProfile());
     }
     catch(Exception $e) {
@@ -231,6 +247,51 @@ function hybridauth_router() {
   
   // We shouldn't get here, but just in case...
   return MENU_ACCESS_DENIED;
+}
+
+function hybridauth_router_openid() {
+  $provider_id = $_REQUEST['provider'];
+  if (!$provider_id) {
+    drupal_not_found();
+    drupal_exit();
+  }
+  
+  return drupal_get_form('hybridauth_router_openid_form', $provider_id);
+}
+
+function hybridauth_router_openid_form($form, &$form_state, $provider_id) {
+  $form = array();
+  
+  $form['openid_identifier'] = array(
+    '#type' => 'textfield',
+    '#title' => t('OpenID Identity'),
+    '#description' => t('Type your OpenID identity that you want to use.'),
+  );
+  
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+  $form['actions']['cancel'] = array(
+    '#type' => 'link',
+    '#title' => t('Cancel'),
+    '#href' => $_GET['destination'],
+    //'#options' => $options,
+  );
+  
+  return $form;
+}
+
+function hybridauth_router_openid_form_submit($form, &$form_state) {
+  $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+  unset($_GET['destination']);
+  
+  $query = drupal_get_query_parameters();
+  $query['openid_identifier'] = $form_state['values']['openid_identifier'];
+  $query['destination'] = $destination;
+  
+  drupal_goto('hybridauth/router', array('query' => $query));
 }
 
 /**

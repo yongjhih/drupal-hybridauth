@@ -75,6 +75,12 @@ function hybridauth_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'hybridauth.pages.inc',
   );
+  $items['hybridauth/router/openid'] = array(
+    'page callback' => 'hybridauth_router_openid',
+    'access callback' => TRUE,
+    'type' => MENU_CALLBACK,
+    'file' => 'hybridauth.pages.inc',
+  );
   $items['hybridauth/confirm/%/%/%'] = array(
     'title' => 'Confirm email',
     'page callback' => 'hybridauth_email_confirm',
