@@ -65,8 +65,8 @@ function hybridauth_admin_settings() {
 
 function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = NULL) {
   if (!isset($provider_id)) {
-    drupal_access_denied();
-    exit();
+    drupal_not_found();
+    drupal_exit();
   }
   
   $form = array();
