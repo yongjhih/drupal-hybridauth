@@ -9,3 +9,9 @@
   padding: 0;
   margin: 0;
 }
+
+#hybridauth-popup-loading {
+  width: 54px;
+  height: 55px;
+  background: transparent url(images/throbber.gif);
+}

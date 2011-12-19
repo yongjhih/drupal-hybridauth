@@ -18,248 +18,501 @@ function hybridauth_endpoint() {
   return MENU_ACCESS_DENIED;
 }
 
-function hybridauth_router() {
+function hybridauth_popup() {
   global $user;
   
-  $provider_id = $_REQUEST['provider'];
-  if (!$provider_id) {
-    drupal_not_found();
-    drupal_exit();
+  $provider_id = isset($_REQUEST['provider']) ? $_REQUEST['provider'] : NULL;
+  
+  // Make sure it's Drupal that starts the session then load the lib
+  drupal_session_start();
+  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
+  
+  // Try to get HybridAuth instance
+  try {
+    $hybridauth = hybridauth_get_instance();
+  }
+  // PHP error
+  catch (ErrorException $e) {
+    drupal_set_message(t('There was an error processing your request!'), 'error');
+    watchdog_exception('hybridauth', $e);
+    
+    if (isset($_GET['overlay']) && $_GET['overlay']) {
+      // TODO: take a look at this code
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+      drupal_add_js('
+        if (window.opener){
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+        }
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
+    }
+    drupal_goto();
+  }
+  // An error coming from HA
+  catch (Exception $e) {
+    //watchdog_exception('hybridauth', $e);
+    $redirect = TRUE;
+    
+    switch ($e->getCode()) {
+      case 5: // Authentification failed. The user has canceled the authentication or the provider refused the connection.
+        // Close popup window and leave overlay alone.
+        $redirect = FALSE;
+        break;
+        
+      case 0: // Unspecified error.
+      case 1: // Hybriauth configuration error.
+      case 2: // Provider not properly configured.
+      case 3: // Unknown or disabled provider.
+      case 4: // Missing provider application credentials.
+      default:
+        // Report the error and log it.
+        drupal_set_message(t('There was an error processing your request!'), 'error');
+        watchdog_exception('hybridauth', $e);
+    }
+    
+    // Handle the overlay situation.
+    if (isset($_GET['overlay']) && $_GET['overlay']) {
+      // TODO: take a look at this code
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+      drupal_add_js('
+        var redirect = ' . ($redirect ? 'true' : 'false') . ';
+        if (window.opener && redirect) {
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+        }
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
+    }
+    drupal_goto();
   }
   
-  // OpenID requires extra params so we use a special form
-  if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
+  // If we don't have a provider ID show a list of providers.
+  if (!$provider_id) {
+    return _hybridauth_popup_list($hybridauth);
+  }
+  // Else if provider is OpenID, but we don't have the OpenID target, show OpenId form.
+  elseif ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
     $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
     unset($_GET['destination']);
     
     $query = drupal_get_query_parameters();
     $query['destination'] = $destination;
     
-    drupal_goto('hybridauth/router/openid', array('query' => $query));
+    drupal_goto('hybridauth/popup/openid', array('query' => $query));
+  }
+  // Should we try to run the authentication?
+  elseif (isset($_GET['authenticate']) && $_GET['authenticate']) {
+    return _hybridauth_popup_auth($hybridauth, $provider_id);
+  }
+  // Else let's show the provider popup
+  else {
+    return _hybridauth_popup_provider($hybridauth, $provider_id);
   }
   
-  // Make sure it's Drupal that starts the session.
-  drupal_session_start();
-  
-  module_load_include('inc', 'hybridauth', 'hybridauth.auth');
-  
-  $add_to_account = isset($_REQUEST['add']) ? TRUE : FALSE;
-  
-  if ($hybridauth = hybridauth_get_controller()) {
-    $_SESSION['hybridauth'] = array();
-    $_SESSION['hybridauth']['stat'] = 'ok';
-    
-    $params = NULL;
-    if (isset($_GET['openid_identifier'])) {
-      $params = array('openid_identifier' => $_GET['openid_identifier']);
-    }
-    
-    try {
-      $adapter = $hybridauth->authenticate($provider_id, $params);
-      $profile = (array) ($adapter->getUserProfile());
-    }
-    catch(Exception $e) {
-      $_SESSION['hybridauth']['stat'] = $e->getMessage();
-      drupal_set_message(t('We were unable to complete your request.'), 'error');
-      watchdog_exception('hybridauth', $e);
-      drupal_goto();
-    }
-    
-    $provider_name = hybridauth_get_provider_name($provider_id);
-    $_SESSION['hybridauth']['profile'] = $profile;
-    
-    // Save provider info (for token replacement and account linking).
-    $_SESSION['hybridauth_provider_info'] = array(
-      'id' => $provider_id,
-      'name' => $provider_name,
-    );
-    
-    // Are we adding a new identity to an existing account?
-    if ($add_to_account) {
-      if (user_is_logged_in()) {
-        // the identifier returned by auth_info() should not be already
-        // mapped to an existing account
-        if (user_get_authmaps(_hybridauth_get_authmap_name($provider_id, $profile['identifier']))) {
-          $message = array(
-            'text' => t('We were unable to complete your request.  That account ID is already linked to a user on our site.'),
-            'type' => 'error',
-          );
-        }
-        else {
-          $txn = db_transaction();
-          try {
-            // Can't use user_set_authmaps() here, since it doesn't support
-            // multiple authnames per user via same module
-            $result1 = $aid = db_insert('authmap')
-              ->fields(array(
-                'uid' => $user->uid,
-                'authname' => _hybridauth_get_authmap_name($provider_id, $profile['identifier']),
-                'module' => 'hybridauth',
-              ))
-            ->execute();
-            $result2 = db_insert('hybridauth_account')
-              ->fields(array(
-                'aid' => $aid,
-                'provider_id' => $provider_id,
-                'created' => REQUEST_TIME,
-              ))
-              ->execute();
-          }
-          catch (Exception $e) {
-            $txn->rollback();
-            watchdog_exception('hybridauth', $e);
-          }
+  // We shouldn't get here
+  return MENU_ACCESS_DENIED;
+}
 
-          // Default (error) message.
-          $message = array(
-            'text' => t('We were unable to link your %provider account.', array('%provider' => $provider_name)),
-            'type' => 'error',
-          );
-          if (isset($result1) && isset($result2)) {
-            $message = array(
-              'text' => t('We have successfully linked your %provider account.', array('%provider' => $provider_name)),
-              'type' => 'status',
-            );
-            // Let other modules know that a linked account has been added.
-            $account = array(
-              'user' => $user,
-              'id' => $profile['identifier'],
-              'provider_id' => $provider_id,
-              'provider_name' => $provider_name,
-            );
-            module_invoke_all('hybridauth_account', 'insert', $account);
-            
-            // TODO: support dynamic profile field mapping
-            //_hybridauth_import_user_data();
-          }
+function _hybridauth_popup_list($hybridauth) {
+  // TODO: show provider list
+  return '';
+}
+
+function _hybridauth_popup_auth($hybridauth, $provider_id) {
+  $_SESSION['hybridauth'] = array();
+  $_SESSION['hybridauth']['stat'] = 'ok';
+  
+  $params = array();
+  if (isset($_GET['openid_identifier'])) {
+    $params['openid_identifier'] = $_GET['openid_identifier'];
+  }
+  
+  try {
+    $adapter = $hybridauth->authenticate($provider_id, $params);
+    $profile = (array) ($adapter->getUserProfile());
+  }
+  catch(Exception $e) {
+    $_SESSION['hybridauth']['stat'] = $e->getMessage();
+    drupal_set_message(t('We were unable to complete your request.'), 'error');
+    watchdog_exception('hybridauth', $e);
+    
+    // Are we working inside a colorbox overlay?
+    if (isset($_GET['overlay']) && $_GET['overlay']) {
+      // TODO: take a look at this code
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+      drupal_add_js('
+        if (window.opener){
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
         }
-        // Redirect the user back to original overlay if possible.
-        // @see hybridauth_user_identities().
-        // TODO: look at RPX overlay code for ideas
-        if (isset($_SESSION['hybridauth_overlay_uri'])) {
-          $_GET['destination'] = $_SESSION['hybridauth_overlay_uri'];
-          // Store the message for hybridauth_user_identities() so that it
-          // can be shown in overlay instead of the parent window.
-          $_SESSION['hybridauth_overlay_message'] = $message;
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
+    }
+    drupal_goto();
+  }
+  
+  // If we got here then success!
+  return _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provider_id);
+}
+
+function _hybridauth_popup_provider($hybridauth, $provider_id) {
+  _hybridauth_add_widget_css();
+  $build = array(
+    '#markup' => theme('hybridauth_popup_provider', array('provider_id' => $provider_id, 'done' => TRUE)),
+  );
+  
+  // Are we working inside a colorbox overlay?
+  if (isset($_GET['overlay']) && $_GET['overlay']) {
+    $page = array(
+      'page_top' => '',
+      '#children' => drupal_render($build),
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
+  }
+  
+  return $build;
+}
+
+/**
+ * A helper function that takes a successful HA authentication and handles the Drupal side of things.
+ */
+function _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provider_id) {
+  global $user;
+  
+  $provider_name = hybridauth_get_provider_name($provider_id);
+  $_SESSION['hybridauth']['profile'] = $profile;
+  
+  // Save provider info (for token replacement and account linking).
+  $_SESSION['hybridauth_provider_info'] = array(
+    'id' => $provider_id,
+    'name' => $provider_name,
+  );
+  
+  // Are we adding a new identity to an existing account?
+  if (isset($_GET['add']) && $_GET['add']) {
+    if (user_is_logged_in()) {
+      return _hybridauth_popup_process_auth_addexisting($hybridauth, $adapter, $profile, $provider_id);
+    }
+  }
+  
+  // This wasn't a request to add to an existing logged-in account
+  // Let's see if it matches an existing account that is not logged in.
+  $account = user_external_load(_hybridauth_encode_authname($provider_id, $profile['identifier']));
+  
+  // Is this a registered user?
+  if (isset($account->uid)) {
+    if (!variable_get('user_email_verification', TRUE) ||
+        $account->login ||
+        !empty($account->data['hybridauth_data']['profile']['emailVerified']) &&
+        strtolower($account->data['hybridauth_data']['profile']['emailVerified']) == strtolower($account->mail)) {
+      // IF settings do not require email verification
+      // OR
+      // it's not the first login for the user (which means the email has
+      // already been verified)
+      // OR
+      // they are using an email the ID provider has already verified
+      //
+      // then we can skip the email verification process
+
+      // Check that the user has not been blocked.
+      $state['values']['name'] = $account->name;
+      user_login_name_validate(array(), $state);
+      if (!form_get_errors()) {
+        // Load global $user and perform final login tasks.
+        $form_state['uid'] = $account->uid;
+        user_login_submit(array(), $form_state);
+      }
+    }
+    else {
+      drupal_set_message(t('You must validate your email address for this account before logging in with it.'), 'error');
+    }
+    
+    // Are we working inside a colorbox overlay?
+    if (isset($_GET['overlay']) && $_GET['overlay']) {
+      // TODO: take a look at this code
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+      drupal_add_js('
+        if (window.opener){
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+        }
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
+    }
+    drupal_goto();
+  }
+  // New user.
+  else {
+    // Check that users are allowed to register on their own.
+    if (variable_get('user_register', 1)) {
+      if (!variable_get('hybridauth_force_registration_form', FALSE)) {
+        $form_state['values'] = array();
+        $form_state['values']['op'] = t('Create new account');
+        drupal_form_submit('user_register_form', $form_state);
+        // See if the user was successfully registered.
+        if (!empty($form_state['user'])) {
+          // Let other modules know that a linked account has been added.
+          $account = array(
+            'user' => $user,
+            'id' => _hybridauth_encode_authname($provider_id, $profile['identifier']),
+            'provider_id' => $provider_id,
+            'provider_name' => $provider_name,
+          );
+          module_invoke_all('hybridauth_linked_account', 'insert', $account);
+          
+          // Are we working inside a colorbox overlay?
+          if (isset($_GET['overlay']) && $_GET['overlay']) {
+            // TODO: take a look at this code
+            $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+            $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+            drupal_add_js('
+              if (window.opener){
+                try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+                window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+              }
+              window.self.close();
+            ', 'inline');
+            $page = array(
+              'page_top' => '',
+              '#children' => 'Closing...',
+              'page_bottom' => '',
+            );
+            print theme('html', array('page' => $page));
+            drupal_exit();
+          }
           drupal_goto();
         }
-        else {
-          unset($_SESSION['hybridauth_overlay_message']);
-          drupal_set_message($message['text'], $message['type']);
-          drupal_goto('user/' . $user->uid . '/hybridauth');
-        }
-      }
-    }
-    
-    // This wasn't a request add to an existing account
-    $account = user_external_load($provider_id . '::' . $profile['identifier']);
-    
-    // Is this a registered user?
-    if (isset($account->uid)) {
-      if (!variable_get('user_email_verification', TRUE) ||
-          $account->login ||
-          !empty($account->data['hybridauth_data']['profile']['verifiedEmail']) &&
-          strtolower($account->data['hybridauth_data']['profile']['verifiedEmail']) == strtolower($account->mail)) {
-        // IF settings do not require email verification
-        // OR
-        // it's not the first login for the user (which means the email has
-        // already been verified)
-        // OR
-        // they are using an email the ID provider has already verified
-        //
-        // then we can skip the email verification process
+        // get the error messages and clear the messages queue
+        $messages = drupal_get_messages('error');
 
-        // Check that the user has not been blocked.
-        $state['values']['name'] = $account->name;
-        user_login_name_validate(array(), $state);
-        if (!form_get_errors()) {
-          // Load global $user and perform final login tasks.
-          $form_state['uid'] = $account->uid;
-          user_login_submit(array(), $form_state);
+        if (empty($form_state['values']['mail'])) {
+          // If the idenitity provider did not provide an email address, ask
+          // the user to complete (and submit) the form manually instead of
+          // showing the error messages about the missing values generated by
+          // FAPI.
+          drupal_set_message(t('Although we have verified your account, @provider did not provide us with your e-mail address.  Please enter one below to complete your registration.  (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
+        }
+        else {
+          drupal_set_message(t('Although we have verified your account, registration using the information provided by @provider failed due to the reasons listed below. Please complete the registration by filling out the form below. (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
+          
+          // Append form validation errors below the above warning.
+          foreach ($messages['error'] as $message) {
+            drupal_set_message($message, 'error');
+          }
         }
       }
       else {
-        drupal_set_message(t('You must validate your email address for this account before logging in with it.'), 'error');
+        drupal_set_message(t('Please complete the registration by filling out the form below.  (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
+      }
+      
+      // Redirect to the normal registration page and prefill with the values
+      // we received from HybridAuth.
+      $destination = drupal_get_destination();
+      unset($_GET['destination']);
+      
+      // Are we working inside a colorbox overlay?
+      if (isset($_GET['overlay']) && $_GET['overlay']) {
+        // TODO: take a look at this code
+        $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+        drupal_add_js('
+          if (window.opener){
+            try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+            window.opener.parent.location.href = "' . url('user/register', array('query' => $destination)) . '";
+          }
+          window.self.close();
+        ', 'inline');
+        $page = array(
+          'page_top' => '',
+          '#children' => 'Closing...',
+          'page_bottom' => '',
+        );
+        print theme('html', array('page' => $page));
+        drupal_exit();
+      }
+      drupal_goto('user/register', array('query' => $destination));
+    }
+    // Users are not allowed to register.
+    else {
+      drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
+      
+      // Are we working inside a colorbox overlay?
+      if (isset($_GET['overlay']) && $_GET['overlay']) {
+        // TODO: take a look at this code
+        $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+        $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+        drupal_add_js('
+          if (window.opener){
+            try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+            window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+          }
+          window.self.close();
+        ', 'inline');
+        $page = array(
+          'page_top' => '',
+          '#children' => 'Closing...',
+          'page_bottom' => '',
+        );
+        print theme('html', array('page' => $page));
+        drupal_exit();
       }
       drupal_goto();
     }
-    // New user.
-    else {
-      // Check that users are allowed to register on their own.
-      if (variable_get('user_register', 1)) {
-        if (!variable_get('hybridauth_force_registration_form', FALSE)) {
-          $form_state['values'] = array();
-          $form_state['values']['op'] = t('Create new account');
-          drupal_form_submit('user_register_form', $form_state);
-          // See if the user was successfully registered.
-          if (!empty($form_state['user'])) {
-            // Let other modules know that a linked account has been added.
-            $account = array(
-              'user' => $user,
-              'id' => $profile['identifier'],
-              'provider_id' => $provider_id,
-              'provider_name' => $provider_name,
-            );
-            module_invoke_all('hybridauth_linked_account', 'insert', $account);
-            
-            // Nothing more to do.
-            drupal_goto();
-          }
-          // get the error messages and clear the messages queue
-          $messages = drupal_get_messages('error');
-
-          if (empty($form_state['values']['mail'])) {
-            // If the idenitity provider did not provide an email address, ask
-            // the user to complete (and submit) the form manually instead of
-            // showing the error messages about the missing values generated by
-            // FAPI.
-            drupal_set_message(t('Although we have verified your account, @provider did not provide us with your e-mail address.  Please enter one below to complete your registration.  (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
-          }
-          else {
-            drupal_set_message(t('Although we have verified your account, registration using the information provided by @provider failed due to the reasons listed below. Please complete the registration by filling out the form below. (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
-            
-            // Append form validation errors below the above warning.
-            foreach ($messages['error'] as $message) {
-              drupal_set_message($message, 'error');
-            }
-          }
-        }
-        else {
-          drupal_set_message(t('Please complete the registration by filling out the form below.  (If you\'ve previously registered with us, please <a href="@login">log in</a> and add your @provider account under "Linked accounts.")', array('@provider' => $provider_name, '@login' => url('user/login'))), 'warning');
-        }
-        
-        // Redirect to the normal registration page and prefill with the values
-        // we received from HybridAuth.
-        $destination = drupal_get_destination();
-        unset($_GET['destination']);
-        drupal_goto('user/register', array('query' => $destination));
-      }
-      else {
-        drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
-        drupal_goto();
-      }
-    }
-  }
-  else {
-    drupal_set_message(t('You need a provider to be here!'), 'error');
-    return MENU_ACCESS_DENIED;
   }
   
   // We shouldn't get here, but just in case...
   return MENU_ACCESS_DENIED;
 }
 
-function hybridauth_router_openid() {
-  $provider_id = $_REQUEST['provider'];
+/**
+ * A helper function that takes a successful HA authentication and handles the Drupal side of things.
+ */
+function _hybridauth_popup_process_auth_addexisting($hybridauth, $adapter, $profile, $provider_id) {
+  global $user;
+  
+  // The identifier given should not be already mapped to an existing account
+  if (user_get_authmaps(_hybridauth_encode_authname($provider_id, $profile['identifier']))) {
+    $message = array(
+      'text' => t('We were unable to complete your request.  That account ID is already linked to a user on this site.'),
+      'type' => 'error',
+    );
+  }
+  else {
+    $txn = db_transaction();
+    try {
+      // Can't use user_set_authmaps() here, since it doesn't support multiple authnames per user via same module
+      $result1 = $aid = db_insert('authmap')
+        ->fields(array(
+          'uid' => $user->uid,
+          'authname' => _hybridauth_encode_authname($provider_id, $profile['identifier']),
+          'module' => 'hybridauth',
+        ))
+      ->execute();
+      $result2 = db_insert('hybridauth_account')
+        ->fields(array(
+          'aid' => $aid,
+          'provider_id' => $provider_id,
+          'created' => REQUEST_TIME,
+        ))
+        ->execute();
+    }
+    catch (Exception $e) {
+      $txn->rollback();
+      watchdog_exception('hybridauth', $e);
+    }
+
+    // Default (error) message.
+    $message = array(
+      'text' => t('We were unable to link your %provider account.', array('%provider' => $provider_name)),
+      'type' => 'error',
+    );
+    if (isset($result1) && isset($result2)) {
+      $message = array(
+        'text' => t('We have successfully linked your %provider account.', array('%provider' => $provider_name)),
+        'type' => 'status',
+      );
+      // Let other modules know that a linked account has been added.
+      $account = array(
+        'user' => $user,
+        'id' => _hybridauth_encode_authname($provider_id, $profile['identifier']),
+        'provider_id' => $provider_id,
+        'provider_name' => $provider_name,
+      );
+      module_invoke_all('hybridauth_account', 'insert', $account);
+      
+      // TODO: support dynamic profile field mapping
+      //_hybridauth_import_user_data();
+    }
+  }
+  
+  if (isset($_GET['overlay']) && $_GET['overlay']) {
+    // TODO: take a look at this code
+    drupal_set_message($message['text'], $message['type']);
+    
+    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user/' . $user->uid . '/hybridauth';
+    drupal_add_js('
+      if (window.opener){
+        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      }
+      window.self.close();
+    ', 'inline');
+    $page = array(
+      'page_top' => '',
+      '#children' => 'Closing...',
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
+  }
+  
+  drupal_set_message($message['text'], $message['type']);
+  drupal_goto('user/' . $user->uid . '/hybridauth');
+}
+
+function hybridauth_popup_openid() {
+  $overlay = isset($_GET['overlay']) ? $_GET['overlay'] : FALSE;
+  
+  $provider_id = isset($_GET['provider']) ? $_GET['provider'] : NULL;
   if (!$provider_id) {
+    // TODO: handle overlay case
     drupal_not_found();
     drupal_exit();
   }
   
-  return drupal_get_form('hybridauth_router_openid_form', $provider_id);
+  _hybridauth_add_widget_css();
+  $form = drupal_get_form('hybridauth_popup_openid_form', $provider_id, $overlay);;
+  
+  // Are we working inside a colorbox overlay?
+  if ($overlay) {
+    $page = array(
+      'page_top' => '',
+      '#children' => drupal_render($form),
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
+  }
+  
+  return drupal_render($form);
 }
 
-function hybridauth_router_openid_form($form, &$form_state, $provider_id) {
+function hybridauth_popup_openid_form($form, &$form_state, $provider_id, $overlay=FALSE) {
   $form = array();
   
   $form['openid_identifier'] = array(
@@ -273,17 +526,22 @@ function hybridauth_router_openid_form($form, &$form_state, $provider_id) {
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
-  $form['actions']['cancel'] = array(
-    '#type' => 'link',
-    '#title' => t('Cancel'),
-    '#href' => $_GET['destination'],
-    //'#options' => $options,
-  );
+  if ($overlay) {
+    // TODO: how should we handle this?
+  }
+  else {
+    $form['actions']['cancel'] = array(
+      '#type' => 'link',
+      '#title' => t('Cancel'),
+      '#href' => $_GET['destination'],
+      //'#options' => $options,
+    );
+  }
   
   return $form;
 }
 
-function hybridauth_router_openid_form_submit($form, &$form_state) {
+function hybridauth_popup_openid_form_submit($form, &$form_state) {
   $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
   unset($_GET['destination']);
   
@@ -291,7 +549,7 @@ function hybridauth_router_openid_form_submit($form, &$form_state) {
   $query['openid_identifier'] = $form_state['values']['openid_identifier'];
   $query['destination'] = $destination;
   
-  drupal_goto('hybridauth/router', array('query' => $query));
+  drupal_goto('hybridauth/popup', array('query' => $query));
 }
 
 /**

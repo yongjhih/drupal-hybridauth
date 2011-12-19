@@ -71,16 +71,63 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   
   $form = array();
   
-  if (in_array($provider_id, array('Facebook', 'Live'))) {
-    $form['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
+  switch ($provider_id) {
+    case 'Facebook':
+      $help = t('
+          <p>Enter your application ID and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
+          <p>You must set <strong>App Domain</strong> to something like <strong>example.com</strong> to cover <strong>*.example.com</strong>.</p>
+          <p>You must set <strong>Site URL</strong> to <strong>%site_uri</strong>.</p>
+        ',
+        array(
+          '!apps_uri' => 'https://developers.facebook.com/apps',
+          '%site_uri' => url('<front>', array('absolute' => TRUE)),
+        )
+      );
+      break;
+      
+    case 'Twitter':
+      $help = t('
+          <p>Enter your consumer key and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
+        ',
+        array(
+          '!apps_uri' => 'https://dev.twitter.com/apps',
+        )
+      );
+      break;
+      
+    case 'Google':
+      $help = t('
+          <p>Enter your application ID and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
+          <p>You must set <strong>Authorized Redirect URIs</strong> to <strong>%redirect_uri</strong>.</p>
+          <p>You must set <strong>Authorized JavaScript Origins</strong> to <strong>%origin_uri</strong>.</p>
+        ',
+        array(
+          '!apps_uri' => 'https://code.google.com/apis/console#access',
+          '%redirect_uri' => url('hybridauth/endpoint', array('absolute' => TRUE, 'query' => array('hauth.done' => 'Google'))),
+          '%origin_uri' => url('<front>', array('absolute' => TRUE)),
+        )
+      );
+      break;
+      
+    default:
+      $help = t('Enter the application ID, consumer key, and/or secret key as required.');
+      break;
+  }
+  
+  $form['keys'] = array(
+    '#type' => 'fieldset',
+    '#description' => $help,
+  );
+  if (in_array($provider_id, array('Facebook', 'Live', 'Google'))) {
+    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
       '#type' => 'textfield',
       '#title' => t('Application ID'),
       '#description' => t('The application ID'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_id', ''),
     );
   }
-  if (in_array($provider_id, array('Google', 'LinkedIn', 'MySpace', 'Twitter', 'YahooOAuth'))) {
-    $form['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
+  if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'YahooOAuth'))) {
+    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
       '#type' => 'textfield',
       '#title' => t('Application consumer key'),
       '#description' => t('The Application consumer key'),
@@ -88,7 +135,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     );
   }
   if (in_array($provider_id, array('Facebook', 'Google', 'LinkedIn', 'Live', 'MySpace', 'Twitter', 'YahooOAuth'))) {
-    $form['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
+    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
       '#type' => 'textfield',
       '#title' => t('Application consumer secret'),
       '#description' => t('The application consumer secret key'),
@@ -158,8 +205,6 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   }
   
   $form = system_settings_form($form);
-  krumo($form);
-  
   return $form;
 }
 
@@ -189,16 +234,42 @@ function hybridauth_admin_widget_settings() {
     '#description' => t('Should we add the social login widget to the login forms?'),
     '#default_value' => variable_get('hybridauth_widget_attach_loginform', FALSE),
   );
-  
-  $form['hybridauth_widget_icon_size'] = array(
+  $form['loginform'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Login form options'),
+    '#states' => array(
+      'invisible' => array(
+        'input[name="hybridauth_widget_attach_loginform"]' => array('checked' =>FALSE),
+      ),
+    ),
+  );
+  $options = array(
+    'providers' => t('Providers: Display provider links and icons.'),
+    'single' =>t('Single Button: Display a single button that leads to a page of providers and icons.'),
+  );
+  $form['loginform']['hybridauth_widget_attach_loginform_style'] = array(
+    '#type' => 'select',
+    '#title' => t('Attachment Style'),
+    '#options' => $options,
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform_style', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT),
+  );
+  $form['loginform']['hybridauth_widget_attach_loginform_icon_size'] = array(
     '#type' => 'select',
     '#title' => t('Icon Size'),
     '#options' => array(
-      '32' => '32px x 32px',
-      '48' => '48px x 48px',
-      '64' => '64px x 64px',
+      '32' => '32px',
+      '48' => '48px',
+      '64' => '64px',
     ),
-    '#default_value' => variable_get('hybridauth_widget_icon_size', '64'),
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform_icon_size', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT),
+  );
+  
+  $form['hybridauth_widget_use_overlay'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Display widget pages in an overlay'),
+    '#description' => t('This requires the colorbox module.'),
+    '#default_value' => variable_get('hybridauth_widget_use_overlay', HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT),
+    '#disabled' => !module_exists('colorbox'),
   );
   
   return system_settings_form($form);

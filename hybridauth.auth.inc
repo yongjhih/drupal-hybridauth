@@ -53,7 +53,7 @@ function hybridauth_get_provider_name($provider_id) {
   return isset($providers[$provider_id]) ? $providers[$provider_id] : NULL;
 }
 
-function hybridauth_get_controller() {
+function hybridauth_get_instance() {
   $controller = &drupal_static(__FUNCTION__, NULL);
   
   if (!isset($controller)) {
@@ -61,16 +61,16 @@ function hybridauth_get_controller() {
     
     $lib_path = libraries_get_path('hybridauth', FALSE);
     if ($lib_path) {
-      try {
+      //try {
         require_once($lib_path . '/Hybrid/Auth.php');
         
         $config = hybridauth_get_config();
         $controller = new Hybrid_Auth($config);
-      }
-      catch(Exception $e) {
+      //}
+      //catch(Exception $e) {
         // TODO: How should we handle this?
-        watchdog_exception('hybridauth', $e);
-      }
+        //watchdog_exception('hybridauth', $e);
+      //}
     }
   }
   
@@ -111,6 +111,7 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
           'secret' => variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', ''),
         ),
         'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
+        'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', 'popup'),
         'hauth_return_to' => url('hybridauth/endpoint'),
       );
     }

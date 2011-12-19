@@ -2,6 +2,10 @@
 
 define('HYBRIDAUTH_MINIMUM_PHP', '5.2.0');
 
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT',      'providers');
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT',  '64');
+define('HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT',                 TRUE);
+
 /**
  * Implements hook_permission().
  */
@@ -69,14 +73,14 @@ function hybridauth_menu() {
     'type' => MENU_CALLBACK,
     'file' => 'hybridauth.pages.inc',
   );
-  $items['hybridauth/router'] = array(
-    'page callback' => 'hybridauth_router',
+  $items['hybridauth/popup'] = array(
+    'page callback' => 'hybridauth_popup',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'hybridauth.pages.inc',
   );
-  $items['hybridauth/router/openid'] = array(
-    'page callback' => 'hybridauth_router_openid',
+  $items['hybridauth/popup/openid'] = array(
+    'page callback' => 'hybridauth_popup_openid',
     'access callback' => TRUE,
     'type' => MENU_CALLBACK,
     'file' => 'hybridauth.pages.inc',
@@ -150,13 +154,17 @@ function hybridauth_form_user_login_alter(&$form, &$form_state) {
  * Adds Engage sign-in link to the form.
  */
 function _hybridauth_widget_user_login_form_alter(&$form, &$form_state) {
+  $style = variable_get('hybridauth_widget_attach_loginform_style', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT);
+  
   $form['hybridauth_widget_wrapper'] = array(
     '#type' => 'fieldset',
     '#title' => t('Or log in with...'),
     
     'hybridauth_widget_wrapper' => array(
       '#theme' => 'hybridauth_widget',
-      '#weight' => variable_get('hybridauth_widget_loginform_weight', 150),
+      '#style' => $style,
+      '#size' => variable_get('hybridauth_widget_attach_loginform_icon_size', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT),
+      '#weight' => variable_get('hybridauth_widget_attach_loginform_weight', 150),
     ),
   );
 }
@@ -184,20 +192,16 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
   }
   // Use the email returned by HybridAuth, if any.
   $form['account']['mail']['#default_value'] = $mail;
-
+  
   // If email verification is not required, hide the password field and
   // just fill with random password to avoid confusion.
-  // TODO: can we get a verified email property?
-  /*
-  if (!empty($profile['verifiedEmail']) ||
+  if (!empty($profile['emailVerified']) ||
       !variable_get('user_email_verification', TRUE) ||
       variable_get('hybridauth_bypass_email_verification', FALSE)) {
-
     $form['account']['pass']['#type'] = 'hidden';
     $form['account']['pass']['#value'] = user_password();
   }
-  */
-
+  
   $form['hybridauth_id'] = array(
     '#type' => 'value',
     '#default_value' => $profile['identifier'],
@@ -207,7 +211,7 @@ function hybridauth_form_user_register_form_alter(&$form, &$form_state) {
     '#weight' => 10,
     '#title' => t('Your account ID'),
     '#description' => t('This @provider account will be linked to your site account after registration.', array('@provider' => $_SESSION['hybridauth_provider_info']['name'])),
-    '#markup' => check_plain($profile['identifier']),
+    '#markup' => check_plain(_hybridauth_encode_authname($_SESSION['hybridauth_provider_info']['id'], $profile['identifier'])),
   );
 
   // replace the default user_register form submit handler with our own (because
@@ -443,10 +447,9 @@ function hybridauth_user_insert(&$edit, $account, $category) {
   // use a transaction.
   $txn = db_transaction();
   try {
-    // TODO: user proper identifier
-    user_set_authmaps($account, array('authname_hybridauth' => _hybridauth_get_authmap_name($provider_id, $profile['identifier'])));
+    user_set_authmaps($account, array('authname_hybridauth' => _hybridauth_encode_authname($provider_id, $profile['identifier'])));
     // Get the new authmap ID and insert it in the hybridauth_account table
-    $aid = db_query('SELECT aid FROM {authmap} WHERE authname = :id', array('id' => _hybridauth_get_authmap_name($provider_id, $profile['identifier'])))->fetchField();
+    $aid = db_query('SELECT aid FROM {authmap} WHERE authname = :id', array('id' => _hybridauth_encode_authname($provider_id, $profile['identifier'])))->fetchField();
     db_insert('hybridauth_account')
       ->fields(array(
         'aid' => $aid,
@@ -573,13 +576,31 @@ function hybridauth_theme($existing, $type, $theme, $path) {
       'render element' => 'form',
       'file' => 'hybridauth.admin.inc',
     ),
+    
     'hybridauth_widget' => array(
-      'variables' => array('size' => '64'),
+      'variables' => array('style' => HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT, 'size' => HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT),
       'template' => 'hybridauth-widget',
       'file' => 'hybridauth.widget.inc',
     ),
+    
+    'hybridauth_popup_loading' => array(
+      'variables' => array('provider_id' => NULL, 'done' => FALSE, 'overlay' => FALSE),
+      'template' => 'hybridauth-popup-loading',
+      'file' => 'hybridauth.widget.inc',
+    ),
+    'hybridauth_popup_list' => array(
+      'variables' => array('overlay' => FALSE),
+      'template' => 'hybridauth-popup-list',
+      'file' => 'hybridauth.widget.inc',
+    ),
+    'hybridauth_popup_provider' => array(
+      'variables' => array('provider_id' => NULL, 'overlay' => FALSE),
+      'template' => 'hybridauth-popup-provider',
+      'file' => 'hybridauth.widget.inc',
+    ),
+    
     'hybridauth_provider_icon' => array(
-      'variables' => array('provider_id' => NULL, 'size' => '64', 'style' => NULL),
+      'variables' => array('size' => HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT, 'provider_id' => NULL),
     ),
   );
 }
@@ -590,21 +611,20 @@ function hybridauth_theme($existing, $type, $theme, $path) {
  * An image sprite with all Engage provider icons is included in the images
  * directory for custom theming purposes.
  */
-function theme_hybridauth_provider_icon($variables) {
+function theme_hybridauth_provider_icon($vars) {
   module_load_include('inc', 'hybridauth', 'hybridauth.auth');
   
-  $provider_id = $variables['provider_id'];
+  $size = $vars['size'];
+  
+  $provider_id = $vars['provider_id'];
   $provider_name = hybridauth_get_provider_name($provider_id);
   
   $style = array(
     drupal_html_class('hybridauth-icon'),
-    drupal_html_class('hybridauth-icon-' . $variables['size']),
+    drupal_html_class('hybridauth-icon-' . $size),
     drupal_html_class('hybridauth-' . $provider_id),
-    drupal_html_class('hybridauth-' . $provider_id . '-' . $variables['size']),
+    drupal_html_class('hybridauth-' . $provider_id . '-' . $size),
   );
-  if ($variables['style']) {
-    $style[] = drupal_html_class($variables['style']);
-  }
   
   _hybridauth_add_icon_css();
   
@@ -612,24 +632,48 @@ function theme_hybridauth_provider_icon($variables) {
 }
 
 /**
- * Helper function to create authname
+ * Creates an authname that will remain unique across providers
  */
-function _hybridauth_get_authmap_name($provider_id, $identifier) {
-  return $provider_id . '::' . $identifier;
+function _hybridauth_encode_authname($provider_id, $identifier) {
+  switch ($provider_id) {
+    case 'Facebook':
+      if (is_numeric($identifier)) {
+        return 'http://www.facebook.com/profile.php?id=' . $identifier;
+      }
+      return $identifier;
+      
+    case 'Twitter':
+      if (is_numeric($identifier)) {
+        return 'http://twitter.com/account/profile?user_id=' . $identifier;
+      }
+      return $identifier;
+      
+    case 'Google':
+      if (is_numeric($identifier)) {
+        return 'https://www.google.com/profiles/' . $identifier;
+      }
+      return $identifier;
+      
+    default:
+      return $identifier;
+  }
 }
 
 /**
- * Helper function to extract provider specific identifier from authname
+ * Changes an authname back into the provider identifier format
  */
-function _hybridauth_get_authmap_provider($authname) {
-  list($provider_id, $identfier) = explode('::', $authname);
-  return $provider_id;
-}
-
-/**
- * Helper function to extract provider specific identifier from authname
- */
-function _hybridauth_get_authmap_identfier($authname) {
-  list($provider_id, $identfier) = explode('::', $authname);
-  return $identfier;
+function _hybridauth_decode_authname($provider_id, $authname) {
+  switch ($provider_id) {
+    case 'Facebook':
+      return str_replace('http://www.facebook.com/profile.php?id=', '', $authname);
+      
+    case 'Twitter':
+      return str_replace('http://twitter.com/account/profile?user_id=', '', $authname);
+      
+    case 'Google':
+      return str_replace('https://www.google.com/profiles/', '', $authname);
+      
+    default:
+      return $authname;
+  }
 }
