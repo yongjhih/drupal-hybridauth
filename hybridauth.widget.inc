@@ -40,7 +40,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
     
       $query = array('provider' => $provider_id, 'style' => $vars['style']) + drupal_get_destination();
     
-      if (variable_get('hybridauth_widget_use_overlay', HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT)) {
+      if ($style != 'list' && variable_get('hybridauth_widget_use_overlay', HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT)) {
         if (module_exists('colorbox')) {
           // We need to load the colorbox-load behavior
           drupal_add_js(drupal_get_path('module', 'colorbox') . '/js/colorbox_load.js');
@@ -66,6 +66,27 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
         )
       );
     }
+    
+    drupal_add_js('
+      (function ($) {
+        Drupal.behaviors.hybridauthWidget = {
+          attach: function (context, settings) {
+            $(".hybridauth-widget-provider", context).once("hybridauth-widget-provider", function() {
+              $(this).click(function(event) {
+                event.preventDefault();
+                var url = $(this).attr("href");
+                window.open(
+                  url + "&authenticate=1",
+                  "hybridauth_social_sign_on",
+                  "location=0,status=0,scrollbars=0,width=800,height=500"
+                );
+                return false;
+              });
+            });
+          }
+        };
+      }(jQuery));
+    ', 'inline');
   }
   elseif ($style == 'link') {
     $provider_id = 'none';
@@ -230,7 +251,7 @@ function template_preprocess_hybridauth_popup_provider(&$vars, $hook) {
   
   // Create cancel button
   $cancel_query = $query;
-  $cancel_query['provider'] = 'none';
+  $cancel_query['provider'] = 'list';
   $vars['cancel_button'] = l(
     t('Use another account'),
     'hybridauth/popup',
@@ -240,16 +261,16 @@ function template_preprocess_hybridauth_popup_provider(&$vars, $hook) {
     )
   );
   
-  $url = url('hybridauth/popup', array('query' => $query + array('authenticate' => TRUE)));
   drupal_add_js('
     (function ($) {
-      Drupal.behaviors.hybridauthPopup = {
+      Drupal.behaviors.hybridauthPopupProvider = {
         attach: function (context, settings) {
-          $("#' . $button_id . '", context).once("' . $button_id . '", function() {
+          $(".hybridauth-popup-button-login", context).once("hybridauth-popup-button-login", function() {
             $(this).click(function(event) {
               event.preventDefault();
+              var url = $(this).attr("href");
               window.open(
-                "' . $url . '",
+                url + "&authenticate=1",
                 "hybridauth_social_sign_on",
                 "location=0,status=0,scrollbars=0,width=800,height=500"
               );

@@ -23,6 +23,17 @@ function hybridauth_popup() {
   
   $provider_id = isset($_REQUEST['provider']) ? $_REQUEST['provider'] : NULL;
   
+  // If no provider was given then look for saved preference
+  if (empty($provider_id) || $provider_id == 'none') {
+    if (isset($_COOKIE['__ha_provider']) && !empty($_COOKIE['__ha_provider'])) {
+      $provider_id = $_COOKIE['__ha_provider'];
+    }
+  }
+  // Else, save provider preference to a cookie for 365 days.
+  else {
+    setcookie('__ha_provider', $provider_id, REQUEST_TIME + 31536000, base_path(), variable_get('cookie_domain', ''));
+  }
+  
   // Make sure it's Drupal that starts the session then load the lib
   drupal_session_start();
   module_load_include('inc', 'hybridauth', 'hybridauth.auth');
@@ -36,26 +47,23 @@ function hybridauth_popup() {
     drupal_set_message(t('There was an error processing your request!'), 'error');
     watchdog_exception('hybridauth', $e);
     
-    if (isset($_GET['overlay']) && $_GET['overlay']) {
-      // TODO: take a look at this code
-      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-      drupal_add_js('
-        if (window.opener){
-          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-        }
-        window.self.close();
-      ', 'inline');
-      $page = array(
-        'page_top' => '',
-        '#children' => 'Closing...',
-        'page_bottom' => '',
-      );
-      print theme('html', array('page' => $page));
-      drupal_exit();
-    }
-    drupal_goto();
+    // Cleanly close popup and redirect
+    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+    drupal_add_js('
+      if (window.opener){
+        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      }
+      window.self.close();
+    ', 'inline');
+    $page = array(
+      'page_top' => '',
+      '#children' => 'Closing...',
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
   }
   // An error coming from HA
   catch (Exception $e) {
@@ -79,32 +87,28 @@ function hybridauth_popup() {
         watchdog_exception('hybridauth', $e);
     }
     
-    // Handle the overlay situation.
-    if (isset($_GET['overlay']) && $_GET['overlay']) {
-      // TODO: take a look at this code
-      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-      drupal_add_js('
-        var redirect = ' . ($redirect ? 'true' : 'false') . ';
-        if (window.opener && redirect) {
-          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-        }
-        window.self.close();
-      ', 'inline');
-      $page = array(
-        'page_top' => '',
-        '#children' => 'Closing...',
-        'page_bottom' => '',
-      );
-      print theme('html', array('page' => $page));
-      drupal_exit();
-    }
-    drupal_goto();
+    // Cleanly close popup and redirect
+    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+    drupal_add_js('
+      var redirect = ' . ($redirect ? 'true' : 'false') . ';
+      if (window.opener && redirect) {
+        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      }
+      window.self.close();
+    ', 'inline');
+    $page = array(
+      'page_top' => '',
+      '#children' => 'Closing...',
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
   }
   
   // If we don't have a provider ID show a list of providers.
-  if (empty($provider_id) || $provider_id == 'none') {
+  if (empty($provider_id) || $provider_id == 'none' || $provider_id == 'list') {
     return _hybridauth_popup_list($hybridauth);
   }
   // Else if provider is OpenID, but we don't have the OpenID target, show OpenId form.
@@ -188,27 +192,23 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
     drupal_set_message(t('We were unable to complete your request.'), 'error');
     watchdog_exception('hybridauth', $e);
     
-    // Are we working inside a colorbox overlay?
-    if (isset($_GET['overlay']) && $_GET['overlay']) {
-      // TODO: take a look at this code
-      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-      drupal_add_js('
-        if (window.opener){
-          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-        }
-        window.self.close();
-      ', 'inline');
-      $page = array(
-        'page_top' => '',
-        '#children' => 'Closing...',
-        'page_bottom' => '',
-      );
-      print theme('html', array('page' => $page));
-      drupal_exit();
-    }
-    drupal_goto();
+    // Cleanly close popup and redirect
+    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+    drupal_add_js('
+      if (window.opener){
+        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      }
+      window.self.close();
+    ', 'inline');
+    $page = array(
+      'page_top' => '',
+      '#children' => 'Closing...',
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
   }
   
   // If we got here then success!
@@ -269,27 +269,23 @@ function _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provid
       drupal_set_message(t('You must validate your email address for this account before logging in with it.'), 'error');
     }
     
-    // Are we working inside a colorbox overlay?
-    if (isset($_GET['overlay']) && $_GET['overlay']) {
-      // TODO: take a look at this code
-      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-      drupal_add_js('
-        if (window.opener){
-          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-        }
-        window.self.close();
-      ', 'inline');
-      $page = array(
-        'page_top' => '',
-        '#children' => 'Closing...',
-        'page_bottom' => '',
-      );
-      print theme('html', array('page' => $page));
-      drupal_exit();
-    }
-    drupal_goto();
+    // Cleanly close popup and redirect
+    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+    drupal_add_js('
+      if (window.opener){
+        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      }
+      window.self.close();
+    ', 'inline');
+    $page = array(
+      'page_top' => '',
+      '#children' => 'Closing...',
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
   }
   // New user.
   else {
@@ -310,27 +306,23 @@ function _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provid
           );
           module_invoke_all('hybridauth_linked_account', 'insert', $account);
           
-          // Are we working inside a colorbox overlay?
-          if (isset($_GET['overlay']) && $_GET['overlay']) {
-            // TODO: take a look at this code
-            $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-            $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-            drupal_add_js('
-              if (window.opener){
-                try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-                window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-              }
-              window.self.close();
-            ', 'inline');
-            $page = array(
-              'page_top' => '',
-              '#children' => 'Closing...',
-              'page_bottom' => '',
-            );
-            print theme('html', array('page' => $page));
-            drupal_exit();
-          }
-          drupal_goto();
+          // Cleanly close popup and redirect
+          $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+          $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+          drupal_add_js('
+            if (window.opener){
+              try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+              window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+            }
+            window.self.close();
+          ', 'inline');
+          $page = array(
+            'page_top' => '',
+            '#children' => 'Closing...',
+            'page_bottom' => '',
+          );
+          print theme('html', array('page' => $page));
+          drupal_exit();
         }
         // get the error messages and clear the messages queue
         $messages = drupal_get_messages('error');
@@ -360,52 +352,44 @@ function _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provid
       $destination = drupal_get_destination();
       unset($_GET['destination']);
       
-      // Are we working inside a colorbox overlay?
-      if (isset($_GET['overlay']) && $_GET['overlay']) {
-        // TODO: take a look at this code
-        $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-        drupal_add_js('
-          if (window.opener){
-            try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-            window.opener.parent.location.href = "' . url('user/register', array('query' => $destination)) . '";
-          }
-          window.self.close();
-        ', 'inline');
-        $page = array(
-          'page_top' => '',
-          '#children' => 'Closing...',
-          'page_bottom' => '',
-        );
-        print theme('html', array('page' => $page));
-        drupal_exit();
-      }
-      drupal_goto('user/register', array('query' => $destination));
+      // Cleanly close popup and redirect
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      drupal_add_js('
+        if (window.opener){
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url('user/register', array('query' => $destination)) . '";
+        }
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
     }
     // Users are not allowed to register.
     else {
       drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
       
-      // Are we working inside a colorbox overlay?
-      if (isset($_GET['overlay']) && $_GET['overlay']) {
-        // TODO: take a look at this code
-        $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-        $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
-        drupal_add_js('
-          if (window.opener){
-            try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-            window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-          }
-          window.self.close();
-        ', 'inline');
-        $page = array(
-          'page_top' => '',
-          '#children' => 'Closing...',
-          'page_bottom' => '',
-        );
-        print theme('html', array('page' => $page));
-        drupal_exit();
-      }
-      drupal_goto();
+      // Cleanly close popup and redirect
+      $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+      $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user';
+      drupal_add_js('
+        if (window.opener){
+          try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+          window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+        }
+        window.self.close();
+      ', 'inline');
+      $page = array(
+        'page_top' => '',
+        '#children' => 'Closing...',
+        'page_bottom' => '',
+      );
+      print theme('html', array('page' => $page));
+      drupal_exit();
     }
   }
   
@@ -474,30 +458,25 @@ function _hybridauth_popup_process_auth_addexisting($hybridauth, $adapter, $prof
     }
   }
   
-  if (isset($_GET['overlay']) && $_GET['overlay']) {
-    // TODO: take a look at this code
-    drupal_set_message($message['text'], $message['type']);
-    
-    $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-    $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user/' . $user->uid . '/hybridauth';
-    drupal_add_js('
-      if (window.opener){
-        try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
-        window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
-      }
-      window.self.close();
-    ', 'inline');
-    $page = array(
-      'page_top' => '',
-      '#children' => 'Closing...',
-      'page_bottom' => '',
-    );
-    print theme('html', array('page' => $page));
-    drupal_exit();
-  }
-  
+  // Cleanly close popup and redirect
   drupal_set_message($message['text'], $message['type']);
-  drupal_goto('user/' . $user->uid . '/hybridauth');
+  
+  $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
+  $destination = isset($_GET['destination']) ? $_GET['destination'] : 'user/' . $user->uid . '/hybridauth';
+  drupal_add_js('
+    if (window.opener){
+      try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
+      window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+    }
+    window.self.close();
+  ', 'inline');
+  $page = array(
+    'page_top' => '',
+    '#children' => 'Closing...',
+    'page_bottom' => '',
+  );
+  print theme('html', array('page' => $page));
+  drupal_exit();
 }
 
 function hybridauth_popup_openid() {
@@ -511,7 +490,7 @@ function hybridauth_popup_openid() {
   }
   
   _hybridauth_add_widget_css();
-  $form = drupal_get_form('hybridauth_popup_openid_form', $provider_id, $overlay);;
+  $form = drupal_get_form('hybridauth_popup_openid_form', $provider_id, $overlay);
   
   // Are we working inside a colorbox overlay?
   if ($overlay) {
