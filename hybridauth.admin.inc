@@ -240,13 +240,19 @@ function hybridauth_admin_widget_settings() {
     '#title' => t('Login form options'),
     '#states' => array(
       'invisible' => array(
-        'input[name="hybridauth_widget_attach_loginform"]' => array('checked' =>FALSE),
+        ':input[name="hybridauth_widget_attach_loginform"]' => array('checked' => FALSE),
       ),
     ),
   );
+  $form['loginform']['hybridauth_widget_attach_loginform_wrapper_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Wrapper title'),
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform_wrapper_title', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_WRAPPER_TITLE_DEFAULT),
+  );
   $options = array(
-    'providers' => t('Providers: Display provider links and icons.'),
-    'single' =>t('Single Button: Display a single button that leads to a page of providers and icons.'),
+    'list' => t('Providers: Display provider links and icons.'),
+    'button' =>t('Single Button: Display a single button that leads to a page of providers and icons.'),
+    'link' =>t('Single Link: Display a single link that leads to a page of providers and icons.'),
   );
   $form['loginform']['hybridauth_widget_attach_loginform_style'] = array(
     '#type' => 'select',
@@ -263,6 +269,31 @@ function hybridauth_admin_widget_settings() {
       '64' => '64px',
     ),
     '#default_value' => variable_get('hybridauth_widget_attach_loginform_icon_size', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT),
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="hybridauth_widget_attach_loginform_style"]' => array('value' => 'link'),
+      ),
+    ),
+  );
+  $form['loginform']['hybridauth_widget_attach_loginform_link_title'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link title'),
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform_link_title', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_LINK_TITLE_DEFAULT),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="hybridauth_widget_attach_loginform_style"]' => array('value' => 'link'),
+      ),
+    ),
+  );
+  $form['loginform']['hybridauth_widget_attach_loginform_link_alt'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Link alt'),
+    '#default_value' => variable_get('hybridauth_widget_attach_loginform_link_alt', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_LINK_ALT_DEFAULT),
+    '#states' => array(
+      'visible' => array(
+        ':input[name="hybridauth_widget_attach_loginform_style"]' => array('value' => 'link'),
+      ),
+    ),
   );
   
   $form['hybridauth_widget_use_overlay'] = array(

@@ -104,7 +104,7 @@ function hybridauth_popup() {
   }
   
   // If we don't have a provider ID show a list of providers.
-  if (!$provider_id) {
+  if (empty($provider_id) || $provider_id == 'none') {
     return _hybridauth_popup_list($hybridauth);
   }
   // Else if provider is OpenID, but we don't have the OpenID target, show OpenId form.
@@ -131,8 +131,43 @@ function hybridauth_popup() {
 }
 
 function _hybridauth_popup_list($hybridauth) {
-  // TODO: show provider list
-  return '';
+  _hybridauth_add_widget_css();
+  $build = array(
+    '#markup' => theme('hybridauth_popup_list', array()),
+  );
+  
+  // Are we working inside a colorbox overlay?
+  if (isset($_GET['overlay']) && $_GET['overlay']) {
+    $page = array(
+      'page_top' => '',
+      '#children' => drupal_render($build),
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
+  }
+  
+  return $build;
+}
+
+function _hybridauth_popup_provider($hybridauth, $provider_id) {
+  _hybridauth_add_widget_css();
+  $build = array(
+    '#markup' => theme('hybridauth_popup_provider', array('provider_id' => $provider_id, 'done' => TRUE)),
+  );
+  
+  // Are we working inside a colorbox overlay?
+  if (isset($_GET['overlay']) && $_GET['overlay']) {
+    $page = array(
+      'page_top' => '',
+      '#children' => drupal_render($build),
+      'page_bottom' => '',
+    );
+    print theme('html', array('page' => $page));
+    drupal_exit();
+  }
+  
+  return $build;
 }
 
 function _hybridauth_popup_auth($hybridauth, $provider_id) {
@@ -178,26 +213,6 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
   
   // If we got here then success!
   return _hybridauth_popup_process_auth($hybridauth, $adapter, $profile, $provider_id);
-}
-
-function _hybridauth_popup_provider($hybridauth, $provider_id) {
-  _hybridauth_add_widget_css();
-  $build = array(
-    '#markup' => theme('hybridauth_popup_provider', array('provider_id' => $provider_id, 'done' => TRUE)),
-  );
-  
-  // Are we working inside a colorbox overlay?
-  if (isset($_GET['overlay']) && $_GET['overlay']) {
-    $page = array(
-      'page_top' => '',
-      '#children' => drupal_render($build),
-      'page_bottom' => '',
-    );
-    print theme('html', array('page' => $page));
-    drupal_exit();
-  }
-  
-  return $build;
 }
 
 /**

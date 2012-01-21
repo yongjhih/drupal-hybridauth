@@ -2,9 +2,12 @@
 
 define('HYBRIDAUTH_MINIMUM_PHP', '5.2.0');
 
-define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT',      'providers');
-define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT',  '64');
-define('HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT',                 TRUE);
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_WRAPPER_TITLE_DEFAULT',  'Or log in with...');
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_STYLE_DEFAULT',          'list');
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_ICON_SIZE_DEFAULT',      '64');
+define('HYBRIDAUTH_WIDGET_USE_OVERLAY_DEFAULT',                     TRUE);
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_LINK_TITLE_DEFAULT',     'Social networking account');
+define('HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_LINK_ALT_DEFAULT',       '');
 
 /**
  * Implements hook_permission().
@@ -158,7 +161,7 @@ function _hybridauth_widget_user_login_form_alter(&$form, &$form_state) {
   
   $form['hybridauth_widget_wrapper'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Or log in with...'),
+    '#title' => variable_get('hybridauth_widget_attach_loginform_wrapper_title', HYBRIDAUTH_WIDGET_ATTACH_LOGINFORM_WRAPPER_TITLE_DEFAULT),
     
     'hybridauth_widget_wrapper' => array(
       '#theme' => 'hybridauth_widget',

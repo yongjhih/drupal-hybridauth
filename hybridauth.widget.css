@@ -15,3 +15,31 @@
   height: 55px;
   background: transparent url(images/throbber.gif);
 }
+
+#hybridauth-popup-list li {
+  float: left;
+  margin: 10px;
+  padding: 0;
+  list-style-type: none;
+}
+
+.hybridauth-popup-provider .info {
+  padding: 30px;
+}
+.hybridauth-popup-provider .info .name {
+  font-size: 36px;
+}
+.hybridauth-popup-provider .buttons {
+  clear: both;
+}
+.hybridauth-popup-provider .buttons .button {
+  float: right;
+  clear: right;
+}
+.hybridauth-popup-provider .hybridauth-popup-button-login {
+  display: block;
+  padding: 10px 20px;
+  margin: 10px 0;
+  font-size: 20px;
+  background: #EEE;
+}
