@@ -30,7 +30,7 @@ function mymodule_ctools_plugin_directory($module, $type) {
 }
 
 And then place your icon pack plugins into 'plugins/icon_pack/iconpackname".
-This directory should contain 2 files:
+This directory should contain 2 or 3 files - plugin definition and css/js files:
 plugins/icon_pack/iconpackname/iconpackname.inc
 ***********************************************
 <?php
@@ -40,9 +40,12 @@ plugins/icon_pack/iconpackname/iconpackname.inc
  */
 $plugin = array(
   'title' => t('Mymodule icon pack'),
+  //specify css file name to include
+  'css' => 'iconpackname.css',
+  //specify 'js' key if js file needs to be included
+  'js' => 'iconpackname.js',
 );
 ***********************************************
-plugins/icon_pack/iconpackname/iconpackname.css
 
 Take a look at these modules icon packs in "plugins/icon_pack" and you will figure it out.
 Themes can also define their icon packs - turn to Ctools module documentation on how themes should declare their plugins.
