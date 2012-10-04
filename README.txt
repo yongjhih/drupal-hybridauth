@@ -3,19 +3,53 @@ Welcome to HybridAuth for Drupal
 
 Installation:
 -------------
-Place the entirety of this directory in sites/all/modules/hybridauth
-You must also install the Libraries module (http://drupal.org/project/libraries) to use HybridAuth.
+Install as any other module - http://drupal.org/documentation/install/modules-themes
 
-Navigate to administer >> build >> modules. Enable HybridAuth.
+This module needs third-party library to work with authentication providers - HybridAuth.
+Download it at http://hybridauth.sourceforge.net/download.html and unpack into 
+'sites/all/libraries/hybridauth' directory.
+If you need additional providers support like Mail.ru - then you need to download 
+additional providers package and then copy needed additional providers to the library.
+For instance, to get Mail.ru provider working you need to copy 'hybridauth-mailru/Providers/Mailru.php'
+ to 'hybridauth/Hybrid/Providers/Mailru.php' and you are good to go.
+ After that you just need to configure your application ID, private and secret keys at module configuration pages.
+
+Dependencies:
+-------------
+- Ctools module (http://drupal.org/project/ctools) - it is used to manage icon pack plugins.
+Yes, you can now easily have your own icon packs as Ctools plugins.
+
+To make it happen you need to implement hook_ctools_plugin_directory():
+/**
+ * Implements hook_ctools_plugin_directory().
+ */
+function mymodule_ctools_plugin_directory($module, $type) {
+  if ($module == 'hybridauth' && $type == 'icon_pack') {
+    return 'plugins/icon_pack';
+  }
+}
+
+And then place your icon pack plugins into 'plugins/icon_pack/iconpackname".
+This directory should contain 2 files:
+plugins/icon_pack/iconpackname/iconpackname.inc
+***********************************************
+<?php
+
+/**
+ * Plugin declaration.
+ */
+$plugin = array(
+  'title' => t('Mymodule icon pack'),
+);
+***********************************************
+plugins/icon_pack/iconpackname/iconpackname.css
+
+Take a look at these modules icon packs in "plugins/icon_pack" and you will figure it out.
+Themes can also define their icon packs - turn to Ctools module documentation on how themes should declare their plugins.
 
 Recommended additions:
 ----------------------
-It is recommended that you install the ColorBox jQuery plugin:
-1. Download and unpack the Colorbox plugin in "sites/all/libraries".
-   Link: http://colorpowered.com/colorbox/colorbox.zip
-
-Licenses:
----------
-Icons are provided without restrictions by:
-http://www.elegantthemes.com/blog/resources/free-social-media-icon-set
-
+It is recommended to have the following modules:
+- Token (http://drupal.org/project/token) - to get a browsable list of available tokens on administration pages.
+- Rules (http://drupal.org/project/rules) - to map HybridAuth data to user profile fields and other great stuff.
+- Real name (http://drupal.org/project/realname) - as it caches display names and improves performance of your site.
