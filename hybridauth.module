@@ -551,12 +551,16 @@ function _hybridauth_library_path() {
 }
 
 function _hybridauth_add_icon_pack_files($name) {
-  $icon_pack = hybridauth_get_icon_pack($name);
-  if (!empty($icon_pack['css'])) {
-    drupal_add_css($icon_pack['path'] . '/' . $icon_pack['css']);
-  }
-  if (!empty($icon_pack['js'])) {
-    drupal_add_js($icon_pack['path'] . '/' . $icon_pack['js']);
+  $done = &drupal_static(__FUNCTION__, NULL);
+  if (!isset($done[$name])) {
+    $done[$name] = TRUE;
+    $icon_pack = hybridauth_get_icon_pack($name);
+    if (!empty($icon_pack['css'])) {
+      drupal_add_css($icon_pack['path'] . '/' . $icon_pack['css']);
+    }
+    if (!empty($icon_pack['js'])) {
+      drupal_add_js($icon_pack['path'] . '/' . $icon_pack['js']);
+    }
   }
 }
 
