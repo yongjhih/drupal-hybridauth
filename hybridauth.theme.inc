@@ -76,5 +76,5 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
     );
   }
   
-  _hybridauth_add_icon_pack_css(variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'));
+  _hybridauth_add_icon_pack_files(variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'));
 }

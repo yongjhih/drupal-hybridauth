@@ -258,7 +258,7 @@ function hybridauth_theme($existing, $type, $theme, $path) {
  * Returns markup for a specific provider icon.
  */
 function theme_hybridauth_provider_icon($vars) {
-  _hybridauth_add_icon_pack_css($vars['icon_pack']);
+  _hybridauth_add_icon_pack_files($vars['icon_pack']);
   $provider_id = $vars['provider_id'];
   if (isset($vars['provider_name'])) {
     $provider_name = $vars['provider_name'];
@@ -550,9 +550,14 @@ function _hybridauth_library_path() {
   }
 }
 
-function _hybridauth_add_icon_pack_css($name) {
+function _hybridauth_add_icon_pack_files($name) {
   $icon_pack = hybridauth_get_icon_pack($name);
-  drupal_add_css($icon_pack['path'] . '/' . $icon_pack['name'] . '.css');
+  if (!empty($icon_pack['css'])) {
+    drupal_add_css($icon_pack['path'] . '/' . $icon_pack['css']);
+  }
+  if (!empty($icon_pack['js'])) {
+    drupal_add_js($icon_pack['path'] . '/' . $icon_pack['js']);
+  }
 }
 
 function _hybridauth_make_username($data) {
