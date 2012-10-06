@@ -32,29 +32,32 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
       vals.push(label + ': ' + 'None');
     }
     
+    var widget_type;
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-type"]', context).text()) + '</span>';
     var list = [];
     $('div#edit-hybridauth-widget-type', context).find('label').each(function(index, Element) {
       var label_for = $(this).attr('for');
       if ($('#' + label_for).is(':checked')) {
         list.push($.trim($(this).text()));
-        value = $('#' + label_for).val();
+        widget_type = $('#' + label_for).val();
       }
     });
     vals.push(label + ': ' + list.join(', '));
     
-    if (value == 'link') {
-      value = $('input#edit-hybridauth-widget-link-title', context).attr('value');
-      label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-title"]', context).text()) + '</span>';
+    if (widget_type == 'link') {
+      value = $('input#edit-hybridauth-widget-link-text', context).attr('value');
+      label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-text"]', context).text()) + '</span>';
       if (value) {
         vals.push(label + ': ' + value);
       }
       else {
         vals.push(label + ': ' + 'None');
       }
-      
-      value = $('input#edit-hybridauth-widget-link-alt', context).attr('value');
-      label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-alt"]', context).text()) + '</span>';
+    }
+    
+    if (widget_type == 'link' || widget_type == 'button') {
+      value = $('input#edit-hybridauth-widget-link-title', context).attr('value');
+      label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-title"]', context).text()) + '</span>';
       if (value) {
         vals.push(label + ': ' + value);
       }

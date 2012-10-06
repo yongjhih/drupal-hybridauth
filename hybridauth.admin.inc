@@ -84,23 +84,23 @@ function hybridauth_admin_settings() {
       ),
     ),
   );
-  $form['vtabs']['fset_widget']['hybridauth_widget_link_title'] = array(
+  $form['vtabs']['fset_widget']['hybridauth_widget_link_text'] = array(
     '#type' => 'textfield',
-    '#title' => t('Link title'),
-    '#default_value' => variable_get('hybridauth_widget_link_title', 'Social network account'),
+    '#title' => t('Link text'),
+    '#default_value' => variable_get('hybridauth_widget_link_text', 'Social network account'),
     '#states' => array(
       'visible' => array(
         ':input[name="hybridauth_widget_type"]' => array('value' => 'link'),
       ),
     ),
   );
-  $form['vtabs']['fset_widget']['hybridauth_widget_link_alt'] = array(
+  $form['vtabs']['fset_widget']['hybridauth_widget_link_title'] = array(
     '#type' => 'textfield',
-    '#title' => t('Link alt'),
-    '#default_value' => variable_get('hybridauth_widget_link_alt', ''),
+    '#title' => t('Link or icon title'),
+    '#default_value' => variable_get('hybridauth_widget_link_title', 'Social network account'),
     '#states' => array(
-      'visible' => array(
-        ':input[name="hybridauth_widget_type"]' => array('value' => 'link'),
+      'invisible' => array(
+        ':input[name="hybridauth_widget_type"]' => array('value' => 'list'),
       ),
     ),
   );

@@ -28,8 +28,8 @@ function hybridauth_uninstall() {
   variable_del('hybridauth_widget_title');
   variable_del('hybridauth_widget_type');
   variable_del('hybridauth_widget_use_overlay');
+  variable_del('hybridauth_widget_link_text');
   variable_del('hybridauth_widget_link_title');
-  variable_del('hybridauth_widget_link_alt');
   variable_del('hybridauth_widget_icon_pack');
   variable_del('hybridauth_widget_weight');
   variable_del('hybridauth_disable_username_change');
