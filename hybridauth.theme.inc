@@ -3,17 +3,22 @@
 function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
   $vars['widget_id'] = drupal_html_id($element['#hybridauth_id']);
-  
   $vars['providers'] = array();
+  if ($element['#hybridauth_destination']) {
+    $query = array('destination' => $element['#hybridauth_destination']);
+  }
+  else {
+    $query = drupal_get_destination();
+  }
   
   if ($element['#hybridauth_widget_type'] == 'list') {
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
       $vars['providers'][$provider_id] = l(
-        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $provider_name)),
+        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $provider_name)),
         'hybridauth/popup/' . $provider_id,
         array(
           'html' => TRUE,
-          'query' => drupal_get_destination(),
+          'query' => $query,
           'attributes' => array(
             'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
             'title' => $provider_name,
@@ -24,7 +29,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   }
   else {
     $provider_id = 'none';
-    if (variable_get('hybridauth_widget_use_overlay', 1)) {
+    if ($element['#hybridauth_widget_use_overlay']) {
       $class = array('ctools-use-modal', 'ctools-modal-hybridauthmodal');
       ctools_include('modal');
       ctools_modal_add_js();
@@ -62,20 +67,20 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
     
     $vars['providers'][$provider_id] = l(
       ($element['#hybridauth_widget_type'] == 'link') ?
-        variable_get('hybridauth_widget_link_text', 'Social network account') :
-        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => variable_get('hybridauth_widget_link_title', 'Social network account'))),
+        $element['#hybridauth_widget_link_text'] :
+        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $element['#hybridauth_widget_link_title'])),
       'hybridauth/providers/nojs',
       array(
         'html' => TRUE,
-        'query' => drupal_get_destination(),
+        'query' => $query,
         'attributes' => array(
           'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
-          'title' => variable_get('hybridauth_widget_link_title', 'Social network account'),
+          'title' => $element['#hybridauth_widget_link_title'],
           'class' => $class,
         ),
       )
     );
   }
   
-  _hybridauth_add_icon_pack_files($element['#hybridauth_icon_pack']);
+  _hybridauth_add_icon_pack_files($element['#hybridauth_widget_icon_pack']);
 }

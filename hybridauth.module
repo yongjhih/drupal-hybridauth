@@ -212,10 +212,14 @@ function hybridauth_element_info() {
     '#theme' => 'hybridauth_widget',
     '#theme_wrappers' => array('form_element'),
     '#hybridauth_id' => 'hybridauth',
-    '#title' => variable_get('hybridauth_widget_title', ''),
-    '#weight' => variable_get('hybridauth_widget_weight', -100),
+    '#title' => variable_get('hybridauth_widget_title', 'Or log in with...'),
+    '#weight' => variable_get('hybridauth_widget_weight', 100),
     '#hybridauth_widget_type' => variable_get('hybridauth_widget_type', 'list'),
-    '#hybridauth_icon_pack' => variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'),
+    '#hybridauth_widget_use_overlay' => variable_get('hybridauth_widget_use_overlay', 1),
+    '#hybridauth_widget_link_text' => variable_get('hybridauth_widget_link_text', 'Social network account'),
+    '#hybridauth_widget_link_title' => variable_get('hybridauth_widget_link_title', 'Social network account'),
+    '#hybridauth_widget_icon_pack' => variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'),
+    '#hybridauth_destination' => variable_get('hybridauth_destination', ''),
     '#attached' => array(
       'js' => array(
         drupal_get_path('module', 'hybridauth') . '/js/hybridauth.js' => array(
