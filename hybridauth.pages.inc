@@ -262,6 +262,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     $form['hybridauth_widget'] = array(
       '#type' => 'hybridauth_widget',
       '#title' => t('Add more identities'),
+      '#hybridauth_widget_type' =>'list',
       '#hybridauth_destination' => '',
     );
   }
