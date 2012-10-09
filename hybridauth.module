@@ -659,6 +659,10 @@ function _hybridauth_user_save($data, $uid = NULL) {
   }
   
   _hybridauth_identity_save($data, $uid);
+  //invoke hybridauth_identity_added rules event
+  if (module_exists('rules')) {
+    rules_invoke_event('hybridauth_identity_added', $account, $data);
+  }
   
   $user_save_trigger = FALSE;
   $edit = array();
