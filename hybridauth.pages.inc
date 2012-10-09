@@ -100,7 +100,6 @@ function _hybridauth_popup_close($redirect = TRUE) {
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
     if (window.opener && redirect){
-      try { window.opener.parent.$.colorbox.close(); } catch(err) {} 
       window.opener.parent.location.href = "' . url($destination['destination'], array('absolute' => TRUE)) . '";
     }
     window.self.close();
