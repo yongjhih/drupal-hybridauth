@@ -262,6 +262,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     $form['hybridauth_widget'] = array(
       '#type' => 'hybridauth_widget',
       '#title' => t('Add more identities'),
+      '#weight' => 10,
       '#hybridauth_widget_type' =>'list',
       '#hybridauth_destination' => '',
     );
@@ -271,6 +272,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
   if (user_access('administer site configuration') || user_access('administer users')) {
     $form['vtabs'] = array(
       '#type' => 'vertical_tabs',
+      '#weight' => 20,
     );
     
     $header = array(t('Token'), t('Value'));
@@ -368,6 +370,16 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       );
+      //add more identities
+      if (user_access('use hybridauth')) {
+        $form['hybridauth_widget'] = array(
+          '#type' => 'hybridauth_widget',
+          '#title' => t('Add more identities'),
+          '#weight' => 10,
+          '#hybridauth_widget_type' =>'list',
+         '#hybridauth_destination' => '',
+        );
+      }
       return $form;
     }
   }
