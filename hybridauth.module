@@ -596,6 +596,14 @@ function _hybridauth_make_username($data) {
   }
 }
 
+function _hybridauth_user_is_blocked_by_uid($uid) {
+  return db_select('users')
+    ->fields('users', array('name'))
+    ->condition('uid', $uid)
+    ->condition('status', 0)
+    ->execute()->fetchObject();
+}
+
 function _hybridauth_identity_save($data, $uid = NULL) {
   global $user;
   if (!$uid) {

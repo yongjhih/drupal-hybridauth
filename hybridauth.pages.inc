@@ -174,8 +174,14 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
   }
   
   if ($identity = _hybridauth_identity_load($data)) {
-    $form_state['uid'] = $identity['uid'];
-    user_login_submit(array(), $form_state);
+    //check if user is blocked
+    if (_hybridauth_user_is_blocked_by_uid($identity['uid'])) {
+      drupal_set_message(t('Your account has not been activated or is blocked.'), 'error');
+    }
+    else {
+      $form_state['uid'] = $identity['uid'];
+      user_login_submit(array(), $form_state);
+    }
   }
   //handle duplicate email addresses
   elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = user_load_by_mail($data['email'])) {
