@@ -317,29 +317,30 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     '#type' => 'fieldset',
     '#description' => $help,
   );
-  if (in_array($provider_id, array('Facebook', 'Live', 'Google', 'Mailru', 'Odnoklassniki', 'Vkontakte', 'Yandex'))) {
-    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Application ID'),
-      '#description' => t('The application ID'),
-      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_id', ''),
-    );
+  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Application ID'),
+    '#description' => t('The application ID'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_id', ''),
+  );
+  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Application consumer key'),
+    '#description' => t('The Application consumer key'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_key', ''),
+  );
+  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Application consumer secret'),
+    '#description' => t('The application consumer secret key'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', ''),
+  );
+  
+  if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'Yahoo'))) {
+    unset($form['keys']['hybridauth_provider_' . $provider_id . '_keys_id']);
   }
-  if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'Yahoo', 'Mailru', 'Odnoklassniki', 'Vkontakte', 'Yandex'))) {
-    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Application consumer key'),
-      '#description' => t('The Application consumer key'),
-      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_key', ''),
-    );
-  }
-  if (in_array($provider_id, array('Facebook', 'Google', 'LinkedIn', 'Live', 'MySpace', 'Twitter', 'Yahoo', 'Mailru', 'Odnoklassniki', 'Vkontakte', 'Yandex'))) {
-    $form['keys']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Application consumer secret'),
-      '#description' => t('The application consumer secret key'),
-      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', ''),
-    );
+  if (in_array($provider_id, array('Facebook', 'Google', 'Live'))) {
+    unset($form['keys']['hybridauth_provider_' . $provider_id . '_keys_key']);
   }
   
   if (in_array($provider_id, array('Facebook'))) {
