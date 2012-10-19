@@ -15,6 +15,7 @@ function hybridauth_install() {
  * Implements hook_uninstall().
  */
 function hybridauth_uninstall() {
+  module_load_include('module', 'hybridauth');
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
     variable_del('hybridauth_provider_' . $provider_id . '_enabled');
     variable_del('hybridauth_provider_' . $provider_id . '_weight');
