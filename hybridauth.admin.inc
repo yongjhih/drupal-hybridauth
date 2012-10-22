@@ -208,7 +208,11 @@ function hybridauth_admin_settings() {
   $form['vtabs']['fset_other']['hybridauth_duplicate_emails'] = array(
     '#type' => 'radios',
     '#title' => t('Duplicate emails'),
-    '#options' => array(0 => t('Allow duplicate email addresses'), 1 => t("Don't allow duplicate email addresses, block registration and advise to log in using the existing account")),
+    '#options' => array(
+      0 => t('Allow duplicate email addresses, create new user account and login'),
+      1 => t("Don't allow duplicate email addresses, block registration and advise to login using the existing account"),
+      2 => t("Don't allow duplicate email addresses, add new identity to the existing account and login"),
+    ),
     '#default_value' => variable_get('hybridauth_duplicate_emails', 1),
     '#description' => t('Select how to handle duplicate email addresses. This situation occurs when the same user is trying to authenticate using different authentication providers, but with the same email address.'),
   );

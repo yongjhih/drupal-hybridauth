@@ -185,15 +185,29 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
   }
   //handle duplicate email addresses
   elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = user_load_by_mail($data['email'])) {
-    drupal_set_message(t('You are trying to login with email address of another user.'), 'error');
-    if (!empty($account->data['hybridauth'])) {
-      $providers = hybridauth_providers_list();
-      drupal_set_message(t('If you are completely sure it is your email address, try to login through %provider.',
-        array('%provider' => $providers[$account->data['hybridauth']['provider']])), 'status');
+    //block registration
+    if (variable_get('hybridauth_duplicate_emails', 1) == 1) {
+      drupal_set_message(t('You are trying to login with email address of another user.'), 'error');
+      if (!empty($account->data['hybridauth'])) {
+        $providers = hybridauth_providers_list();
+        drupal_set_message(t('If you are completely sure it is your email address, try to login through %provider.',
+          array('%provider' => $providers[$account->data['hybridauth']['provider']])), 'status');
+      }
+      else {
+        drupal_set_message(t('If you are completely sure it is your email address, try to login using your username and password on this site. If you don\'t remember your password - <a href="@password">request new password</a>.',
+          array('@password' => url('user/password'))));
+      }
     }
-    else {
-      drupal_set_message(t('If you are completely sure it is your email address, try to login using your username and password on this site. If you don\'t remember your password - <a href="@password">request new password</a>.',
-        array('@password' => url('user/password'))));
+    //add identity to existing account
+    elseif (variable_get('hybridauth_duplicate_emails', 1) == 2) {
+      _hybridauth_identity_save($data, $account->uid);
+      drupal_set_message(t('New identity added.'));
+      //invoke hybridauth_identity_added rules event
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_identity_added', $account, $data);
+      }
+      $form_state['uid'] = $account->uid;
+      user_login_submit(array(), $form_state);
     }
   }
   else {
