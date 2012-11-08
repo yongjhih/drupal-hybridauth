@@ -97,8 +97,14 @@ function hybridauth_popup($provider_id) {
 function _hybridauth_popup_close($redirect = TRUE) {
   global $user;
   $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-  $destination = drupal_get_destination();
-  $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
+  //if (variable_get('user_register', 1) == 1) { //visitors can register accounts
+    $destination = drupal_get_destination();
+    $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
+  //}
+  //redirect to front page
+  //else {
+  //  $destination = '';
+  //}
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
     if (window.opener && redirect){
@@ -177,8 +183,8 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
   
   if ($identity = _hybridauth_identity_load($data)) {
     //check if user is blocked
-    if (_hybridauth_user_is_blocked_by_uid($identity['uid'])) {
-      drupal_set_message(t('Your account has not been activated or is blocked.'), 'error');
+    if ($account = _hybridauth_user_is_blocked_by_uid($identity['uid'])) {
+      drupal_set_message(t('The username %name has not been activated or is blocked.', array('%name' => $account->name)), 'error');
     }
     else {
       $form_state['uid'] = $identity['uid'];
@@ -212,11 +218,17 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
       user_login_submit(array(), $form_state);
     }
   }
+  //create new user account
   else {
     global $hybridauth_data;
     $hybridauth_data = $data;
-    user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
-    _hybridauth_user_save($data);
+    if (variable_get('user_register', 1)) { //visitors can create accounts
+      user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
+      _hybridauth_user_save($data);
+    }
+    else { //only admin can create accounts
+      drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
+    }
   }
   
   _hybridauth_popup_close();

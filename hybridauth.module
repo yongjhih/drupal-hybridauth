@@ -137,6 +137,10 @@ function hybridauth_user_presave(&$edit, $account, $category) {
     if (!empty($hybridauth_data['email'])) {
       $edit['mail'] = $hybridauth_data['email'];
     }
+    
+    if (variable_get('user_register', 1) == 2) { //admin approval is required
+      $edit['status'] = 0;
+    }
   }
 }
 
@@ -684,6 +688,11 @@ function _hybridauth_user_save($data, $uid = NULL) {
 	    $edit['picture'] = $file;
 	    $user_save_trigger = TRUE;
     }
+  }
+  
+  if (variable_get('user_register', 1) == 2) { //admin approval is required
+    _user_mail_notify('register_pending_approval', $user);
+    drupal_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
   }
   
   if ($user_save_trigger) {
