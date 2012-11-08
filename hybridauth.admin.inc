@@ -6,7 +6,7 @@
  */
 
 function hybridauth_admin_settings() {
-  if (!variable_get('user_register', 1)) {
+  if (!variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) {
     drupal_set_message(t('Currently only administrators can create new user accounts. Check the "Who can register accounts?" option at <a href="!link">Account settings</a>.',
       array('!link' => url('admin/config/people/accounts'))), 'warning');
   }

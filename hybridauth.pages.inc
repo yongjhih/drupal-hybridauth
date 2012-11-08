@@ -97,7 +97,7 @@ function hybridauth_popup($provider_id) {
 function _hybridauth_popup_close($redirect = TRUE) {
   global $user;
   $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
-  //if (variable_get('user_register', 1) == 1) { //visitors can register accounts
+  //if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS) { //visitors can register accounts without admin approval
     $destination = drupal_get_destination();
     $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
   //}
@@ -222,7 +222,7 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
   else {
     global $hybridauth_data;
     $hybridauth_data = $data;
-    if (variable_get('user_register', 1)) { //visitors can create accounts
+    if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)) { //visitors can create accounts
       user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
       _hybridauth_user_save($data);
     }
