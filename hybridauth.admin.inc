@@ -151,19 +151,19 @@ function hybridauth_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Username pattern'),
     '#default_value' => variable_get('hybridauth_username', 'hybridauth_[user:hybridauth:provider]_[user:hybridauth:identifier]'),
-    '#description' => t('Create username for new users using this pattern; counter will be added in case of username conflict.') . ' ' .
-      t('Install !link module to get list of all available tokens.',
-        array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))) . ' ' .
-      t('You should use only HybridAuth tokens here as the user is not created yet.'),
+    '#description' => t('Create username for new users using this pattern; counter will be added in case of username conflict.') . ' '
+      . t('You should use only HybridAuth tokens here as the user is not created yet.') . ' '
+      . t('Install !link module to get list of all available tokens.',
+        array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
   $form['vtabs']['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
     '#default_value' => variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]'),
-    '#description' => t('Install !link module to get list of all available tokens.',
-        array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))) . ' ' .
-      t('You can use any user tokens here.'),
+    '#description' => t('You can use any user tokens here.') . ' ' 
+      . t('Install !link module to get list of all available tokens.',
+        array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
   $form['vtabs']['fset_account']['hybridauth_override_realname'] = array(
@@ -191,8 +191,18 @@ function hybridauth_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Redirect after login'),
     '#default_value' => variable_get('hybridauth_destination', ''),
-    '#description' => t('Drupal path to redirect to, like "node/1". Leave empty to return to the same page.'),
+    '#description' => t('Drupal path to redirect to, like "node/1". Leave empty to return to the same page.') . ' '
+      . t('You can use any user or global tokens here.') . ' '
+      . t('Install !link module to get list of all available tokens.',
+        array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
   );
+  if (module_exists('token')) {
+    $form['vtabs']['fset_other']['hybridauth_token_tree'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => array('user'),
+      '#global_types' => TRUE,
+    );
+  }
   $form['vtabs']['fset_other']['hybridauth_forms'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Drupal forms'),

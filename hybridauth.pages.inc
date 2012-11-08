@@ -95,12 +95,14 @@ function hybridauth_popup($provider_id) {
  * Close the popup and redirect.
  */
 function _hybridauth_popup_close($redirect = TRUE) {
+  global $user;
   $GLOBALS['devel_shutdown'] = FALSE; // Prevent devel module from spewing.
   $destination = drupal_get_destination();
+  $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
     if (window.opener && redirect){
-      window.opener.parent.location.href = "' . url($destination['destination'], array('absolute' => TRUE)) . '";
+      window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
     }
     window.self.close();
   ', 'inline');
@@ -397,7 +399,7 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
           '#title' => t('Add more identities'),
           '#weight' => 10,
           '#hybridauth_widget_type' =>'list',
-         '#hybridauth_destination' => '',
+          '#hybridauth_destination' => '',
         );
       }
       return $form;
