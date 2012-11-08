@@ -8,11 +8,18 @@ Install as any other module - http://drupal.org/documentation/install/modules-th
 This module needs third-party library to work with authentication providers - HybridAuth.
 Download it at http://hybridauth.sourceforge.net/download.html and unpack into 
 'sites/all/libraries/hybridauth' directory.
+HybridAuth library requires php-curl extension.
+
 If you need additional providers support like Mail.ru - then you need to download 
 additional providers package and then copy needed additional providers to the library.
 For instance, to get Mail.ru provider working you need to copy 'hybridauth-mailru/Providers/Mailru.php' 
 to 'hybridauth/Hybrid/Providers/Mailru.php' and you are good to go.
 After that you just need to configure your application ID, private and secret keys at module configuration pages.
+
+After installation please go through the configuration settings and grant your users permission to use
+HybridAuth:
+- anonymous users - to login using HybridAuth widget
+- authenticated users - to add more HybridAuth identities to the account
 
 Dependencies:
 -------------
