@@ -137,8 +137,10 @@ function hybridauth_user_presave(&$edit, $account, $category) {
     if (!empty($hybridauth_data['email'])) {
       $edit['mail'] = $hybridauth_data['email'];
     }
-    
-    if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) { //admin approval is required
+
+    //admin approval is required
+    if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
+      || variable_get('hybridauth_register', 0) == 2) {
       $edit['status'] = 0;
     }
   }
@@ -693,12 +695,16 @@ function _hybridauth_user_save($data, $uid = NULL) {
 	    $user_save_trigger = TRUE;
     }
   }
-  
-  if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) { //admin approval is required
+
+  //admin approval is required
+  if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
+    || variable_get('hybridauth_register', 0) == 2) {
     _user_mail_notify('register_pending_approval', $account);
     drupal_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
   }
-  elseif (!empty($data['email']) && $data['email'] != $data['emailVerified'] && variable_get('user_email_verification', TRUE)) { //email verification is required
+  //email verification is required
+  elseif (!empty($data['email']) && $data['email'] != $data['emailVerified']
+    && ((!variable_get('hybridauth_email_verification', 0) && variable_get('user_email_verification', TRUE)) || variable_get('hybridauth_email_verification', 0) == 1)) {
     session_destroy();
     $edit['login'] = 0;
     $user_save_trigger = TRUE;

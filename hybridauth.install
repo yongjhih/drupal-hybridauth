@@ -36,6 +36,8 @@ function hybridauth_uninstall() {
   variable_del('hybridauth_disable_username_change');
   variable_del('hybridauth_remove_password_fields');
   variable_del('hybridauth_pictures');
+  variable_del('hybridauth_register');
+  variable_del('hybridauth_email_verification');
   variable_del('hybridauth_username');
   variable_del('hybridauth_display_name');
   variable_del('hybridauth_override_realname');

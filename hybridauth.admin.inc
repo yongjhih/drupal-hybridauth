@@ -6,8 +6,8 @@
  */
 
 function hybridauth_admin_settings() {
-  if (variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_ADMINISTRATORS_ONLY) {
-    drupal_set_message(t('Currently only administrators can create new user accounts. Check the "Who can register accounts?" option at <a href="!link">Account settings</a>.',
+  if (!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_ADMINISTRATORS_ONLY) {
+    drupal_set_message(t('Currently only administrators can create new user accounts. Either change the "Who can register accounts?" option under "Account settings" tab or at the core <a href="!link">Account settings</a>.',
       array('!link' => url('admin/config/people/accounts'))), 'warning');
   }
   
@@ -151,6 +151,41 @@ function hybridauth_admin_settings() {
       array('!link' => url('admin/config/people/accounts'))),
     '#default_value' => variable_get('hybridauth_pictures', 1),
     '#disabled' => !variable_get('user_pictures', 0),
+  );
+  $core_settings = array(
+    USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
+    USER_REGISTER_VISITORS => t('Visitors'),
+    USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+  );
+  $form['vtabs']['fset_account']['hybridauth_register'] = array(
+    '#type' => 'radios',
+    '#title' => t('Who can register accounts?'),
+    '#options' => array(
+      0 => t('Follow core') . ': ' . $core_settings[variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)],
+      1 => t('Visitors'),
+      2 => t('Visitors, but administrator approval is required'),
+    ),
+    '#description' => t('Select who can register accounts through HybridAuth.') . ' '
+      . t('The core settings are available at <a href="!link">Account settings</a>.',
+        array('!link' => url('admin/config/people/accounts'))),
+    '#default_value' => variable_get('hybridauth_register', 0),
+  );
+  $core_settings = array(
+    0 => t("Don't require e-mail verification"),
+    1 => t('Require e-mail verification'),
+  );
+  $form['vtabs']['fset_account']['hybridauth_email_verification'] = array(
+    '#type' => 'radios',
+    '#title' => t('E-mail verification'),
+    '#options' => array(
+      0 => t('Follow core') . ': ' . $core_settings[variable_get('user_email_verification', TRUE)],
+      1 => t('Require e-mail verification'),
+      2 => t("Don't require e-mail verification"),
+    ),
+    '#description' => t('Select how to handle not verified e-mail addresses (authentication provider gives non-verified e-mail address).') . ' '
+      . t('The core settings are available at <a href="!link">Account settings</a>.',
+        array('!link' => url('admin/config/people/accounts'))),
+    '#default_value' => variable_get('hybridauth_email_verification', 0),
   );
   $form['vtabs']['fset_account']['hybridauth_username'] = array(
     '#type' => 'textfield',
