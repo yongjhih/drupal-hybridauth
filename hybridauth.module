@@ -615,7 +615,7 @@ function _hybridauth_user_login_access_by_uid($uid) {
     ->fields('users', array('login'))
     ->condition('uid', $uid)
     ->execute()->fetchObject();
-  return $result->login;
+  return !($result->login == 280281600); //Dries birthday timestamp, Nov 19, 1978 :)
 }
 
 function _hybridauth_identity_save($data, $uid = NULL) {
@@ -706,7 +706,7 @@ function _hybridauth_user_save($data, $uid = NULL) {
   elseif (!empty($data['email']) && $data['email'] != $data['emailVerified']
     && ((!variable_get('hybridauth_email_verification', 0) && variable_get('user_email_verification', TRUE)) || variable_get('hybridauth_email_verification', 0) == 1)) {
     session_destroy();
-    $edit['login'] = 0;
+    $edit['login'] = 280281600; //Dries birthday timestamp, Nov 19, 1978 :)
     $user_save_trigger = TRUE;
     $user_email_verify_trigger = TRUE;
   }
