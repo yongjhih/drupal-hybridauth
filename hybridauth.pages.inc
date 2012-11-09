@@ -186,6 +186,11 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
     if ($account = _hybridauth_user_is_blocked_by_uid($identity['uid'])) {
       drupal_set_message(t('The username %name has not been activated or is blocked.', array('%name' => $account->name)), 'error');
     }
+    elseif (!_hybridauth_user_login_access_by_uid($identity['uid'])) {
+      drupal_set_message(t('You need to verify your e-mail address - !email.', array('!email' => $data['email'])), 'error');
+      drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      _user_mail_notify('register_no_approval_required', user_load($identity['uid']));
+    }
     else {
       $form_state['uid'] = $identity['uid'];
       user_login_submit(array(), $form_state);
