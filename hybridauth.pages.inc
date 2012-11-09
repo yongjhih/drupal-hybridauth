@@ -211,8 +211,8 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
           array('@password' => url('user/password'))));
       }
     }
-    //add identity to existing account
-    elseif (variable_get('hybridauth_duplicate_emails', 1) == 2) {
+    //add identity to existing account, only if emailVerified
+    elseif (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
       _hybridauth_identity_save($data, $account->uid);
       drupal_set_message(t('New identity added.'));
       //invoke hybridauth_identity_added rules event
