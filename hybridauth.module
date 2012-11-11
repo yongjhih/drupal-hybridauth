@@ -487,15 +487,9 @@ function hybridauth_get_instance() {
     $controller = FALSE;
     
     if ($lib_path = _hybridauth_library_path()) {
-      //try {
-        require_once($lib_path . '/Hybrid/Auth.php');
-        $config = hybridauth_get_config();
-        $controller = new Hybrid_Auth($config);
-      //}
-      //catch(Exception $e) {
-        // TODO: How should we handle this?
-        //watchdog_exception('hybridauth', $e);
-      //}
+      require_once($lib_path . '/Hybrid/Auth.php');
+      $config = hybridauth_get_config();
+      $controller = new Hybrid_Auth($config);
     }
   }
   

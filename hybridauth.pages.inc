@@ -5,13 +5,7 @@ function hybridauth_endpoint() {
   drupal_session_start();
   
   if ($lib_path = _hybridauth_library_path()) {
-    try {
-      require_once($lib_path . '/index.php');
-    }
-    catch(Exception $e) {
-      // TODO: How should we handle this?
-      watchdog_exception('hybridauth', $e);
-    }
+    require_once($lib_path . '/index.php');
   }
   
   return MENU_ACCESS_DENIED;
@@ -38,12 +32,10 @@ function hybridauth_popup($provider_id) {
   // If provider is OpenID, but we don't have the OpenID target, show OpenID form.
   if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
     $form = drupal_get_form('hybridauth_openid_form');
-    
-    $page = array(
-      'page_top' => '',
-      '#children' => drupal_render($form),
-      'page_bottom' => '',
-    );
+
+    $page = element_info('page');
+    $page['#children'] = theme('status_messages') . drupal_render($form);
+
     print theme('html', array('page' => $page));
     drupal_exit();
   }
@@ -52,43 +44,14 @@ function hybridauth_popup($provider_id) {
   drupal_session_start();
   
   // Try to get HybridAuth instance
-  try {
-    $hybridauth = hybridauth_get_instance();
+  if ($hybridauth = hybridauth_get_instance()) {
+    _hybridauth_popup_auth($hybridauth, $provider_id);
   }
-  // PHP error
-  catch (ErrorException $e) {
-    drupal_set_message(t('There was an error processing your request!'), 'error');
-    watchdog_exception('hybridauth', $e);
-    // Cleanly close popup and redirect
+  else {
+    drupal_set_message(t('There was an error processing your request.'), 'error');
+    watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);
     _hybridauth_popup_close();
   }
-  // An error coming from HA
-  catch (Exception $e) {
-    //watchdog_exception('hybridauth', $e);
-    $redirect = TRUE;
-    
-    switch ($e->getCode()) {
-      case 5: // Authentification failed. The user has canceled the authentication or the provider refused the connection.
-        // Close popup window and leave overlay alone.
-        $redirect = FALSE;
-        break;
-        
-      case 0: // Unspecified error.
-      case 1: // Hybriauth configuration error.
-      case 2: // Provider not properly configured.
-      case 3: // Unknown or disabled provider.
-      case 4: // Missing provider application credentials.
-      default:
-        // Report the error and log it.
-        drupal_set_message(t('There was an error processing your request!'), 'error');
-        watchdog_exception('hybridauth', $e);
-    }
-    
-    // Cleanly close popup and redirect
-    _hybridauth_popup_close($redirect);
-  }
-  
-  return _hybridauth_popup_auth($hybridauth, $provider_id);
 }
 
 /**
@@ -125,9 +88,6 @@ function _hybridauth_popup_close($redirect = TRUE) {
 }
 
 function _hybridauth_popup_auth($hybridauth, $provider_id) {
-  $_SESSION['hybridauth'] = array();
-  $_SESSION['hybridauth']['stat'] = 'ok';
-  
   $params = array();
   if (isset($_GET['openid_identifier'])) {
     $params['openid_identifier'] = $_GET['openid_identifier'];
@@ -136,18 +96,34 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
   try {
     $adapter = $hybridauth->authenticate($provider_id, $params);
     $profile = (array) ($adapter->getUserProfile());
-    $profile['provider'] = $provider_id;
   }
-  catch(Exception $e) {
-    $_SESSION['hybridauth']['stat'] = $e->getMessage();
-    drupal_set_message(t('We were unable to complete your request.'), 'error');
+  // An exception coming from HybridAuth library
+  catch (Exception $e) {
     watchdog_exception('hybridauth', $e);
-    
-    // Cleanly close popup and redirect
-    _hybridauth_popup_close();
+    $redirect = TRUE;
+
+    switch ($e->getCode()) {
+      case 5: // Authentification failed. The user has canceled the authentication or the provider refused the connection.
+        $redirect = FALSE;
+        break;
+      case 0: // Unspecified error
+      case 1: // Hybridauth configuration error
+      case 2: // Provider not properly configured
+      case 3: // Unknown or disabled provider
+      case 4: // Missing provider application credentials (your application id, key or secret)
+      case 6: // User profile request failed
+      case 7: // User not connected to the provider
+      case 8: // Provider does not support this feature
+      default:
+        // Report the error and log it.
+        drupal_set_message(t('There was an error processing your request.'), 'error');
+    }
+
+    _hybridauth_popup_close($redirect);
   }
-  
+
   // Process Drupal authentication.
+  $profile['provider'] = $provider_id;
   _hybridauth_popup_process_auth($profile);
 }
 
