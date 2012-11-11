@@ -72,6 +72,7 @@ function hybridauth_admin_settings() {
       'lastName' => t('Last name'),
       'gender' => t('Gender'),
     ),
+    '#description' => t("Select required fields. If authentication provider doesn't return them, visitor will need to fill additional form with these fields before registration."),
     '#default_value' => variable_get('hybridauth_required_fields', array('email' => 'email')),
   );
   

@@ -147,22 +147,6 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
     _hybridauth_popup_close();
   }
   
-  // Check profile information for required fields.
-  if (!user_is_logged_in()) {
-    $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
-    foreach ($required_fields as $key => $value) {
-      if (empty($profile[$key])) {
-        $form = drupal_get_form('hybridauth_required_fields_form', $profile);
-
-        $page = element_info('page');
-        $page['#children'] = theme('status_messages') . drupal_render($form);
-
-        print theme('html', array('page' => $page));
-        drupal_exit();
-      }
-    }
-  }
-  
   // Process Drupal authentication.
   _hybridauth_popup_process_auth($profile);
 }
@@ -244,6 +228,8 @@ function _hybridauth_popup_process_auth($data) {
   }
   //create new user account
   else {
+    // Check profile information for required fields.
+    _hybridauth_check_required_fields($data);
     global $hybridauth_data;
     $hybridauth_data = $data;
     //visitors can create accounts
@@ -259,6 +245,21 @@ function _hybridauth_popup_process_auth($data) {
   }
   
   _hybridauth_popup_close();
+}
+
+function _hybridauth_check_required_fields($data) {
+  $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
+  foreach ($required_fields as $key => $value) {
+    if (empty($data[$key]) && !($data[$key] === 0)) {
+      $form = drupal_get_form('hybridauth_required_fields_form', $data);
+
+      $page = element_info('page');
+      $page['#children'] = theme('status_messages') . drupal_render($form);
+
+      print theme('html', array('page' => $page));
+      drupal_exit();
+    }
+  }
 }
 
 function hybridauth_required_fields_form($form, &$form_state, $data) {
@@ -287,10 +288,6 @@ function hybridauth_required_fields_form($form, &$form_state, $data) {
       }
     }
   }
-  
-  $form['test'] = array(
-    '#markup' => print_r($data, TRUE),
-  );
 
   $form['actions'] = array('#type' => 'actions');
   $form['actions']['submit'] = array(
@@ -457,6 +454,7 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
   
   $form = array();
   $form['#user'] = $account;
+  $form['#del_identity'] = $del_identity;
   $form['#del_identity_data'] = $del_identity_data;
   $form['question'] = array(
     '#markup' => $question,
@@ -523,6 +521,9 @@ function hybridauth_user_identity_delete_validate($form, &$form_state) {
 }
 
 function hybridauth_user_identity_delete_submit($form, &$form_state) {
+  $account = $form['#user'];
+  $del_identity = $form['#del_identity'];
+  $del_identity_data = $form['#del_identity_data'];
   if (!empty($form_state['values']['identity_choice'])) {
     $identity = _hybridauth_identity_load_by_id($form_state['values']['identity_choice']);
     $data = unserialize($identity['data']);
@@ -531,19 +532,19 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
     $edit['name'] = $name;
     //change hybridauth data used for tokens
     $edit['data']['hybridauth'] = $data;
-    user_save($form_state['build_info']['args'][0], $edit);
+    user_save($account, $edit);
     //change authname in authmap DB table
-    user_set_authmaps($form_state['build_info']['args'][0], array('authname_hybridauth' => $name));
+    user_set_authmaps($account, array('authname_hybridauth' => $name));
   }
   
-  $deleted = _hybridauth_identity_delete_by_id($form_state['build_info']['args'][1]);
+  $deleted = _hybridauth_identity_delete_by_id($del_identity['id']);
   if ($deleted) {
     drupal_set_message(t('Identity deleted.'));
     //invoke hybridauth_identity_deleted rules event
     if (module_exists('rules')) {
-      rules_invoke_event('hybridauth_identity_deleted', $form['#user'], $form['#del_identity_data']);
+      rules_invoke_event('hybridauth_identity_deleted', $account, $del_identity_data);
     }
   }
   
-  $form_state['redirect'] = 'user/' . $form_state['build_info']['args'][0]->uid . '/hybridauth';
+  $form_state['redirect'] = 'user/' . $account->uid . '/hybridauth';
 }
