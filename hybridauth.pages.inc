@@ -532,7 +532,7 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
     $edit['name'] = $name;
     //change hybridauth data used for tokens
     $edit['data']['hybridauth'] = $data;
-    user_save($account, $edit);
+    $account = user_save($account, $edit);
     //change authname in authmap DB table
     user_set_authmaps($account, array('authname_hybridauth' => $name));
   }

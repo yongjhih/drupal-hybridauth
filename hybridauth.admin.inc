@@ -148,27 +148,6 @@ function hybridauth_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
   );
-  $form['vtabs']['fset_account']['hybridauth_disable_username_change'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Disable username change'),
-    '#description' => t('Remove username field from user account edit form for users created by HybridAuth.'
-      . ' If this is unchecked then users should also have "Change own username" permission to actually be able to change the username.'),
-    '#default_value' => variable_get('hybridauth_disable_username_change', 1),
-  );
-  $form['vtabs']['fset_account']['hybridauth_remove_password_fields'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Remove password fields'),
-    '#description' => t('Remove password fields from user account edit form for users created by HybridAuth.'),
-    '#default_value' => variable_get('hybridauth_remove_password_fields', 1),
-  );
-  $form['vtabs']['fset_account']['hybridauth_pictures'] = array(
-    '#type' => 'checkbox',
-    '#title' => t('Save HybridAuth provided picture as user picture'),
-    '#description' => t('Save pictures provided by HybridAuth as user pictures. Check the "Enable user pictures" option at <a href="!link">Account settings</a> to make this option available.',
-      array('!link' => url('admin/config/people/accounts'))),
-    '#default_value' => variable_get('hybridauth_pictures', 1),
-    '#disabled' => !variable_get('user_pictures', 0),
-  );
   $core_settings = array(
     USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
     USER_REGISTER_VISITORS => t('Visitors'),
@@ -204,6 +183,14 @@ function hybridauth_admin_settings() {
         array('!link' => url('admin/config/people/accounts'))),
     '#default_value' => variable_get('hybridauth_email_verification', 0),
   );
+  $form['vtabs']['fset_account']['hybridauth_pictures'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Save HybridAuth provided picture as user picture'),
+    '#description' => t('Save pictures provided by HybridAuth as user pictures. Check the "Enable user pictures" option at <a href="!link">Account settings</a> to make this option available.',
+      array('!link' => url('admin/config/people/accounts'))),
+    '#default_value' => variable_get('hybridauth_pictures', 1),
+    '#disabled' => !variable_get('user_pictures', 0),
+  );
   $form['vtabs']['fset_account']['hybridauth_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username pattern'),
@@ -223,6 +210,19 @@ function hybridauth_admin_settings() {
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
+  if (module_exists('token')) {
+    $form['vtabs']['fset_account']['fset_token'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Token'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['vtabs']['fset_account']['fset_token']['hybridauth_token_tree'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => array('user'),
+      '#global_types' => FALSE,
+    );
+  }
   $form['vtabs']['fset_account']['hybridauth_override_realname'] = array(
     '#type' => 'checkbox',
     '#title' => t('Override Real name'),
@@ -232,13 +232,19 @@ function hybridauth_admin_settings() {
     '#default_value' => variable_get('hybridauth_override_realname', 0),
     '#disabled' => !module_exists('realname'),
   );
-  if (module_exists('token')) {
-    $form['vtabs']['fset_account']['hybridauth_token_tree'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array('user'),
-      '#global_types' => FALSE,
-    );
-  }
+  $form['vtabs']['fset_account']['hybridauth_disable_username_change'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Disable username change'),
+    '#description' => t('Remove username field from user account edit form for users created by HybridAuth.'
+      . ' If this is unchecked then users should also have "Change own username" permission to actually be able to change the username.'),
+    '#default_value' => variable_get('hybridauth_disable_username_change', 1),
+  );
+  $form['vtabs']['fset_account']['hybridauth_remove_password_fields'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Remove password fields'),
+    '#description' => t('Remove password fields from user account edit form for users created by HybridAuth.'),
+    '#default_value' => variable_get('hybridauth_remove_password_fields', 1),
+  );
   
   $form['vtabs']['fset_other'] = array(
     '#type' => 'fieldset',
@@ -254,7 +260,13 @@ function hybridauth_admin_settings() {
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
   );
   if (module_exists('token')) {
-    $form['vtabs']['fset_other']['hybridauth_token_tree'] = array(
+    $form['vtabs']['fset_other']['fset_token'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Token'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['vtabs']['fset_other']['fset_token']['hybridauth_token_tree'] = array(
       '#theme' => 'token_tree',
       '#token_types' => array('user'),
       '#global_types' => TRUE,
