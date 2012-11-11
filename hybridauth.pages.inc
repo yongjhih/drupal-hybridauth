@@ -147,14 +147,30 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
     _hybridauth_popup_close();
   }
   
-  // If we got here then success!
-  _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $profile);
+  // Check profile information for required fields.
+  if (!user_is_logged_in()) {
+    $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
+    foreach ($required_fields as $key => $value) {
+      if (empty($profile[$key])) {
+        $form = drupal_get_form('hybridauth_required_fields_form', $profile);
+
+        $page = element_info('page');
+        $page['#children'] = theme('status_messages') . drupal_render($form);
+
+        print theme('html', array('page' => $page));
+        drupal_exit();
+      }
+    }
+  }
+  
+  // Process Drupal authentication.
+  _hybridauth_popup_process_auth($profile);
 }
 
 /**
  * A helper function that takes a successful HA authentication and handles the Drupal side of things.
  */
-function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $data) {
+function _hybridauth_popup_process_auth($data) {
   global $user;
   
   //user is already logged in, tries to add new identity
@@ -243,6 +259,71 @@ function _hybridauth_popup_process_auth($hybridauth, $provider_id, $adapter, $da
   }
   
   _hybridauth_popup_close();
+}
+
+function hybridauth_required_fields_form($form, &$form_state, $data) {
+  $hybridauth_fields = hybridauth_fields_list();
+  $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
+  $form = array();
+  $form['#data'] = $data;
+  
+  foreach ($required_fields as $key => $value) {
+    if (empty($data[$key]) && !($data[$key] === 0)) {
+      $form[$key] = array(
+        '#type' => 'textfield',
+        '#title' => $hybridauth_fields[$key],
+        '#required' => TRUE,
+      );
+      if ($key == 'email') {
+        $form[$key]['#maxlength'] = EMAIL_MAX_LENGTH;
+        $form[$key]['#description'] = t('A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.');
+      }
+      if ($key == 'gender') {
+        $form[$key]['#type'] = 'radios';
+        $form[$key]['#options'] = array(
+          'male' => t('Male'),
+          'female' => t('Female'),
+        );
+      }
+    }
+  }
+  
+  $form['test'] = array(
+    '#markup' => print_r($data, TRUE),
+  );
+
+  $form['actions'] = array('#type' => 'actions');
+  $form['actions']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Submit'),
+  );
+
+  return $form;
+}
+
+function hybridauth_required_fields_form_validate($form, &$form_state) {
+  // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
+  // warnings often caused by cutting and pasting.
+  $mail = trim($form_state['values']['email']);
+  form_set_value($form['email'], $mail, $form_state);
+
+  // Validate the e-mail address.
+  if ($error = user_validate_mail($form_state['values']['email'])) {
+    form_set_error('email', $error);
+  }
+}
+
+function hybridauth_required_fields_form_submit($form, &$form_state) {
+  $data = $form['#data'];
+  $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
+  
+  foreach ($required_fields as $key => $value) {
+    if (empty($data[$key]) && !($data[$key] === 0)) {
+      $data[$key] = $form_state['values'][$key];
+    }
+  }
+
+  _hybridauth_popup_process_auth($data);
 }
 
 function hybridauth_openid_form($form, &$form_state) {

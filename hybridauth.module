@@ -445,7 +445,7 @@ function hybridauth_fields_list() {
     'birthDay' => t('Birth day'),
     'birthMonth' => t('Birth month'),
     'birthYear' => t('Birth year'),
-    'email' => t('Email address'),
+    'email' => t('E-mail address'),
     'emailVerified' => t('Verified email address'),
     'phone' => t('Phone number'),
     'address' => t('Address'),
@@ -620,9 +620,7 @@ function _hybridauth_user_login_access_by_uid($uid) {
 
 function _hybridauth_identity_save($data, $uid = NULL) {
   global $user;
-  if (!$uid) {
-    $uid = $user->uid;
-  }
+  $uid = $uid ? $uid : $user->uid;
   db_merge('hybridauth_identity')
     ->key(array('uid' => $uid, 'provider' => $data['provider'], 'provider_identifier' => $data['identifier']))
     ->fields(array('data' => serialize($data)))

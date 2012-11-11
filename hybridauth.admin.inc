@@ -58,6 +58,22 @@ function hybridauth_admin_settings() {
       ),
     );
   }
+
+  $form['vtabs']['fset_fields'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Required fields'),
+  );
+  $form['vtabs']['fset_fields']['hybridauth_required_fields'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Required fields'),
+    '#options' => array(
+      'email' => t('Email address'),
+      'firstName' => t('First name'),
+      'lastName' => t('Last name'),
+      'gender' => t('Gender'),
+    ),
+    '#default_value' => variable_get('hybridauth_required_fields', array('email' => 'email')),
+  );
   
   $form['vtabs']['fset_widget'] = array(
     '#type' => 'fieldset',
