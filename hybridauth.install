@@ -64,7 +64,7 @@ function hybridauth_requirements($phase) {
         $requirements['hybridauth'] = array(
           'title' => $t('HybridAuth library'),
           'value' => Hybrid_Auth::$version,
-          'severity' => REQUIREMENT_INFO,
+          'severity' => REQUIREMENT_OK,
         );
       }
       catch(Exception $e) {

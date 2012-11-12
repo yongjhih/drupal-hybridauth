@@ -5,7 +5,12 @@ function hybridauth_endpoint() {
   drupal_session_start();
   
   if ($lib_path = _hybridauth_library_path()) {
-    require_once($lib_path . '/index.php');
+    try {
+      require_once($lib_path . '/index.php');
+    }
+    catch(Exception $e) {
+      watchdog_exception('hybridauth', $e);
+    }
   }
   
   return MENU_ACCESS_DENIED;
@@ -32,15 +37,13 @@ function hybridauth_popup($provider_id) {
   // If provider is OpenID, but we don't have the OpenID target, show OpenID form.
   if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
     $form = drupal_get_form('hybridauth_openid_form');
-
     $page = element_info('page');
     $page['#children'] = theme('status_messages') . drupal_render($form);
-
     print theme('html', array('page' => $page));
     drupal_exit();
   }
   
-  // Make sure it's Drupal that starts the session then load the lib
+  // Make sure it's Drupal that starts the session.
   drupal_session_start();
   
   // Try to get HybridAuth instance
@@ -49,7 +52,6 @@ function hybridauth_popup($provider_id) {
   }
   else {
     drupal_set_message(t('There was an error processing your request.'), 'error');
-    watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);
     _hybridauth_popup_close();
   }
 }
@@ -78,11 +80,8 @@ function _hybridauth_popup_close($redirect = TRUE) {
     }
     window.self.close();
   ', 'inline');
-  $page = array(
-    'page_top' => '',
-    '#children' => 'Closing...',
-    'page_bottom' => '',
-  );
+  $page = element_info('page');
+  $page['#children'] = 'Closing...';
   print theme('html', array('page' => $page));
   drupal_exit();
 }
@@ -99,7 +98,6 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
   }
   // An exception coming from HybridAuth library
   catch (Exception $e) {
-    watchdog_exception('hybridauth', $e);
     $redirect = TRUE;
 
     switch ($e->getCode()) {
@@ -118,7 +116,8 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
         // Report the error and log it.
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
-
+    
+    watchdog_exception('hybridauth', $e);
     _hybridauth_popup_close($redirect);
   }
 

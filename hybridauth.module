@@ -487,9 +487,14 @@ function hybridauth_get_instance() {
     $controller = FALSE;
     
     if ($lib_path = _hybridauth_library_path()) {
-      require_once($lib_path . '/Hybrid/Auth.php');
-      $config = hybridauth_get_config();
-      $controller = new Hybrid_Auth($config);
+      try {
+        require_once($lib_path . '/Hybrid/Auth.php');
+        $config = hybridauth_get_config();
+        $controller = new Hybrid_Auth($config);
+      }
+      catch(Exception $e) {
+        watchdog_exception('hybridauth', $e);
+      }
     }
   }
   
@@ -499,11 +504,11 @@ function hybridauth_get_instance() {
 function hybridauth_get_config() {
   $config = &drupal_static(__FUNCTION__, NULL);
   
-  if (variable_get('hybridauth_debug', FALSE) && !file_exists(file_directory_temp() . '/hybridauth.debug.log')) {
-    file_put_contents(file_directory_temp() . '/hybridauth.debug.log', '');
-  }
-  
   if (!isset($config)) {
+    if (variable_get('hybridauth_debug', FALSE) && !file_exists(file_directory_temp() . '/hybridauth.debug.log')) {
+      file_put_contents(file_directory_temp() . '/hybridauth.debug.log', '');
+    }
+    
     $config = array(
       'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE)),
       'providers' => array(),
@@ -554,6 +559,7 @@ function _hybridauth_library_path() {
     return $library_path . '/hybridauth';
   }
   else {
+    watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);
     return FALSE;
   }
 }
