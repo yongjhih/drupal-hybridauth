@@ -242,21 +242,26 @@ function hybridauth_required_fields_form($form, &$form_state, $data) {
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   $form = array();
   $form['#data'] = $data;
+  $form['fset'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Required information'),
+    '#description' => t('Please fill in additional information to complete your registration.'),
+  );
   
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
-      $form[$key] = array(
+      $form['fset'][$key] = array(
         '#type' => 'textfield',
         '#title' => $hybridauth_fields[$key],
         '#required' => TRUE,
       );
       if ($key == 'email') {
-        $form[$key]['#maxlength'] = EMAIL_MAX_LENGTH;
-        $form[$key]['#description'] = t('A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.');
+        $form['fset'][$key]['#maxlength'] = EMAIL_MAX_LENGTH;
+        $form['fset'][$key]['#description'] = t('A valid e-mail address. All e-mails from the system will be sent to this address. The e-mail address is not made public and will only be used if you wish to receive a new password or wish to receive certain news or notifications by e-mail.');
       }
       if ($key == 'gender') {
-        $form[$key]['#type'] = 'radios';
-        $form[$key]['#options'] = array(
+        $form['fset'][$key]['#type'] = 'radios';
+        $form['fset'][$key]['#options'] = array(
           'male' => t('Male'),
           'female' => t('Female'),
         );
@@ -264,8 +269,8 @@ function hybridauth_required_fields_form($form, &$form_state, $data) {
     }
   }
 
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['fset']['actions'] = array('#type' => 'actions');
+  $form['fset']['actions']['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
