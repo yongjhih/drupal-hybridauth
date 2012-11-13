@@ -311,6 +311,11 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
       '#description' => t('Choose your username.') . ' '
         . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
     );
+    if (module_exists('username_check')) {
+      _username_check_load_resources();
+      $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
+      $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
+    }
   }
 
   $form['fset']['actions'] = array('#type' => 'actions');
@@ -323,14 +328,14 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
 }
 
 function hybridauth_additional_info_form_validate($form, &$form_state) {
-  // Validate new or changing username.
+  // Validate username.
   if (isset($form_state['values']['username'])) {
     if ($error = user_validate_name($form_state['values']['username'])) {
       form_set_error('username', $error);
     }
-    //elseif ((bool) db_select('users')->fields('users', array('uid'))->condition('uid', $account->uid, '<>')->condition('name', db_like($form_state['values']['name']), 'LIKE')->range(0, 1)->execute()->fetchField()) {
-    //  form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
-    //}
+    elseif (user_load_by_name($form_state['values']['username'])) {
+      form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['username'])));
+    }
   }
 
   if (isset($form_state['values']['email'])) {
