@@ -201,6 +201,12 @@ function hybridauth_admin_settings() {
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
+  $form['vtabs']['fset_account']['hybridauth_registration_username_change'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Change username when registering'),
+    '#description' => t('Allow users to change their username when registering through HybridAuth.'),
+    '#default_value' => variable_get('hybridauth_registration_username_change', 0),
+  );
   $form['vtabs']['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
