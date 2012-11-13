@@ -176,8 +176,20 @@ function _hybridauth_popup_process_auth($data) {
   }
   //handle duplicate email addresses
   elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = user_load_by_mail($data['email'])) {
-    //block registration
-    if (variable_get('hybridauth_duplicate_emails', 1) == 1) {
+    //add identity to existing account, only if emailVerified
+    if (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
+      _hybridauth_identity_save($data, $account->uid);
+      drupal_set_message(t('New identity added.'));
+      //invoke hybridauth_identity_added rules event
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_identity_added', $account, $data);
+      }
+      $form_state['uid'] = $account->uid;
+      user_login_submit(array(), $form_state);
+    }
+    //block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
+    //(variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] != $data['emailVerified'])
+    else {
       drupal_set_message(t('You are trying to login with email address of another user.'), 'error');
       if (!empty($account->data['hybridauth'])) {
         $providers = hybridauth_providers_list();
@@ -189,17 +201,7 @@ function _hybridauth_popup_process_auth($data) {
           array('@password' => url('user/password'))));
       }
     }
-    //add identity to existing account, only if emailVerified
-    elseif (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
-      _hybridauth_identity_save($data, $account->uid);
-      drupal_set_message(t('New identity added.'));
-      //invoke hybridauth_identity_added rules event
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_identity_added', $account, $data);
-      }
-      $form_state['uid'] = $account->uid;
-      user_login_submit(array(), $form_state);
-    }
+    
   }
   //create new user account
   else {
@@ -282,7 +284,7 @@ function hybridauth_required_fields_form_validate($form, &$form_state) {
   // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
   // warnings often caused by cutting and pasting.
   $mail = trim($form_state['values']['email']);
-  form_set_value($form['email'], $mail, $form_state);
+  form_set_value($form['fset']['email'], $mail, $form_state);
 
   // Validate the e-mail address.
   if ($error = user_validate_mail($form_state['values']['email'])) {
