@@ -6,11 +6,8 @@ Drupal.behaviors.hybridauthWidget.attach = function (context, settings) {
     $(this).click(function(event) {
       event.preventDefault();
       var url = $(this).attr('href');
-      window.open(
-        url,
-        'hybridauth_social_sign_on',
-        'location=0,status=0,scrollbars=0,width=800,height=500'
-      );
+      popup_window = window.open(url, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500');
+      popup_window.focus();
       return false;
     });
   });
