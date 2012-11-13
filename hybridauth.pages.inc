@@ -334,7 +334,7 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
       form_set_error('username', $error);
     }
     elseif (user_load_by_name($form_state['values']['username'])) {
-      form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['username'])));
+      form_set_error('username', t('The name %name is already taken.', array('%name' => $form_state['values']['username'])));
     }
   }
 
