@@ -46,7 +46,7 @@ function hybridauth_popup($provider_id) {
   // Make sure it's Drupal that starts the session.
   drupal_session_start();
   
-  // Try to get HybridAuth instance
+  // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
     _hybridauth_popup_auth($hybridauth, $provider_id);
   }
@@ -96,7 +96,6 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
     $adapter = $hybridauth->authenticate($provider_id, $params);
     $profile = (array) ($adapter->getUserProfile());
   }
-  // An exception coming from HybridAuth library
   catch (Exception $e) {
     $redirect = TRUE;
 
@@ -132,26 +131,26 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
 function _hybridauth_popup_process_auth($data) {
   global $user;
   
-  //user is already logged in, tries to add new identity
+  // User is already logged in, tries to add new identity.
   if (user_is_logged_in()) {
-    //identity is already registered
+    // Identity is already registered.
     if ($identity = _hybridauth_identity_load($data)) {
-      //registered to this user
+      // Registered to this user.
       if ($user->uid == $identity['uid']) {
         drupal_set_message(t('You have already registered this identity.'));
         _hybridauth_popup_close();
       }
-      //registered to another user
+      // Registered to another user.
       else {
         drupal_set_message(t('This identity is registered to another user.'), 'error');
         _hybridauth_popup_close();
       }
     }
-    //identity is not registered - register it to the logged in user
+    // Identity is not registered - register it to the logged in user.
     else {
       _hybridauth_identity_save($data);
       drupal_set_message(t('New identity added.'));
-      //invoke hybridauth_identity_added rules event
+      // Invoke hybridauth_identity_added rules event.
       if (module_exists('rules')) {
         rules_invoke_event('hybridauth_identity_added', $user, $data);
       }
@@ -160,10 +159,11 @@ function _hybridauth_popup_process_auth($data) {
   }
   
   if ($identity = _hybridauth_identity_load($data)) {
-    //check if user is blocked
+    // Check if user is blocked.
     if ($account = _hybridauth_user_is_blocked_by_uid($identity['uid'])) {
       drupal_set_message(t('The username %name has not been activated or is blocked.', array('%name' => $account->name)), 'error');
     }
+    // Check for email verification timestamp.
     elseif (!_hybridauth_user_login_access_by_uid($identity['uid'])) {
       drupal_set_message(t('You need to verify your e-mail address - !email.', array('!email' => $data['email'])), 'error');
       drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
@@ -174,20 +174,20 @@ function _hybridauth_popup_process_auth($data) {
       user_login_submit(array(), $form_state);
     }
   }
-  //handle duplicate email addresses
+  // Handle duplicate email addresses.
   elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = user_load_by_mail($data['email'])) {
-    //add identity to existing account, only if emailVerified
+    // Add identity to existing account, only if emailVerified.
     if (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
       _hybridauth_identity_save($data, $account->uid);
       drupal_set_message(t('New identity added.'));
-      //invoke hybridauth_identity_added rules event
+      // Invoke hybridauth_identity_added rules event.
       if (module_exists('rules')) {
         rules_invoke_event('hybridauth_identity_added', $account, $data);
       }
       $form_state['uid'] = $account->uid;
       user_login_submit(array(), $form_state);
     }
-    //block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
+    // Block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
     //(variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] != $data['emailVerified'])
     else {
       drupal_set_message(t('You are trying to login with email address of another user.'), 'error');
@@ -203,9 +203,9 @@ function _hybridauth_popup_process_auth($data) {
     }
     
   }
-  //create new user account
+  // Create new user account.
   else {
-    //visitors can create accounts
+    // Visitors can create accounts.
     if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL))
       || variable_get('hybridauth_register', 0)) {
       // Check profile information for required fields.
@@ -234,7 +234,7 @@ function _hybridauth_popup_process_auth($data) {
       
       _hybridauth_user_save($data);
     }
-    //only admin can create accounts
+    // Only admin can create accounts.
     else {
       drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
     }
@@ -526,17 +526,20 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   $del_identity = $form['#del_identity'];
   $del_identity_data = $form['#del_identity_data'];
   if (!empty($form_state['values']['identity_choice'])) {
+    // Change hybridauth data used for tokens.
     $identity = _hybridauth_identity_load_by_id($form_state['values']['identity_choice']);
     $data = unserialize($identity['data']);
-    //change hybridauth data used for tokens
     $edit['data']['hybridauth'] = $data;
+    // Change name.
+    //$name = _hybridauth_make_username($data);
+    //$edit['name'] = $name;
     $account = user_save($account, $edit);
   }
   
   $deleted = _hybridauth_identity_delete_by_id($del_identity['id']);
   if ($deleted) {
     drupal_set_message(t('Identity deleted.'));
-    //invoke hybridauth_identity_deleted rules event
+    // Invoke hybridauth_identity_deleted rules event.
     if (module_exists('rules')) {
       rules_invoke_event('hybridauth_identity_deleted', $account, $del_identity_data);
     }
