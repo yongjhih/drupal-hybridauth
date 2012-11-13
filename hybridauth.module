@@ -579,11 +579,17 @@ function _hybridauth_add_icon_pack_files($name) {
 }
 
 function _hybridauth_make_username($data) {
-  $pattern = variable_get('hybridauth_username', 'hybridauth_[user:hybridauth:provider]_[user:hybridauth:identifier]');
-  $account = new stdClass();
-  $account->data = array('hybridauth' => $data);
+  if (empty($data['username'])) {
+    $pattern = variable_get('hybridauth_username', 'hybridauth_[user:hybridauth:provider]_[user:hybridauth:identifier]');
+    $account = new stdClass();
+    $account->data = array('hybridauth' => $data);
+
+    $hybridauth_name = $desired_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE, 'sanitize' => FALSE));
+  }
+  else {
+    $hybridauth_name = $data['username'];
+  }
   
-  $hybridauth_name = $desired_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE, 'sanitize' => FALSE));
   $counter = 0;
   while (user_load_by_name($hybridauth_name)) {
     $counter++;

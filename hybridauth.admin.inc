@@ -203,7 +203,7 @@ function hybridauth_admin_settings() {
   );
   $form['vtabs']['fset_account']['hybridauth_registration_username_change'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Change username when registering'),
+    '#title' => t('Allow username change when registering'),
     '#description' => t('Allow users to change their username when registering through HybridAuth.'),
     '#default_value' => variable_get('hybridauth_registration_username_change', 0),
   );

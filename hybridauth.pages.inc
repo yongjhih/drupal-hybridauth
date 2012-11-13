@@ -209,7 +209,8 @@ function _hybridauth_popup_process_auth($data) {
     if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL))
       || variable_get('hybridauth_register', 0)) {
       // Check profile information for required fields.
-      _hybridauth_check_required_fields($data);
+      _hybridauth_check_additional_info($data);
+      
       global $hybridauth_data;
       $hybridauth_data = $data;
       //user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
@@ -243,22 +244,31 @@ function _hybridauth_popup_process_auth($data) {
   _hybridauth_popup_close();
 }
 
-function _hybridauth_check_required_fields($data) {
+function _hybridauth_check_additional_info($data) {
+  $show_form = FALSE;
+  if (variable_get('hybridauth_registration_username_change', 0) && empty($data['username'])) {
+    $show_form = TRUE;
+  }
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
-      $form = drupal_get_form('hybridauth_required_fields_form', $data);
-
-      $page = element_info('page');
-      $page['#children'] = theme('status_messages') . drupal_render($form);
-
-      print theme('html', array('page' => $page));
-      drupal_exit();
+      $show_form = TRUE;
+      break;
     }
+  }
+  
+  if ($show_form) {
+    $form = drupal_get_form('hybridauth_additional_info_form', $data);
+
+    $page = element_info('page');
+    $page['#children'] = theme('status_messages') . drupal_render($form);
+
+    print theme('html', array('page' => $page));
+    drupal_exit();
   }
 }
 
-function hybridauth_required_fields_form($form, &$form_state, $data) {
+function hybridauth_additional_info_form($form, &$form_state, $data) {
   $hybridauth_fields = hybridauth_fields_list();
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   $form = array();
@@ -290,6 +300,19 @@ function hybridauth_required_fields_form($form, &$form_state, $data) {
     }
   }
 
+  if (variable_get('hybridauth_registration_username_change', 0)) {
+    $form['fset']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Username'),
+      '#maxlength' => USERNAME_MAX_LENGTH,
+      '#required' => TRUE,
+      '#attributes' => array('class' => array('username')),
+      '#default_value' => _hybridauth_make_username($data),
+      '#description' => t('Choose your username.') . ' '
+        . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
+    );
+  }
+
   $form['fset']['actions'] = array('#type' => 'actions');
   $form['fset']['actions']['submit'] = array(
     '#type' => 'submit',
@@ -299,19 +322,31 @@ function hybridauth_required_fields_form($form, &$form_state, $data) {
   return $form;
 }
 
-function hybridauth_required_fields_form_validate($form, &$form_state) {
-  // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
-  // warnings often caused by cutting and pasting.
-  $mail = trim($form_state['values']['email']);
-  form_set_value($form['fset']['email'], $mail, $form_state);
+function hybridauth_additional_info_form_validate($form, &$form_state) {
+  // Validate new or changing username.
+  if (isset($form_state['values']['username'])) {
+    if ($error = user_validate_name($form_state['values']['username'])) {
+      form_set_error('username', $error);
+    }
+    //elseif ((bool) db_select('users')->fields('users', array('uid'))->condition('uid', $account->uid, '<>')->condition('name', db_like($form_state['values']['name']), 'LIKE')->range(0, 1)->execute()->fetchField()) {
+    //  form_set_error('name', t('The name %name is already taken.', array('%name' => $form_state['values']['name'])));
+    //}
+  }
 
-  // Validate the e-mail address.
-  if ($error = user_validate_mail($form_state['values']['email'])) {
-    form_set_error('email', $error);
+  if (isset($form_state['values']['email'])) {
+    // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
+    // warnings often caused by cutting and pasting.
+    $mail = trim($form_state['values']['email']);
+    form_set_value($form['fset']['email'], $mail, $form_state);
+
+    // Validate the e-mail address.
+    if ($error = user_validate_mail($form_state['values']['email'])) {
+      form_set_error('email', $error);
+    }
   }
 }
 
-function hybridauth_required_fields_form_submit($form, &$form_state) {
+function hybridauth_additional_info_form_submit($form, &$form_state) {
   $data = $form['#data'];
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   
@@ -319,6 +354,10 @@ function hybridauth_required_fields_form_submit($form, &$form_state) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $data[$key] = $form_state['values'][$key];
     }
+  }
+
+  if (isset($form_state['values']['username'])) {
+    $data['username'] = $form_state['values']['username'];
   }
 
   _hybridauth_popup_process_auth($data);
