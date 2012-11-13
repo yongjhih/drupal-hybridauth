@@ -269,8 +269,6 @@ function _hybridauth_check_additional_info($data) {
 }
 
 function hybridauth_additional_info_form($form, &$form_state, $data) {
-  $hybridauth_fields = hybridauth_fields_list();
-  $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   $form = array();
   $form['#data'] = $data;
   $form['fset'] = array(
@@ -279,6 +277,26 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
     '#description' => t('Please fill in additional information to complete your registration.'),
   );
   
+  if (variable_get('hybridauth_registration_username_change', 0)) {
+    $form['fset']['username'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Username'),
+      '#maxlength' => USERNAME_MAX_LENGTH,
+      '#required' => TRUE,
+      '#attributes' => array('class' => array('username')),
+      '#default_value' => _hybridauth_make_username($data),
+      '#description' => t('Choose your username.') . ' '
+        . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
+    );
+    if (module_exists('username_check')) {
+      _username_check_load_resources();
+      $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
+      $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
+    }
+  }
+
+  $hybridauth_fields = hybridauth_fields_list();
+  $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $form['fset'][$key] = array(
@@ -297,24 +315,6 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
           'female' => t('Female'),
         );
       }
-    }
-  }
-
-  if (variable_get('hybridauth_registration_username_change', 0)) {
-    $form['fset']['username'] = array(
-      '#type' => 'textfield',
-      '#title' => t('Username'),
-      '#maxlength' => USERNAME_MAX_LENGTH,
-      '#required' => TRUE,
-      '#attributes' => array('class' => array('username')),
-      '#default_value' => _hybridauth_make_username($data),
-      '#description' => t('Choose your username.') . ' '
-        . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
-    );
-    if (module_exists('username_check')) {
-      _username_check_load_resources();
-      $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
-      $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
   }
 
