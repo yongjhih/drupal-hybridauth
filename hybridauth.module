@@ -129,7 +129,7 @@ function hybridauth_block_view($delta = '') {
 /**
  * Implements hook_user_presave().
  */
-function hybridauth_user_presave(&$edit, $account, $category) {
+/*function hybridauth_user_presave(&$edit, $account, $category) {
   global $hybridauth_data;
   if (empty($account->uid) && !empty($hybridauth_data)) { // the user is being created
     $edit['data']['hybridauth'] = $hybridauth_data;
@@ -144,7 +144,7 @@ function hybridauth_user_presave(&$edit, $account, $category) {
       $edit['status'] = 0;
     }
   }
-}
+}*/
 
 /**
  * Implements hook_user_delete().
@@ -356,19 +356,6 @@ function hybridauth_email_registration_name($edit, $account) {
   }
   return NULL;
 }
-
-/**
- * Implements hook_exit().
- * Intercepts drupal_goto() calls from Legal legal_user_login().
- */
-function hybridauth_exit($destination = NULL) {
-  global $hybridauth_data;
-  if (!empty($hybridauth_data) && preg_match('/\/legal_accept\/([\d]*)\//', $destination, $matches) && !_hybridauth_identity_load($hybridauth_data)) {
-    $uid = $matches[1];
-    _hybridauth_user_save($hybridauth_data, $uid);
-  }
-}
-
 
 /**
  * Internal functions.
@@ -673,57 +660,4 @@ function _hybridauth_identity_delete_by_id($id) {
     ->condition('id', $id, '=')
     ->execute();
   return $result;
-}
-
-function _hybridauth_user_save($data, $uid = NULL) {
-  global $user;
-  $account = $uid ? user_load($uid) : $user;
-  
-  _hybridauth_identity_save($data, $uid);
-  // Invoke hybridauth_identity_added rules event.
-  if (module_exists('rules')) {
-    rules_invoke_event('hybridauth_identity_added', $account, $data);
-  }
-  
-  $user_save_trigger = FALSE;
-  $user_email_verify_trigger = FALSE;
-  $edit = array();
-  //save user picture
-  if (variable_get('user_pictures', 0) && variable_get('hybridauth_pictures', 1)) {
-    $photo_url = $data['photoURL'];
-    if ($photo_url) {
-      $photo = drupal_http_request($photo_url);
-	    $file = file_save_data($photo->data);
-	    $file->status = 0; //to make user_save() to process the file and move it
-	    $edit['picture'] = $file;
-	    $user_save_trigger = TRUE;
-    }
-  }
-
-  //admin approval is required
-  if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
-    || variable_get('hybridauth_register', 0) == 2) {
-    _user_mail_notify('register_pending_approval', $account);
-    drupal_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
-  }
-  //email verification is required
-  elseif (!empty($data['email']) && $data['email'] != $data['emailVerified']
-    && ((!variable_get('hybridauth_email_verification', 0) && variable_get('user_email_verification', TRUE)) || variable_get('hybridauth_email_verification', 0) == 1)) {
-    session_destroy();
-    $edit['login'] = 280281600; //Dries birthday timestamp, Nov 19, 1978 :)
-    $user_save_trigger = TRUE;
-    $user_email_verify_trigger = TRUE;
-  }
-  
-  if ($user_save_trigger) {
-    //hack to remove one notice from Legal module
-    if (module_exists('legal')) {
-      $edit['legal_accept'] = NULL;
-    }
-    $account = user_save($account, $edit);
-  }
-  if ($user_email_verify_trigger) {
-    _user_mail_notify('register_no_approval_required', $account);
-    drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
-  }
 }

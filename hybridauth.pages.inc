@@ -165,6 +165,7 @@ function _hybridauth_popup_process_auth($data) {
     }
     // Check for email verification timestamp.
     elseif (!_hybridauth_user_login_access_by_uid($identity['uid'])) {
+      $data = unserialize($identity['data']);
       drupal_set_message(t('You need to verify your e-mail address - !email.', array('!email' => $data['email'])), 'error');
       drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
       _user_mail_notify('register_no_approval_required', user_load($identity['uid']));
@@ -211,9 +212,9 @@ function _hybridauth_popup_process_auth($data) {
       // Check profile information for required fields.
       _hybridauth_check_additional_info($data);
       
+      //TODO: remove this global if possible
       global $hybridauth_data;
       $hybridauth_data = $data;
-      //user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
       // Register this new user.
       $name = _hybridauth_make_username($data);
       $userinfo = array(
@@ -221,19 +222,75 @@ function _hybridauth_popup_process_auth($data) {
         'pass' => user_password(),
         'init' => $name,
         'status' => 1,
-        'access' => REQUEST_TIME
+        'access' => REQUEST_TIME,
+        'mail' => $data['email'],
+        'data' => array('hybridauth' => $data),
       );
+      $admin_approval_required = FALSE;
+      // Admin approval is required.
+      if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
+        || variable_get('hybridauth_register', 0) == 2) {
+        $userinfo['status'] = 0;
+        $admin_approval_required = TRUE;
+      }
       $account = user_save(drupal_anonymous_user(), $userinfo);
       // Terminate if an error occurred during user_save().
       if (!$account) {
         drupal_set_message(t("Error saving user account."), 'error');
         _hybridauth_popup_close();
       }
+      _hybridauth_identity_save($data, $account->uid);
+      // Invoke hybridauth_identity_added rules event.
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_identity_added', $account, $data);
+      }
+
+      $user_save_trigger = FALSE;
+      $user_email_verify_trigger = FALSE;
+      $user_login_trigger = TRUE;
+      // Save user picture.
+      if (variable_get('user_pictures', 0) && variable_get('hybridauth_pictures', 1)) {
+        $photo_url = $data['photoURL'];
+        if ($photo_url) {
+          $photo = drupal_http_request($photo_url);
+          $file = file_save_data($photo->data);
+          $file->status = 0; // to make user_save() to process the file and move it
+          $edit['picture'] = $file;
+          $user_save_trigger = TRUE;
+        }
+      }
+      // Admin approval is required.
+      if ($admin_approval_required) {
+        $user_login_trigger = FALSE;
+        _user_mail_notify('register_pending_approval', $account);
+        drupal_set_message(t('Thank you for applying for an account. Your account is currently pending approval by the site administrator.<br />In the meantime, a welcome message with further instructions has been sent to your e-mail address.'));
+      }
+      // Email verification is required.
+      elseif (!empty($data['email']) && $data['email'] != $data['emailVerified']
+        && ((!variable_get('hybridauth_email_verification', 0) && variable_get('user_email_verification', TRUE)) || variable_get('hybridauth_email_verification', 0) == 1)) {
+        $user_login_trigger = FALSE;
+        $edit['login'] = 280281600; //Dries birthday timestamp, Nov 19, 1978 :)
+        $user_save_trigger = TRUE;
+        $user_email_verify_trigger = TRUE;
+      }
+
+      if ($user_save_trigger) {
+        // Hack to remove one notice from Legal module.
+        if (module_exists('legal')) {
+          $edit['legal_accept'] = NULL;
+        }
+        $account = user_save($account, $edit);
+      }
+      if ($user_email_verify_trigger) {
+        _user_mail_notify('register_no_approval_required', $account);
+        drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
+      }
+
       // Log user in.
-      $form_state['uid'] = $account->uid;
-      user_login_submit(array(), $form_state);
-      
-      _hybridauth_user_save($data);
+      if ($user_login_trigger) {
+        $form_state['uid'] = $account->uid;
+        user_login_submit(array(), $form_state);
+      }
     }
     // Only admin can create accounts.
     else {
@@ -354,17 +411,21 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
 function hybridauth_additional_info_form_submit($form, &$form_state) {
   $data = $form['#data'];
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
+  $manual_fields = array();
   
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $data[$key] = $form_state['values'][$key];
+      $manual_fields[] = $key;
     }
   }
 
   if (isset($form_state['values']['username'])) {
     $data['username'] = $form_state['values']['username'];
+    $manual_fields[] = 'username';
   }
-
+  $data['manual'] = implode(',', $manual_fields);
+  
   _hybridauth_popup_process_auth($data);
 }
 
