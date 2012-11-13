@@ -205,14 +205,33 @@ function _hybridauth_popup_process_auth($data) {
   }
   //create new user account
   else {
-    // Check profile information for required fields.
-    _hybridauth_check_required_fields($data);
-    global $hybridauth_data;
-    $hybridauth_data = $data;
     //visitors can create accounts
     if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL))
       || variable_get('hybridauth_register', 0)) {
-      user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
+      // Check profile information for required fields.
+      _hybridauth_check_required_fields($data);
+      global $hybridauth_data;
+      $hybridauth_data = $data;
+      //user_external_login_register(_hybridauth_make_username($data), 'hybridauth');
+      // Register this new user.
+      $name = _hybridauth_make_username($data);
+      $userinfo = array(
+        'name' => $name,
+        'pass' => user_password(),
+        'init' => $name,
+        'status' => 1,
+        'access' => REQUEST_TIME
+      );
+      $account = user_save(drupal_anonymous_user(), $userinfo);
+      // Terminate if an error occurred during user_save().
+      if (!$account) {
+        drupal_set_message(t("Error saving user account."), 'error');
+        _hybridauth_popup_close();
+      }
+      // Log user in.
+      $form_state['uid'] = $account->uid;
+      user_login_submit(array(), $form_state);
+      
       _hybridauth_user_save($data);
     }
     //only admin can create accounts
@@ -509,14 +528,9 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   if (!empty($form_state['values']['identity_choice'])) {
     $identity = _hybridauth_identity_load_by_id($form_state['values']['identity_choice']);
     $data = unserialize($identity['data']);
-    $name = _hybridauth_make_username($data);
-    //change name
-    $edit['name'] = $name;
     //change hybridauth data used for tokens
     $edit['data']['hybridauth'] = $data;
     $account = user_save($account, $edit);
-    //change authname in authmap DB table
-    user_set_authmaps($account, array('authname_hybridauth' => $name));
   }
   
   $deleted = _hybridauth_identity_delete_by_id($del_identity['id']);
