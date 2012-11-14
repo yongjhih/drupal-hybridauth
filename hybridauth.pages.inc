@@ -649,6 +649,12 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
       rules_invoke_event('hybridauth_identity_deleted', $account, $del_identity_data);
     }
   }
+
+  // Try to get HybridAuth instance.
+  if ($hybridauth = hybridauth_get_instance()) {
+    $adapter = $hybridauth->getAdapter($del_identity['provider']);
+    $adapter->logout();
+  }
   
   $form_state['redirect'] = 'user/' . $account->uid . '/hybridauth';
 }

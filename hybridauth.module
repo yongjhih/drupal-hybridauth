@@ -127,6 +127,32 @@ function hybridauth_block_view($delta = '') {
 }
 
 /**
+ * Implements hook_user_login().
+ */
+function hybridauth_user_login(&$edit, $account) {
+  if ($hybridauth_session_data = _hybridauth_session_load($account->uid)) {
+    // Try to get HybridAuth instance.
+    if ($hybridauth = hybridauth_get_instance()) {
+      // Call Hybrid_Auth::restoreSessionData() to set stored data.
+      $hybridauth->restoreSessionData($hybridauth_session_data['data']);
+    }
+  }
+}
+
+/**
+ * Implements hook_user_logout().
+ */
+function hybridauth_user_logout($account) {
+  // Try to get HybridAuth instance.
+  if ($hybridauth = hybridauth_get_instance()) {
+    // Call Hybrid_Auth::getSessionData() to get stored data.
+    if ($hybridauth_session_data = $hybridauth->getSessionData()) {
+      _hybridauth_session_save($hybridauth_session_data, $account->uid);
+    }
+  }
+}
+
+/**
  * Implements hook_user_delete().
  */
 function hybridauth_user_delete($account) {
@@ -638,6 +664,31 @@ function _hybridauth_identity_delete_by_uid($uid) {
 function _hybridauth_identity_delete_by_id($id) {
   $result = db_delete('hybridauth_identity')
     ->condition('id', $id, '=')
+    ->execute();
+  return $result;
+}
+
+function _hybridauth_session_save($data, $uid = NULL) {
+  global $user;
+  $uid = $uid ? $uid : $user->uid;
+  db_merge('hybridauth_session')
+    ->key(array('uid' => $uid))
+    ->fields(array('data' => $data, 'updated' => REQUEST_TIME))
+    ->execute();
+}
+
+function _hybridauth_session_load($uid) {
+  $result = db_select('hybridauth_session', 'ha_sess')
+    ->fields('ha_sess')
+    ->condition('uid', $uid, '=')
+    ->execute()
+    ->fetchAssoc();
+  return $result;
+}
+
+function _hybridauth_session_delete($uid) {
+  $result = db_delete('hybridauth_session')
+    ->condition('uid', $uid, '=')
     ->execute();
   return $result;
 }

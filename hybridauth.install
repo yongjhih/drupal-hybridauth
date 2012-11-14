@@ -146,7 +146,41 @@ function hybridauth_schema() {
     'primary key' => array('id'),
   );
   
+  $schema['hybridauth_session'] = array(
+    'description' => 'Holds sessions data from HybridAuth library.',
+    'fields' => array(
+      'uid' => array(
+        'description' => 'The {users}.uid that owns this HybridAuth session data.',
+        'type' => 'int',
+        'unsigned' => TRUE,
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+      'data' => array(
+        'description' => 'A serialized array containing session data from HybridAuth library.',
+        'type' => 'text',
+        'not null' => TRUE,
+        'size' => 'normal',
+      ),
+      'updated' => array(
+        'description' => 'The Unix timestamp when the session was saved.',
+        'type' => 'int',
+        'not null' => TRUE,
+        'default' => 0,
+      ),
+    ),
+    'primary key' => array('uid'),
+  );
+  
   return $schema;
+}
+
+/**
+ * Add hybridauth_session DB table.
+ */
+function hybridauth_update_7001(&$sandbox) {
+  $schema = hybridauth_schema();
+  db_create_table('hybridauth_session', $schema['hybridauth_session']);
 }
 
 /**
