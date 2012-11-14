@@ -456,7 +456,7 @@ function hybridauth_openid_form_submit($form, &$form_state) {
 }
 
 /**
- * Menu callback; manage Engage 3rd party identities for the specified user.
+ * Menu callback; manage HybridAuth identities for the specified user.
  */
 function hybridauth_user_identity($form, &$form_state, $account) {
   drupal_set_title(format_username($account));
@@ -503,6 +503,13 @@ function hybridauth_user_identity($form, &$form_state, $account) {
       foreach ($hybridauth->getConnectedProviders() as $provider_key) {
         $connected_providers[] = $providers[$provider_key];
       }
+    }
+    catch (Exception $e) {
+      watchdog_exception('hybridauth', $e);
+    }
+    try {
+      $adapter = $hybridauth->getAdapter('Twitter');
+      //$adapter->setUserStatus('Testing out posting from HybridAuth #spam #test /cc @hybridauth');
     }
     catch (Exception $e) {
       watchdog_exception('hybridauth', $e);
@@ -616,7 +623,7 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       );
-      //add more identities
+      // Add more identities.
       if (user_access('use hybridauth')) {
         $form['hybridauth_widget'] = array(
           '#type' => 'hybridauth_widget',

@@ -160,7 +160,7 @@ function hybridauth_schema() {
         'description' => 'A serialized array containing session data from HybridAuth library.',
         'type' => 'text',
         'not null' => TRUE,
-        'size' => 'normal',
+        'size' => 'medium',
       ),
       'updated' => array(
         'description' => 'The Unix timestamp when the session was saved.',
