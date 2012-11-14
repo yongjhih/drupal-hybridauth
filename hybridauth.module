@@ -131,10 +131,14 @@ function hybridauth_block_view($delta = '') {
  */
 function hybridauth_user_login(&$edit, $account) {
   if ($hybridauth_session_data = _hybridauth_session_load($account->uid)) {
-    // Try to get HybridAuth instance.
     if ($hybridauth = hybridauth_get_instance()) {
+      $hybridauth_session_data = $hybridauth_session_data['data'];
+      $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
+      if (is_array($hybridauth_session_data_current)) {
+        $hybridauth_session_data = serialize(array_merge(unserialize($hybridauth_session_data), $hybridauth_session_data_current));
+      }
       // Call Hybrid_Auth::restoreSessionData() to set stored data.
-      $hybridauth->restoreSessionData($hybridauth_session_data['data']);
+      $hybridauth->restoreSessionData($hybridauth_session_data);
     }
   }
 }

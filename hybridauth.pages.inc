@@ -460,7 +460,7 @@ function hybridauth_openid_form_submit($form, &$form_state) {
  */
 function hybridauth_user_identity($form, &$form_state, $account) {
   drupal_set_title(format_username($account));
-  
+
   $identities = _hybridauth_identity_load_by_uid($account->uid);
   $providers = hybridauth_providers_list();
   
@@ -486,7 +486,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     '#empty' => t('You don\'t have any identities yet.')
   );
   
-  //add more identities
+  // Add more identities.
   if (user_access('use hybridauth')) {
     $form['hybridauth_widget'] = array(
       '#type' => 'hybridauth_widget',
@@ -496,8 +496,24 @@ function hybridauth_user_identity($form, &$form_state, $account) {
       '#hybridauth_destination' => '',
     );
   }
+
+  if ($hybridauth = hybridauth_get_instance()) {
+    $connected_providers = array();
+    try {
+      foreach ($hybridauth->getConnectedProviders() as $provider_key) {
+        $connected_providers[] = $providers[$provider_key];
+      }
+    }
+    catch (Exception $e) {
+      watchdog_exception('hybridauth', $e);
+    }
+  }
+  $form['connected_providers'] = array(
+    '#markup' => t('Currently connected to (session data):') . ' ' . implode(', ', $connected_providers),
+    '#weight' => 15,
+  );
   
-  //tokens browser for admins
+  // Tokens browser for admins.
   if (user_access('administer site configuration') || user_access('administer users')) {
     $form['vtabs'] = array(
       '#type' => 'vertical_tabs',
@@ -505,7 +521,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     );
     
     $header = array(t('Token'), t('Value'));
-    //user tokens
+    // User tokens.
     if (!empty($account->data['hybridauth'])) {
       $form['vtabs']['fset_user_tokens'] = array(
         '#type' => 'fieldset',
@@ -523,7 +539,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
       );
     }
     
-    //data from auth providers
+    // Data from auth providers.
     foreach ($data_array as $data) {
       $form['vtabs']['fset_' . $data['provider'] . '_' . $data['identifier']] = array(
         '#type' => 'fieldset',
@@ -650,7 +666,6 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
     }
   }
 
-  // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
     $adapter = $hybridauth->getAdapter($del_identity['provider']);
     $adapter->logout();
