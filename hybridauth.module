@@ -130,7 +130,7 @@ function hybridauth_block_view($delta = '') {
  * Implements hook_user_login().
  */
 function hybridauth_user_login(&$edit, $account) {
-  if ($hybridauth_session_data = _hybridauth_session_load($account->uid)) {
+  if ($hybridauth_session_data = _hybridauth_session_load_by_uid($account->uid)) {
     if ($hybridauth = hybridauth_get_instance()) {
       $hybridauth_session_data = $hybridauth_session_data['data'];
       $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
@@ -161,6 +161,7 @@ function hybridauth_user_logout($account) {
  */
 function hybridauth_user_delete($account) {
   _hybridauth_identity_delete_by_uid($account->uid);
+  _hybridauth_session_delete_by_uid($account->uid);
 }
 
 /**
@@ -681,7 +682,7 @@ function _hybridauth_session_save($data, $uid = NULL) {
     ->execute();
 }
 
-function _hybridauth_session_load($uid) {
+function _hybridauth_session_load_by_uid($uid) {
   $result = db_select('hybridauth_session', 'ha_sess')
     ->fields('ha_sess')
     ->condition('uid', $uid, '=')
@@ -690,7 +691,7 @@ function _hybridauth_session_load($uid) {
   return $result;
 }
 
-function _hybridauth_session_delete($uid) {
+function _hybridauth_session_delete_by_uid($uid) {
   $result = db_delete('hybridauth_session')
     ->condition('uid', $uid, '=')
     ->execute();
