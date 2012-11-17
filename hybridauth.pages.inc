@@ -87,7 +87,9 @@ function _hybridauth_popup_close($redirect = TRUE) {
 }
 
 function _hybridauth_popup_auth($hybridauth, $provider_id) {
-  $params = array();
+  $params = array(
+    'hauth_return_to' => url('hybridauth/popup/' . $provider_id, array('absolute' => TRUE, 'query' => drupal_get_query_parameters())),
+  );
   if (isset($_GET['openid_identifier'])) {
     $params['openid_identifier'] = $_GET['openid_identifier'];
   }
