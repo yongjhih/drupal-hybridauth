@@ -300,6 +300,11 @@ function theme_hybridauth_provider_icon($vars) {
  * Implements hook_username_alter().
  */
 function hybridauth_username_alter(&$name, $account) {
+  // Don't alter anonymous users or objects that do not have any user ID.
+  if (empty($account->uid)) {
+    return;
+  }
+  
   $account2 = user_load($account->uid);
   if (!empty($account2->data['hybridauth']) && !module_exists('realname')) {
     $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
