@@ -126,6 +126,36 @@ function hybridauth_rules_event_info() {
     ),
     'module' => 'hybridauth',
   );
+  $events['hybridauth_user_insert'] = array(
+    'label' => t('User registered through HybridAuth'),
+    'group' => t('HybridAuth'),
+    'variables' => array(
+      'hybridauth_user' => array(
+        'label' => t('registered user'),
+        'type' => 'user',
+      ),
+      'hybridauth' => array(
+        'label' => t('HybridAuth identity data'),
+        'type' => 'hybridauth',
+      ),
+    ),
+    'module' => 'hybridauth',
+  );
+  $events['hybridauth_user_login'] = array(
+    'label' => t('User logged in through HybridAuth'),
+    'group' => t('HybridAuth'),
+    'variables' => array(
+      'hybridauth_user' => array(
+        'label' => t('logged in user'),
+        'type' => 'user',
+      ),
+      'hybridauth' => array(
+        'label' => t('HybridAuth identity data'),
+        'type' => 'hybridauth',
+      ),
+    ),
+    'module' => 'hybridauth',
+  );
   
   return $events;
 }

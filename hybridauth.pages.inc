@@ -148,7 +148,7 @@ function _hybridauth_popup_process_auth($data) {
         _hybridauth_popup_close();
       }
     }
-    // Identity is not registered - register it to the logged in user.
+    // Identity is not registered - add it to the logged in user.
     else {
       _hybridauth_identity_save($data);
       drupal_set_message(t('New identity added.'));
@@ -175,6 +175,10 @@ function _hybridauth_popup_process_auth($data) {
     else {
       $form_state['uid'] = $identity['uid'];
       user_login_submit(array(), $form_state);
+      // Invoke hybridauth_user_login rules event.
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_user_login', $user, $data);
+      }
     }
   }
   // Handle duplicate email addresses.
@@ -189,6 +193,10 @@ function _hybridauth_popup_process_auth($data) {
       }
       $form_state['uid'] = $account->uid;
       user_login_submit(array(), $form_state);
+      // Invoke hybridauth_user_login rules event.
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_user_login', $user, $data);
+      }
     }
     // Block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
     //(variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] != $data['emailVerified'])
@@ -204,7 +212,6 @@ function _hybridauth_popup_process_auth($data) {
           array('@password' => url('user/password'))));
       }
     }
-    
   }
   // Create new user account.
   else {
@@ -240,6 +247,10 @@ function _hybridauth_popup_process_auth($data) {
       if (!$account) {
         drupal_set_message(t("Error saving user account."), 'error');
         _hybridauth_popup_close();
+      }
+      // Invoke hybridauth_user_insert rules event.
+      if (module_exists('rules')) {
+        rules_invoke_event('hybridauth_user_insert', $account, $data);
       }
       _hybridauth_identity_save($data, $account->uid);
       // Invoke hybridauth_identity_added rules event.
@@ -292,6 +303,10 @@ function _hybridauth_popup_process_auth($data) {
       if ($user_login_trigger) {
         $form_state['uid'] = $account->uid;
         user_login_submit(array(), $form_state);
+        // Invoke hybridauth_user_login rules event.
+        if (module_exists('rules')) {
+          rules_invoke_event('hybridauth_user_login', $user, $data);
+        }
       }
     }
     // Only admin can create accounts.
