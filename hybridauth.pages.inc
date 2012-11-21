@@ -514,24 +514,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     );
   }
 
-  if ($hybridauth = hybridauth_get_instance()) {
-    $connected_providers = array();
-    try {
-      foreach ($hybridauth->getConnectedProviders() as $provider_key) {
-        $connected_providers[] = $providers[$provider_key];
-      }
-    }
-    catch (Exception $e) {
-      watchdog_exception('hybridauth', $e);
-    }
-    try {
-      $adapter = $hybridauth->getAdapter('Twitter');
-      //$adapter->setUserStatus('Testing out posting from HybridAuth #spam #test /cc @hybridauth');
-    }
-    catch (Exception $e) {
-      watchdog_exception('hybridauth', $e);
-    }
-  }
+  $connected_providers = hybridauth_get_connected_providers();
   $form['connected_providers'] = array(
     '#markup' => t('Currently connected to (session data):') . ' ' . implode(', ', $connected_providers),
     '#weight' => 15,

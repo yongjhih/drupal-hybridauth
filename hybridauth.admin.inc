@@ -40,7 +40,7 @@ function hybridauth_admin_settings() {
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_enabled'] = array(
       '#type' => 'checkbox',
       '#title' => drupal_placeholder($provider_name),
-      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_enabled', FALSE),
+      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0),
     );
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',

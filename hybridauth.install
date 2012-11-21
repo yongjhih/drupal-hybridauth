@@ -179,8 +179,10 @@ function hybridauth_schema() {
  * Add hybridauth_session DB table.
  */
 function hybridauth_update_7001(&$sandbox) {
-  $schema = hybridauth_schema();
-  db_create_table('hybridauth_session', $schema['hybridauth_session']);
+  if (!db_table_exists('hybridauth_session')) {
+    $schema = hybridauth_schema();
+    db_create_table('hybridauth_session', $schema['hybridauth_session']);
+  }
 }
 
 /**
