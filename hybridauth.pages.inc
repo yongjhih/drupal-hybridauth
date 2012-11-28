@@ -476,6 +476,7 @@ function hybridauth_openid_form_submit($form, &$form_state) {
  * Menu callback; manage HybridAuth identities for the specified user.
  */
 function hybridauth_user_identity($form, &$form_state, $account) {
+  global $user;
   drupal_set_title(format_username($account));
 
   $identities = _hybridauth_identity_load_by_uid($account->uid);
@@ -504,7 +505,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
   );
   
   // Add more identities.
-  if (user_access('use hybridauth')) {
+  if ($account->uid == $user->uid && user_access('use hybridauth')) {
     $form['hybridauth_widget'] = array(
       '#type' => 'hybridauth_widget',
       '#title' => t('Add more identities'),
