@@ -186,5 +186,12 @@ function _hybridauth_ulogin_data_convert($ulogin_data) {
     }
   }
   
+  //adding empty keys - to follow HybridAuth standard
+  foreach (hybridauth_fields_list() as $key => $value) {
+    if (!array_key_exists($key, $hybridauth_data)) {
+      $hybridauth_data[$key] = '';
+    }
+  }
+  
   return $hybridauth_data;
 }
