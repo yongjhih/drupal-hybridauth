@@ -73,7 +73,7 @@ function _hybridauth_ulogin_identities_count() {
   return $result;
 }
 
-function _hybridauth_ulogin_identities($start = 0, $limit = 100) {
+function _hybridauth_ulogin_identities($start = 0, $limit = 10) {
   $result = db_select('ulogin_identity', 'ul_id')
     ->fields('ul_id')
     ->range($start, $limit)
@@ -82,14 +82,14 @@ function _hybridauth_ulogin_identities($start = 0, $limit = 100) {
   return $result;
 }
 
-function _hybridauth_ulogin_identity_process($identity) {
-  if ($provider = _hybridauth_ulogin_provider_convert($identity->network)) {
-    $data = array(
-      'provider' => $provider,
-      'identifier' => $identity->ulogin_uid,
-    );
-    if (!_hybridauth_identity_load($data)) {
-      _hybridauth_identity_save($data, $identity->uid);
+function _hybridauth_ulogin_identity_process($ulogin_identity) {
+  if ($provider = _hybridauth_ulogin_provider_convert($ulogin_identity->network)) {
+    $ulogin_data = unserialize($ulogin_identity->data);
+    $hybridauth_data = _hybridauth_ulogin_data_convert($ulogin_data);
+    $hybridauth_data['provider'] = $provider;
+    $hybridauth_data['identifier'] = $ulogin_identity->ulogin_uid;
+    if (!($existing_identity = _hybridauth_identity_load($hybridauth_data)) || $existing_identity['uid'] == $ulogin_identity->uid) {
+      _hybridauth_identity_save($hybridauth_data, $ulogin_identity->uid);
     }
   }
 }
@@ -130,4 +130,61 @@ function _hybridauth_ulogin_provider_convert($ulogin_network_key) {
   }
   
   return FALSE;
+}
+
+function _hybridauth_ulogin_data_map() {
+  $data_map = &drupal_static(__FUNCTION__, NULL);
+  if (!isset($data_map)) {
+    //ulogin data key => hybridauth data key
+    $data_map = array(
+      'network' => '',  //provider, but we must convert
+      'identity' => 'profileURL',
+      'uid' => 'identifier',
+      'first_name' => 'firstName',
+      'last_name' => 'lastName',
+      'email' => 'email',
+      'nickname' => 'displayName',
+      'bdate' => '', //should convert to separate values for day, month and year
+      'sex' => '', //gender, but we should convert
+      'photo' => 'photoURL',
+      'photo_big' => 'photoURL',
+      'country' => 'country',
+      'city' => 'city',
+      'phone' => 'phone',
+      'manual' => 'manual',
+      'profile' => 'profileURL',
+      'verified_email' => '', //if it is 1 then we should assign emailVerified
+    );
+  }
+  return $data_map;
+}
+
+function _hybridauth_ulogin_data_convert($ulogin_data) {
+  $data_map =_hybridauth_ulogin_data_map();
+  $hybridauth_data = array();  
+  foreach ($ulogin_data as $key => $value) {
+    if (array_key_exists($key, $data_map) && $data_map[$key]) {
+      $hybridauth_data[$data_map[$key]] = $value;
+    }
+    
+    if ($key == 'verified_email' && $value == 1) {
+      $hybridauth_data['emailVerified'] = $ulogin_data['email'];
+    }
+    if ($key == 'sex') {
+      if ($value == 1) {
+        $hybridauth_data['gender'] = 'female';
+      }
+      elseif ($value == 2) {
+        $hybridauth_data['gender'] = 'male';
+      }
+    }
+    if ($key == 'bdate') {
+      list($day, $month, $year) = explode('.', $value);
+      $hybridauth_data['birthDay'] = intval($day);
+      $hybridauth_data['birthMonth'] = intval($month);
+      $hybridauth_data['birthYear'] = intval($year);
+    }
+  }
+  
+  return $hybridauth_data;
 }
