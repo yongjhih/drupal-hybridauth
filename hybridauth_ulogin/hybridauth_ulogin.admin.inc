@@ -91,6 +91,12 @@ function _hybridauth_ulogin_identity_process($ulogin_identity) {
     if (!($existing_identity = _hybridauth_identity_load($hybridauth_data)) || $existing_identity['uid'] == $ulogin_identity->uid) {
       _hybridauth_identity_save($hybridauth_data, $ulogin_identity->uid);
     }
+    
+    $account = user_load($ulogin_identity->uid);
+    if (!empty($account->data['ulogin'])) {
+      $edit['data']['hybridauth'] = $hybridauth_data;
+      user_save($account, $edit);
+    }
   }
 }
 
