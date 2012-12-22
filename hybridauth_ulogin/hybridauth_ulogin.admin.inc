@@ -41,13 +41,12 @@ function _hybridauth_ulogin_batch_operation(&$context) {
     $context['sandbox']['max'] = _hybridauth_ulogin_identities_count();
   }
 
-  $limit = 2;
+  $limit = 5;
   $identities = _hybridauth_ulogin_identities($context['sandbox']['progress'], $limit);
 
   foreach ($identities as $id => $identity) {
     _hybridauth_ulogin_identity_process($identity);
-    
-    $context['results'][] = $id . ' ' . $identity->network . ' ' . _hybridauth_ulogin_provider_convert($identity->network);
+    $context['results'][] = $id;
     $context['sandbox']['progress']++;
   }
   $context['message'] = t('Processed uLogin identity !id', array('!id' => $id));
@@ -73,7 +72,7 @@ function _hybridauth_ulogin_identities_count() {
   return $result;
 }
 
-function _hybridauth_ulogin_identities($start = 0, $limit = 10) {
+function _hybridauth_ulogin_identities($start = 0, $limit = 5) {
   $result = db_select('ulogin_identity', 'ul_id')
     ->fields('ul_id')
     ->range($start, $limit)
@@ -83,6 +82,7 @@ function _hybridauth_ulogin_identities($start = 0, $limit = 10) {
 }
 
 function _hybridauth_ulogin_identity_process($ulogin_identity) {
+  //if no network to provider mapping - then skip this identity
   if ($provider = _hybridauth_ulogin_provider_convert($ulogin_identity->network)) {
     $ulogin_data = unserialize($ulogin_identity->data);
     $hybridauth_data = _hybridauth_ulogin_data_convert($ulogin_data);
@@ -137,7 +137,7 @@ function _hybridauth_ulogin_data_map() {
   if (!isset($data_map)) {
     //ulogin data key => hybridauth data key
     $data_map = array(
-      'network' => '',  //provider, but we must convert
+      'network' => '',  //provider, but we must convert; it is added in _hybridauth_ulogin_identity_process()
       'identity' => 'profileURL',
       'uid' => 'identifier',
       'first_name' => 'firstName',
@@ -167,8 +167,11 @@ function _hybridauth_ulogin_data_convert($ulogin_data) {
       $hybridauth_data[$data_map[$key]] = $value;
     }
     
-    if ($key == 'verified_email' && $value == 1) {
-      $hybridauth_data['emailVerified'] = $ulogin_data['email'];
+    if ($key == 'bdate') {
+      list($day, $month, $year) = explode('.', $value);
+      $hybridauth_data['birthDay'] = intval($day);
+      $hybridauth_data['birthMonth'] = intval($month);
+      $hybridauth_data['birthYear'] = intval($year);
     }
     if ($key == 'sex') {
       if ($value == 1) {
@@ -178,11 +181,8 @@ function _hybridauth_ulogin_data_convert($ulogin_data) {
         $hybridauth_data['gender'] = 'male';
       }
     }
-    if ($key == 'bdate') {
-      list($day, $month, $year) = explode('.', $value);
-      $hybridauth_data['birthDay'] = intval($day);
-      $hybridauth_data['birthMonth'] = intval($month);
-      $hybridauth_data['birthYear'] = intval($year);
+    if ($key == 'verified_email' && $value == 1) {
+      $hybridauth_data['emailVerified'] = $ulogin_data['email'];
     }
   }
   
