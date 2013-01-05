@@ -65,10 +65,14 @@ function _hybridauth_ulogin_finished_callback($success, $results, $operations) {
 }
 
 function _hybridauth_ulogin_identities_count() {
-  $result = db_select('ulogin_identity', 'ul_id')
-    ->countQuery()
-    ->execute()
-    ->fetchField();
+  $result = 0;
+  if (db_table_exists('ulogin_identity')) {
+    $result = db_select('ulogin_identity', 'ul_id')
+      ->countQuery()
+      ->execute()
+      ->fetchField();
+  }
+  
   return $result;
 }
 
