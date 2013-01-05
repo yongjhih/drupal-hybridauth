@@ -574,17 +574,23 @@ function hybridauth_get_connected_providers() {
  * Returns the path to the HybridAuth library.
  */
 function _hybridauth_library_path() {
-  $library_path = variable_get('hybridauth_library_path', module_exists('libraries') ? libraries_get_path('hybridauth') : 'sites/all/libraries/hybridauth');
-  if (file_exists($library_path . '/Hybrid/Auth.php')) {
-    return $library_path;
+  $library_path = &drupal_static(__FUNCTION__, NULL);
+
+  if (!isset($library_path)) {
+    $library_path = variable_get('hybridauth_library_path', module_exists('libraries') ? libraries_get_path('hybridauth') : 'sites/all/libraries/hybridauth');
+    if (file_exists($library_path . '/Hybrid/Auth.php')) {
+      return $library_path;
+    }
+    elseif (file_exists($library_path . '/hybridauth/Hybrid/Auth.php')) {
+      return $library_path . '/hybridauth';
+    }
+    else {
+      watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);
+      return FALSE;
+    }
   }
-  elseif (file_exists($library_path . '/hybridauth/Hybrid/Auth.php')) {
-    return $library_path . '/hybridauth';
-  }
-  else {
-    watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);
-    return FALSE;
-  }
+
+  return $library_path;
 }
 
 function _hybridauth_add_icon_pack_files($name) {
