@@ -169,6 +169,12 @@ function hybridauth_schema() {
         'default' => 0,
       ),
     ),
+    'foreign keys' => array(
+      'hybridauth_session_user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
     'primary key' => array('uid'),
   );
   
@@ -188,5 +194,5 @@ function hybridauth_update_7001(&$sandbox) {
 /**
  * Set us at schema rev 7000 as a base version.
  */
-function hybridauth_update_7000() {
+function hybridauth_update_7000(&$sandbox) {
 }
