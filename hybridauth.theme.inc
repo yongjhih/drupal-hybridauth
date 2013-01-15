@@ -22,7 +22,9 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'attributes' => array(
             'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
             'title' => $provider_name,
-            'class' => array('hybridauth-widget-provider')),
+            'class' => array('hybridauth-widget-provider'),
+            'rel' => array('nofollow'),
+          ),
         )
       );
     }
@@ -77,6 +79,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
           'title' => $element['#hybridauth_widget_link_title'],
           'class' => $class,
+          'rel' => array('nofollow'),
         ),
       )
     );
