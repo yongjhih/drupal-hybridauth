@@ -44,7 +44,7 @@ function hybridauth_admin_settings() {
     );
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight'),
+      //'#title' => t('Weight'),
       '#delta' => 20,
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_weight', 0),
       '#attributes' => array('class' => array('hybridauth-provider-weight')),
@@ -320,7 +320,7 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
   $header = array(
     array('data' => t('Name'), 'colspan' => 2),
     t('Weight'),
-    array('data' => t('Operations'), 'colspan' => 2),
+    t('Operations'),
   );
   $rows = array();
   
@@ -341,7 +341,7 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
   }
   
   //Finally, output the sortable table. Make sure the id variable is the same as the table id in drupal_add_tabledrag
-  $output = theme('table', array('header' => $header, 'rows' => $rows, 'sticky' => FALSE, 'attributes' => array('id' => 'hybridauth-providers')));
+  $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'hybridauth-providers')));
   $output .= drupal_render_children($form);
   
   //This function is the instantiator of the sorter. Make sure the 0th paramater is the id of your table, and the 3rd paramater is the class of your weight variable
