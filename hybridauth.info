@@ -1,7 +1,6 @@
 name = HybridAuth
 description = "Provides HybridAuth social sign-on."
-core = 7.x
-php = 5.2
 package = "User interface"
-configure = admin/config/people/hybridauth
+core = 6.x
+php = 5.2
 dependencies[] = ctools

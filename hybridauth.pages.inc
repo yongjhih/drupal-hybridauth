@@ -2,7 +2,7 @@
 
 function hybridauth_endpoint() {
   // Make sure it's Drupal that starts the session.
-  drupal_session_start();
+  //drupal_session_start();
   
   if ($lib_path = _hybridauth_library_path()) {
     try {
@@ -44,7 +44,7 @@ function hybridauth_popup($provider_id) {
   }
   
   // Make sure it's Drupal that starts the session.
-  drupal_session_start();
+  //drupal_session_start();
   
   // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {

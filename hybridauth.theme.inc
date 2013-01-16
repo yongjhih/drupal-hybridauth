@@ -14,7 +14,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   if ($element['#hybridauth_widget_type'] == 'list') {
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
       $vars['providers'][$provider_id] = l(
-        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $provider_name)),
+        theme('hybridauth_provider_icon', $element['#hybridauth_widget_icon_pack'], $provider_id, $provider_name),
         'hybridauth/popup/' . $provider_id,
         array(
           'html' => TRUE,
@@ -22,7 +22,9 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'attributes' => array(
             'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
             'title' => $provider_name,
-            'class' => array('hybridauth-widget-provider')),
+            'class' => array('hybridauth-widget-provider'),
+            'rel' => 'nofollow',
+          ),
         )
       );
     }
@@ -68,7 +70,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
     $vars['providers'][$provider_id] = l(
       ($element['#hybridauth_widget_type'] == 'link') ?
         $element['#hybridauth_widget_link_text'] :
-        theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $element['#hybridauth_widget_link_title'])),
+        theme('hybridauth_provider_icon', $element['#hybridauth_widget_icon_pack'], $provider_id, $element['#hybridauth_widget_link_title']),
       'hybridauth/providers/nojs',
       array(
         'html' => TRUE,
@@ -77,10 +79,24 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
           'title' => $element['#hybridauth_widget_link_title'],
           'class' => $class,
+          'rel '=> 'nofollow',
         ),
       )
     );
   }
   
   _hybridauth_add_icon_pack_files($element['#hybridauth_widget_icon_pack']);
+}
+
+/**
+ * Returns markup for a specific provider icon.
+ */
+function theme_hybridauth_provider_icon($icon_pack = 'hybridauth_32', $provider_id = NULL, $provider_name = NULL) {
+  _hybridauth_add_icon_pack_files($icon_pack);
+  if (!isset($provider_name)) {
+    $provider_name = hybridauth_get_provider_name($provider_id);
+  }
+
+  $class = array('hybridauth-icon', 'hybridauth-' . $provider_id);
+  return '<span' . drupal_attributes(array('class' => $class, 'title' => $provider_name)) . '></span>';
 }

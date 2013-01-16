@@ -9,12 +9,15 @@
  * Implements hook_install().
  */
 function hybridauth_install() {
+  drupal_install_schema('hybridauth');
 }
 
 /**
  * Implements hook_uninstall().
  */
 function hybridauth_uninstall() {
+  drupal_uninstall_schema('hybridauth');
+  
   module_load_include('module', 'hybridauth');
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
     variable_del('hybridauth_provider_' . $provider_id . '_enabled');
@@ -169,6 +172,12 @@ function hybridauth_schema() {
         'default' => 0,
       ),
     ),
+    'foreign keys' => array(
+      'hybridauth_session_user' => array(
+        'table' => 'users',
+        'columns' => array('uid' => 'uid'),
+      ),
+    ),
     'primary key' => array('uid'),
   );
   
@@ -176,17 +185,7 @@ function hybridauth_schema() {
 }
 
 /**
- * Add hybridauth_session DB table.
+ * Set us at schema rev 6000 as a base version.
  */
-function hybridauth_update_7001(&$sandbox) {
-  if (!db_table_exists('hybridauth_session')) {
-    $schema = hybridauth_schema();
-    db_create_table('hybridauth_session', $schema['hybridauth_session']);
-  }
-}
-
-/**
- * Set us at schema rev 7000 as a base version.
- */
-function hybridauth_update_7000() {
+function hybridauth_update_6000(&$sandbox) {
 }
