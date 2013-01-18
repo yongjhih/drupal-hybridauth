@@ -23,11 +23,11 @@ function hybridauth_providers($js) {
   
   if ($js) {
     ctools_include('modal');
-    ctools_modal_render(t('Log in using your account with'), $build);
+    ctools_modal_render(t('Log in using your account with'), drupal_render($build));
   }
   else {
     $build['#title'] = t('Log in using your account with');
-    return $build;
+    return drupal_render($build);
   }
 }
 
@@ -208,7 +208,8 @@ function _hybridauth_popup_process_auth($data) {
         'status' => 1,
         'access' => time(),
         'mail' => $data['email'],
-        'data' => array('hybridauth' => $data),
+        //'data' => array('hybridauth' => $data),
+        'hybridauth' => $data,
       );
       $admin_approval_required = FALSE;
       // Admin approval is required.
@@ -241,10 +242,13 @@ function _hybridauth_popup_process_auth($data) {
         $photo_url = $data['photoURL'];
         if ($photo_url) {
           $photo = drupal_http_request($photo_url);
-          $file = file_save_data($photo->data);
-          $file->status = 0; // to make user_save() to process the file and move it
-          $edit['picture'] = $file;
-          $user_save_trigger = TRUE;
+          $file = file_save_data($photo->data, file_directory_temp() . '/' . md5($photo_url), FILE_EXISTS_REPLACE);
+          $info = image_get_info($file);
+          $destination = variable_get('user_picture_path', 'pictures') . '/picture-' . $account->uid . '.' . $info['extension'];
+          if (file_copy($file, $destination, FILE_EXISTS_REPLACE)) {
+            $edit['picture'] = $file;
+            $user_save_trigger = TRUE;
+          }
         }
       }
       // Admin approval is required.
@@ -264,9 +268,9 @@ function _hybridauth_popup_process_auth($data) {
 
       if ($user_save_trigger) {
         // Hack to remove one notice from Legal module.
-        if (module_exists('legal')) {
+        /*if (module_exists('legal')) {
           $edit['legal_accept'] = NULL;
-        }
+        }*/
         $account = user_save($account, $edit);
       }
       if ($user_email_verify_trigger) {
@@ -373,7 +377,7 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
     if ($error = user_validate_name($form_state['values']['username'])) {
       form_set_error('username', $error);
     }
-    elseif (user_load_by_name($form_state['values']['username'])) {
+    elseif (user_load(array('name' => $form_state['values']['username']))) {
       form_set_error('username', t('The name %name is already taken.', array('%name' => $form_state['values']['username'])));
     }
   }
@@ -419,10 +423,10 @@ function hybridauth_openid_form(&$form_state) {
     '#type' => 'textfield',
     '#title' => t('OpenID Identity'),
     '#description' => t('Type your OpenID identity you want to use.'),
+    '#required' => TRUE,
   );
   
-  $form['actions'] = array('#type' => 'actions');
-  $form['actions']['submit'] = array(
+  $form['submit'] = array(
     '#type' => 'submit',
     '#value' => t('Submit'),
   );
@@ -431,11 +435,11 @@ function hybridauth_openid_form(&$form_state) {
 }
 
 function hybridauth_openid_form_submit($form, &$form_state) {
-  $query = drupal_get_query_parameters() + drupal_get_destination();
-  unset($_GET['destination']);
-  $query['openid_identifier'] = $form_state['values']['openid_identifier'];
+  $query = drupal_get_destination();
+  unset($_REQUEST['destination']);
+  $query .= '&openid_identifier=' . $form_state['values']['openid_identifier'];
   
-  drupal_goto('hybridauth/popup/OpenID', array('query' => $query));
+  drupal_goto('hybridauth/popup/OpenID', $query);
 }
 
 /**
@@ -486,67 +490,73 @@ function hybridauth_user_identity(&$form_state, $account) {
   
   // Tokens browser for admins.
   if (user_access('administer site configuration') || user_access('administer users')) {
-    $form['vtabs'] = array(
-      '#type' => 'vertical_tabs',
-      '#weight' => 20,
-    );
-    
     $header = array(t('Token'), t('Value'));
     // User tokens.
     if (!empty($account->hybridauth)) {
-      $form['vtabs']['fset_user_tokens'] = array(
+      $form['fset_user_tokens'] = array(
         '#type' => 'fieldset',
         '#title' => t('User tokens'),
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#weight' => 20,
+        '#group' => 'fset_user_tokens',
       );
       
       $rows = array();
       foreach ($account->hybridauth as $key => $value) {
-        $rows[] = array('[user:hybridauth:' . $key . ']', $value);
+        $rows[] = array('[hybridauth_' . $key . ']', $value);
       }
-      $form['vtabs']['fset_user_tokens']['tokens'] = array(
+      $form['fset_user_tokens']['tokens'] = array(
         '#value' => theme('table', $header, $rows),
       );
     }
     
     // Data from auth providers.
     foreach ($data_array as $data) {
-      $form['vtabs']['fset_' . $data['provider'] . '_' . $data['identifier']] = array(
+      $form['fset_' . $data['provider'] . '_' . $data['identifier']] = array(
         '#type' => 'fieldset',
         '#title' => $providers[$data['provider']],
+        '#collapsible' => TRUE,
+        '#collapsed' => TRUE,
+        '#weight' => 20,
+        '#group' => 'fset_' . $data['provider'] . '_' . $data['identifier'],
       );
       
       $rows = array();
       foreach ($data as $key => $value) {
         $rows[] = array($key, $value);
       }
-      $form['vtabs']['fset_' . $data['provider'] . '_' . $data['identifier']]['tokens'] = array(
+      $form['fset_' . $data['provider'] . '_' . $data['identifier']]['tokens'] = array(
         '#value' => theme('table', $header, $rows),
       );
     }
   }
-  
+
+  // Add vertical tabs display if available.
+  $form['#pre_render'][] = 'vertical_tabs_form_pre_render';
   return $form;
 }
 
-function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
+function hybridauth_user_identity_delete(&$form_state, $account, $id) {
   $del_identity = _hybridauth_identity_load_by_id($id);
   if (!$del_identity || $account->uid != $del_identity['uid']) {
     drupal_set_message(t('You are trying to delete non-existing identity.'), 'error');
     drupal_access_denied();
   }
   $del_identity_data = unserialize($del_identity['data']);
-  $username = format_username($account);
+  //$username = theme('username', $account);
+  $username = $account->name;
   $question = t('Are you sure you want to detach the HybridAuth identity !identity from %user?',
     array(
       '!identity' => l($del_identity_data['profileURL'], $del_identity_data['profileURL'], array('attributes' => array('target' => '_blank'), 'external' => TRUE)),
       '%user' => $username));
   
   $form = array();
-  $form['#user'] = $account;
+  $form['#account'] = $account;
   $form['#del_identity'] = $del_identity;
   $form['#del_identity_data'] = $del_identity_data;
   $form['question'] = array(
-    '#markup' => $question,
+    '#value' => $question,
     '#prefix' => '<div>',
     '#suffix' => '</div>',
   );
@@ -565,7 +575,7 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
     
     if (!empty($options)) {
       $form['explanation'] = array(
-        '#markup' => t('This identity was used to create your account. Please choose another identity to replace it.'),
+        '#value' => t('This identity was used to create your account. Please choose another identity to replace it.'),
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       );
@@ -579,7 +589,7 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
     }
     else {
       $form['explanation'] = array(
-        '#markup' => t('This identity was used to create your account. To delete it you should first add another identity to your account.'),
+        '#value' => t('This identity was used to create your account. To delete it you should first add another identity to your account.'),
         '#prefix' => '<div>',
         '#suffix' => '</div>',
       );
@@ -610,14 +620,14 @@ function hybridauth_user_identity_delete_validate($form, &$form_state) {
 }
 
 function hybridauth_user_identity_delete_submit($form, &$form_state) {
-  $account = $form['#user'];
+  $account = $form['#account'];
   $del_identity = $form['#del_identity'];
   $del_identity_data = $form['#del_identity_data'];
   if (!empty($form_state['values']['identity_choice'])) {
     // Change hybridauth data used for tokens.
     $identity = _hybridauth_identity_load_by_id($form_state['values']['identity_choice']);
     $data = unserialize($identity['data']);
-    $edit['data']['hybridauth'] = $data;
+    $edit['hybridauth'] = $data;
     // Change name.
     //$name = _hybridauth_make_username($data);
     //$edit['name'] = $name;

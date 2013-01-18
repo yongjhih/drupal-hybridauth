@@ -22,7 +22,7 @@ function hybridauth_perm() {
 function hybridauth_menu() {
   $items = array();
   
-  $items['admin/settings/hybridauth'] = array(
+  $items['admin/user/hybridauth'] = array(
     'title' => 'HybridAuth',
     'description' => 'Manage HybridAuth social sign-on settings.',
     'page callback' => 'drupal_get_form',
@@ -30,7 +30,7 @@ function hybridauth_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'hybridauth.admin.inc',
   );
-  $items['admin/settings/hybridauth/provider/%'] = array(
+  $items['admin/user/hybridauth/provider/%'] = array(
     'title callback' => 'hybridauth_get_provider_name',
     'title arguments' => array(4),
     'page callback' => 'drupal_get_form',
