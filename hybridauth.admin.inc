@@ -6,23 +6,25 @@
  */
 
 function hybridauth_admin_settings() {
-  if (!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_ADMINISTRATORS_ONLY) {
+  if (!variable_get('hybridauth_register', 0) && variable_get('user_register', 1) == 0) {
     drupal_set_message(t('Currently only administrators can create new user accounts. Either change the "Who can register accounts?" option under "Account settings" tab or at the core <a href="!link">Account settings</a>.',
       array('!link' => url('admin/config/people/accounts'))), 'warning');
   }
   
   $form = array();
-  /*$form['vtabs'] = array(
-    '#type' => 'vertical_tabs',
-    '#attached' => array(
-      'js' => array(drupal_get_path('module', 'hybridauth') . '/js/hybridauth.admin.js'),
-    ),
-  );*/
   
   $form['fset_providers'] = array(
     '#type' => 'fieldset',
     '#title' => t('Authentication providers'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
     '#theme' => 'hybridauth_admin_settings_providers_table',
+    '#group' => 'fset_providers',
+    /*'#attached' => array(
+      'js' => array(
+        'vertical-tabs' => drupal_get_path('module', 'hybridauth') . '/js/hybridauth.admin.js',
+      ),
+    ),*/
   );
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
     $form['fset_providers'][$provider_id] = array(
@@ -42,19 +44,22 @@ function hybridauth_admin_settings() {
     );
     $form['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
-      '#title' => t('Weight'),
+      //'#title' => t('Weight'),
       '#delta' => 20,
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_weight', 0),
-      '#attributes' => array('class' => array('hybridauth-provider-weight')),
+      '#attributes' => array('class' => 'hybridauth-provider-weight'),
     );
     $form['fset_providers'][$provider_id]['settings'] = array(
-      '#value' => l('Settings', 'admin/settings/hybridauth/provider/' . $provider_id, array('query' => drupal_get_destination())),
+      '#value' => l(t('Settings'), 'admin/settings/hybridauth/provider/' . $provider_id, array('query' => drupal_get_destination())),
     );
   }
 
   $form['fset_fields'] = array(
     '#type' => 'fieldset',
     '#title' => t('Required fields'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'fset_fields',
   );
   $form['fset_fields']['hybridauth_required_fields'] = array(
     '#type' => 'checkboxes',
@@ -72,6 +77,9 @@ function hybridauth_admin_settings() {
   $form['fset_widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'fset_widget',
   );
   $form['fset_widget']['hybridauth_widget_title'] = array(
     '#type' => 'textfield',
@@ -93,31 +101,16 @@ function hybridauth_admin_settings() {
     '#type' => 'checkbox',
     '#title' => t('Display list of enabled providers in an overlay'),
     '#default_value' => variable_get('hybridauth_widget_use_overlay', 1),
-    '#states' => array(
-      'invisible' => array(
-        ':input[name="hybridauth_widget_type"]' => array('value' => 'list'),
-      ),
-    ),
   );
   $form['fset_widget']['hybridauth_widget_link_text'] = array(
     '#type' => 'textfield',
     '#title' => t('Link text'),
     '#default_value' => variable_get('hybridauth_widget_link_text', 'Social network account'),
-    '#states' => array(
-      'visible' => array(
-        ':input[name="hybridauth_widget_type"]' => array('value' => 'link'),
-      ),
-    ),
   );
   $form['fset_widget']['hybridauth_widget_link_title'] = array(
     '#type' => 'textfield',
     '#title' => t('Link or icon title'),
     '#default_value' => variable_get('hybridauth_widget_link_title', 'Social network account'),
-    '#states' => array(
-      'invisible' => array(
-        ':input[name="hybridauth_widget_type"]' => array('value' => 'list'),
-      ),
-    ),
   );
   $options = array();
   foreach (hybridauth_get_icon_packs() as $name => $icon_pack) {
@@ -140,23 +133,26 @@ function hybridauth_admin_settings() {
   $form['fset_account'] = array(
     '#type' => 'fieldset',
     '#title' => t('Account settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'fset_account',
   );
   $core_settings = array(
-    USER_REGISTER_ADMINISTRATORS_ONLY => t('Administrators only'),
-    USER_REGISTER_VISITORS => t('Visitors'),
-    USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL => t('Visitors, but administrator approval is required'),
+    0 => t('Only site administrators can create new user accounts.'),
+    1 => t('Visitors can create accounts and no administrator approval is required.'),
+    2 => t('Visitors can create accounts but administrator approval is required.'),
   );
   $form['fset_account']['hybridauth_register'] = array(
     '#type' => 'radios',
     '#title' => t('Who can register accounts?'),
     '#options' => array(
-      0 => t('Follow core') . ': ' . $core_settings[variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)],
+      0 => t('Follow core') . ': ' . $core_settings[variable_get('user_register', 1)],
       1 => t('Visitors'),
       2 => t('Visitors, but administrator approval is required'),
     ),
     '#description' => t('Select who can register accounts through HybridAuth.') . ' '
-      . t('The core settings are available at <a href="!link">Account settings</a>.',
-        array('!link' => url('admin/config/people/accounts'))),
+      . t('The core settings are available at <a href="!link">User settings</a>.',
+        array('!link' => url('admin/user/settings'))),
     '#default_value' => variable_get('hybridauth_register', 0),
   );
   $core_settings = array(
@@ -172,22 +168,22 @@ function hybridauth_admin_settings() {
       2 => t("Don't require e-mail verification"),
     ),
     '#description' => t('Select how to handle not verified e-mail addresses (authentication provider gives non-verified e-mail address).') . ' '
-      . t('The core settings are available at <a href="!link">Account settings</a>.',
-        array('!link' => url('admin/config/people/accounts'))),
+      . t('The core settings are available at <a href="!link">User settings</a>.',
+        array('!link' => url('admin/user/settings'))),
     '#default_value' => variable_get('hybridauth_email_verification', 0),
   );
   $form['fset_account']['hybridauth_pictures'] = array(
     '#type' => 'checkbox',
     '#title' => t('Save HybridAuth provided picture as user picture'),
-    '#description' => t('Save pictures provided by HybridAuth as user pictures. Check the "Enable user pictures" option at <a href="!link">Account settings</a> to make this option available.',
-      array('!link' => url('admin/config/people/accounts'))),
+    '#description' => t('Save pictures provided by HybridAuth as user pictures. Check the "Enable user pictures" option at <a href="!link">User settings</a> to make this option available.',
+      array('!link' => url('admin/user/settings'))),
     '#default_value' => variable_get('hybridauth_pictures', 1),
     '#disabled' => !variable_get('user_pictures', 0),
   );
   $form['fset_account']['hybridauth_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username pattern'),
-    '#default_value' => variable_get('hybridauth_username', 'hybridauth_[user:hybridauth:provider]_[user:hybridauth:identifier]'),
+    '#default_value' => variable_get('hybridauth_username', 'hybridauth_[hybridauth_provider]_[hybridauth_identifier]'),
     '#description' => t('Create username for new users using this pattern; counter will be added in case of username conflict.') . ' '
       . t('You should use only HybridAuth tokens here as the user is not created yet.') . ' '
       . t('Install !link module to get list of all available tokens.',
@@ -217,9 +213,7 @@ function hybridauth_admin_settings() {
       '#collapsed' => TRUE,
     );
     $form['fset_account']['fset_token']['hybridauth_token_tree'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array('user'),
-      '#global_types' => FALSE,
+      '#value' => theme('token_tree', array('user'), FALSE),
     );
   }
   $form['fset_account']['hybridauth_override_realname'] = array(
@@ -248,6 +242,9 @@ function hybridauth_admin_settings() {
   $form['fset_other'] = array(
     '#type' => 'fieldset',
     '#title' => t('Other settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#group' => 'fset_other',
   );
   $form['fset_other']['hybridauth_destination'] = array(
     '#type' => 'textfield',
@@ -266,9 +263,7 @@ function hybridauth_admin_settings() {
       '#collapsed' => TRUE,
     );
     $form['fset_other']['fset_token']['hybridauth_token_tree'] = array(
-      '#theme' => 'token_tree',
-      '#token_types' => array('user'),
-      '#global_types' => TRUE,
+      '#value' => theme('token_tree', array('user'), TRUE),
     );
   }
   $form['fset_other']['hybridauth_forms'] = array(
@@ -300,7 +295,9 @@ function hybridauth_admin_settings() {
     '#description' => t('When in debug mode, extra error information will be logged/displayed. This should be disabled when not in development.'),
     '#default_value' => variable_get('hybridauth_debug', FALSE),
   );
-  
+
+  // Add vertical tabs display if available.
+  $form['#pre_render'][] = 'vertical_tabs_form_pre_render';
   return system_settings_form($form);
 }
 
@@ -311,7 +308,7 @@ function theme_hybridauth_admin_settings_providers_table($form) {
   $header = array(
     array('data' => t('Name'), 'colspan' => 2),
     t('Weight'),
-    array('data' => t('Operations'), 'colspan' => 2),
+    t('Operations'),
   );
   $rows = array();
   
@@ -326,12 +323,12 @@ function theme_hybridauth_admin_settings_providers_table($form) {
       
       $rows[] = array(
         'data' => $row,
-        'class' => array('draggable'),
+        'class' => 'draggable',
       );
     }
   }
   
-  //Finally, output the sortable table. Make sure the id variable is the same as the table id in drupal_add_tabledrag
+  //Finally, output the sortable table. Make sure the id is the same as the table id in drupal_add_tabledrag
   $output = theme('table', $header, $rows, array('id' => 'hybridauth-providers'));
   $output .= drupal_render($form);
   
@@ -341,12 +338,7 @@ function theme_hybridauth_admin_settings_providers_table($form) {
   return $output;
 }
 
-function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = NULL) {
-  if (!isset($provider_id)) {
-    drupal_not_found();
-    drupal_exit();
-  }
-  
+function hybridauth_admin_provider_settings(&$form_state, $provider_id = NULL) {
   $form = array();
   
   switch ($provider_id) {
@@ -489,17 +481,11 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
 
 function hybridauth_report() {
   $providers = hybridauth_providers_list();
-  
+
   $header = array(t('Authentication provider'), t('Users count'));
   $rows = array();
-  $query = db_select('hybridauth_identity', 'ha_id');
-  $query->addField('ha_id', 'provider', 'provider');
-  $query->addExpression('COUNT(provider_identifier)', 'count');
-  $query->groupBy('provider');
-  $results = $query
-    ->execute()
-    ->fetchAllAssoc('provider', PDO::FETCH_ASSOC);
-  foreach ($results as $result) {
+  $results = db_query('SELECT provider, COUNT(provider_identifier) count FROM {hybridauth_identity} GROUP BY provider');
+  while ($result = db_fetch_array($results)) {
     $rows[] = array(
       $providers[$result['provider']],
       $result['count'],
@@ -509,9 +495,7 @@ function hybridauth_report() {
   $form = array();
   
   $form['report'] = array(
-    '#theme' => 'table',
-    '#header' => $header,
-    '#rows' => $rows,
+    '#value' => theme('table', $header, $rows),
   );
   
   return $form;

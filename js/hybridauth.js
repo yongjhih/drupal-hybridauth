@@ -1,15 +1,10 @@
-(function ($) {
-
-Drupal.behaviors.hybridauthWidget = {};
-Drupal.behaviors.hybridauthWidget.attach = function (context, settings) {
-  $('.hybridauth-widget-provider', context).once('hybridauth', function() {
-    $(this).click(function(event) {
-      event.preventDefault();
-      var url = $(this).attr('href');
-      popup_window = window.open(url, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500');
-      popup_window.focus();
-      return false;
-    });
+Drupal.behaviors.hybridauthWidget = function (context) {
+  $('.hybridauth-widget-provider', context).click(function(event) {
+    event.preventDefault();
+    var url = $(this).attr('href');
+    popup_window = window.open(url, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500');
+    popup_window.focus();
+    return false;
   });
 };
 
@@ -36,5 +31,3 @@ Drupal.theme.prototype.HybridAuthModalDialog = function () {
   
   return html;
 };
-
-})(jQuery);

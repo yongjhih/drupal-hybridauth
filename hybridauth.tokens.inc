@@ -6,88 +6,41 @@
  */
 
 /**
- * Implements hook_token_info().
+ * Implements hook_token_list().
  */
-function hybridauth_token_info() {
-  $types = array();
-  $types['hybridauth'] = array(
-    'name' => t('HybridAuth data'),
-    'description' => t('Information about the user from HybridAuth library.'),
-    'needs-data' => 'user',
-  );
-  /*$types['hybridauth2'] = array(
-    'name' => t('HybridAuth data'),
-    'description' => t('Information about the user from HybridAuth library.'),
-    'needs-data' => 'user',
-  );*/
-  
+function hybridauth_token_list($type = 'all') {
   $tokens = array();
-  $tokens['user']['hybridauth'] = array(
-    'name' => t('HybridAuth information'),
-    'description' => t('Information from HybridAuth library.'),
-    'type' => 'hybridauth',
-  );
-  
-  $tokens['hybridauth'] = array (
-    'provider' => array(
-      'name' => t('Authentication provider'),
-      'description' => t('Network providing authentication.'),
-    ),
-  );
-  /*$tokens['hybridauth2'] = array (
-    'provider' => array(
-      'name' => t('Authentication provider'),
-      'description' => t('Network providing authentication.'),
-    ),
-  );*/
-  foreach (hybridauth_fields_list() as $key => $value) {
-    $tokens['hybridauth'][$key] = array(
-      'name' => $value,
-      'description' => $value . ' ' . t('provided by HybridAuth library.'),
-    );
-    /*$tokens['hybridauth2'][$key] = array(
-      'name' => $value,
-      'description' => $value . ' ' . t('provided by HybridAuth library.'),
-    );*/
+
+  if ($type == 'user' || $type == 'all') {
+    foreach (hybridauth_fields_list() as $key => $value) {
+      $tokens['user']['hybridauth_' . $key] = $value . ' ' . t('provided by HybridAuth.');
+    }
   }
-  /*foreach (hybridauth_providers_list() as $key => $value) {
-    $tokens['hybridauth'][$key] = array(
-      'name' => $value,
-      'description' => $value . t(' information through HybridAuth library.'),
-      'type' => 'hybridauth2',
-    );
-  }*/
-  
-  return array(
-    'types' => $types,
-    'tokens' => $tokens,
-  );
+
+  return $tokens;
 }
 
 /**
- * Implements hook_tokens().
+ * Implements hook_token_values().
  */
-function hybridauth_tokens($type, $tokens, array $data = array(), array $options = array()) {
-  $sanitize = !empty($options['sanitize']);
-  $replacements = array();
-  
-  if ($type == 'user' && !empty($data['user'])) {
-    if (!empty($data['user']->data['hybridauth'])) {
-      $hybridauth_tokens = token_find_with_prefix($tokens, 'hybridauth');
-      $replacements += token_generate('hybridauth', $hybridauth_tokens, array('hybridauth' => $data['user']->data['hybridauth']), $options);
+function hybridauth_token_values($type, $object = NULL, $options = array()) {
+  global $hybridauth_data;
+  $values = array();
+
+  if ($type == 'user') {
+    if (!empty($ulogin_data)) { //for just created user
+      $data = $hybridauth_data;
     }
-  }
-  
-  if ($type == 'hybridauth' && !empty($data['hybridauth'])) {
-    foreach ($tokens as $name => $original) {
-      if (isset($data['hybridauth'][$name])) {
-        $replacements[$original] = $sanitize ? check_plain($data['hybridauth'][$name]) : $data['hybridauth'][$name];
-      }
-      else {
-        $replacements[$original] = '';
+    elseif (!empty($object->hybridauth)) { //for existing user
+      $data = $object->hybridauth;
+    }
+
+    if (!empty($data)) {
+      foreach (hybridauth_fields_list() as $key => $value) {
+        $values['hybridauth_' . $key] = $data[$key];
       }
     }
   }
-  
-  return $replacements;
+
+  return $values;
 }

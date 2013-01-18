@@ -64,3 +64,18 @@ It is recommended to have the following modules:
 - Rules (http://drupal.org/project/rules) - to map HybridAuth data to user profile fields and other great stuff.
 See this issue for a working example - http://drupal.org/node/1808456
 - Real name (http://drupal.org/project/realname) - as it caches display names and improves performance of your site.
+
+
+Drupal 6 specifics
+------------------
+Cause it sets arg_separator.output to "&amp;" but it should be just "&"
+Line 157 in settings.php:
+ini_set('arg_separator.output', '&amp;');
+
+Either comment this line out or change it to:
+ini_set('arg_separator.output', '&');
+
+The other way is to patch hybridauth/Hybrid/thirdparty/OAuth/OAuth2Client.php
+Line 64:
+return $this->authorize_url . "?" . http_build_query( $params );
+return $this->authorize_url . "?" . http_build_query( $params, '', '&' );

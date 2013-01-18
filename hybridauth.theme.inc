@@ -1,28 +1,26 @@
 <?php
 
-function template_preprocess_hybridauth_widget(&$vars, $hook) {
+function template_preprocess_hybridauth_widget(&$vars) {
   $element = $vars['element'];
-  $vars['widget_id'] = drupal_html_id($element['#hybridauth_id']);
-  $vars['providers'] = array();
+  $providers = array();
   if ($element['#hybridauth_destination']) {
     $query = array('destination' => $element['#hybridauth_destination']);
   }
   else {
     $query = drupal_get_destination();
   }
-  
+
   if ($element['#hybridauth_widget_type'] == 'list') {
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
-      $vars['providers'][$provider_id] = l(
+      $providers[] = l(
         theme('hybridauth_provider_icon', $element['#hybridauth_widget_icon_pack'], $provider_id, $provider_name),
         'hybridauth/popup/' . $provider_id,
         array(
           'html' => TRUE,
           'query' => $query,
           'attributes' => array(
-            'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
             'title' => $provider_name,
-            'class' => array('hybridauth-widget-provider'),
+            'class' => 'hybridauth-widget-provider',
             'rel' => 'nofollow',
           ),
         )
@@ -32,7 +30,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   else {
     $provider_id = 'none';
     if ($element['#hybridauth_widget_use_overlay']) {
-      $class = array('ctools-use-modal', 'ctools-modal-hybridauthmodal');
+      $class = 'ctools-use-modal ctools-modal-hybridauthmodal';
       ctools_include('modal');
       ctools_modal_add_js();
       $settings = array(
@@ -66,8 +64,8 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       );
       drupal_add_js($settings, 'setting');
     }
-    
-    $vars['providers'][$provider_id] = l(
+
+    $providers[] = l(
       ($element['#hybridauth_widget_type'] == 'link') ?
         $element['#hybridauth_widget_link_text'] :
         theme('hybridauth_provider_icon', $element['#hybridauth_widget_icon_pack'], $provider_id, $element['#hybridauth_widget_link_title']),
@@ -76,7 +74,6 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
         'html' => TRUE,
         'query' => $query,
         'attributes' => array(
-          'id' => drupal_html_id('hybridauth-widget-provider-' . $provider_id),
           'title' => $element['#hybridauth_widget_link_title'],
           'class' => $class,
           'rel '=> 'nofollow',
@@ -84,19 +81,17 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       )
     );
   }
-  
+
   _hybridauth_add_icon_pack_files($element['#hybridauth_widget_icon_pack']);
+  drupal_add_js(drupal_get_path('module', 'hybridauth') . '/js/hybridauth.js');
+  drupal_add_css(drupal_get_path('module', 'hybridauth') . '/css/hybridauth.css');
+  
+  $vars['providers'] = $providers;
 }
 
-/**
- * Returns markup for a specific provider icon.
- */
-function theme_hybridauth_provider_icon($icon_pack = 'hybridauth_32', $provider_id = NULL, $provider_name = NULL) {
-  _hybridauth_add_icon_pack_files($icon_pack);
-  if (!isset($provider_name)) {
-    $provider_name = hybridauth_get_provider_name($provider_id);
+function template_preprocess_hybridauth_provider_icon(&$vars) {
+  _hybridauth_add_icon_pack_files($vars['icon_pack']);
+  if (!isset($vars['provider_name'])) {
+    $vars['provider_name'] = hybridauth_get_provider_name($vars['provider_id']);
   }
-
-  $class = array('hybridauth-icon', 'hybridauth-' . $provider_id);
-  return '<span' . drupal_attributes(array('class' => $class, 'title' => $provider_name)) . '></span>';
 }
