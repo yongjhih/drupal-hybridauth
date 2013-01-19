@@ -332,7 +332,7 @@ function hybridauth_additional_info_form(&$form_state, $data) {
       '#attributes' => array('class' => 'username'),
       '#default_value' => _hybridauth_make_username($data),
       '#description' => t('Choose your username.') . ' '
-        . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
+        . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, and underscores.'),
     );
     if (module_exists('username_check')) {
       _username_check_load_resources('auto');
@@ -381,6 +381,9 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
     elseif (user_load(array('name' => $form_state['values']['username']))) {
       form_set_error('username', t('The name %name is already taken.', array('%name' => $form_state['values']['username'])));
     }
+    elseif (drupal_is_denied('user', $form_state['values']['username'])) {
+      form_set_error('username', t('The name %name has been denied access.', array('%name' => $form_state['values']['username'])));
+    }
   }
 
   if (isset($form_state['values']['email'])) {
@@ -392,6 +395,9 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
     // Validate the e-mail address.
     if ($error = user_validate_mail($form_state['values']['email'])) {
       form_set_error('email', $error);
+    }
+    elseif (drupal_is_denied('mail', $form_state['values']['email'])) {
+      form_set_error('email', t('The e-mail address %email has been denied access.', array('%email' => $form_state['values']['email'])));
     }
   }
 }
