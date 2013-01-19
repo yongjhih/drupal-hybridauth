@@ -647,6 +647,7 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   if ($hybridauth = hybridauth_get_instance()) {
     $adapter = $hybridauth->getAdapter($del_identity['provider']);
     $adapter->logout();
+    _hybridauth_session_save($hybridauth->getSessionData(), $account->uid);
   }
   
   $form_state['redirect'] = 'user/' . $account->uid . '/hybridauth';

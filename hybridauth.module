@@ -117,26 +117,9 @@ function hybridauth_block($op = 'list', $delta = 0, $edit = array()) {
  */
 function hybridauth_user($op, &$edit, &$account, $category = NULL) {
   if ($op == 'login') {
-    if ($hybridauth_session_data = _hybridauth_session_load_by_uid($account->uid)) {
-      if ($hybridauth = hybridauth_get_instance()) {
-        $hybridauth_session_data = $hybridauth_session_data['data'];
-        $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
-        if (is_array($hybridauth_session_data_current)) {
-          $hybridauth_session_data = serialize(array_merge(unserialize($hybridauth_session_data), $hybridauth_session_data_current));
-        }
-        // Call Hybrid_Auth::restoreSessionData() to set stored data.
-        $hybridauth->restoreSessionData($hybridauth_session_data);
-      }
-    }
+    _hybridauth_session_sync_data($account->uid);
   }
-  elseif ($op == 'logout') {
-    // Try to get HybridAuth instance.
-    if ($hybridauth = hybridauth_get_instance()) {
-      // Call Hybrid_Auth::getSessionData() to get stored data.
-      if ($hybridauth_session_data = $hybridauth->getSessionData()) {
-        _hybridauth_session_save($hybridauth_session_data, $account->uid);
-      }
-    }
+  elseif ($op == 'logout') { //session is already destroyed - so no sense to check anything here
   }
   elseif ($op == 'delete') {
     _hybridauth_identity_delete_by_uid($account->uid);
@@ -602,6 +585,8 @@ function _hybridauth_identity_save($data, $uid = NULL) {
   //TODO: use drupal_write_record()?
   db_query("INSERT INTO {hybridauth_identity} (uid, provider, provider_identifier, data) VALUES (%d, '%s', '%s', '%s')",
     $uid, $data['provider'], $data['identifier'], serialize($data));
+
+  _hybridauth_session_sync_data($uid);
 }
 
 function _hybridauth_identity_load($data) {
@@ -652,4 +637,26 @@ function _hybridauth_session_load_by_uid($uid) {
 function _hybridauth_session_delete_by_uid($uid) {
   $result = db_query("DELETE FROM {hybridauth_session} WHERE uid = %d", $uid);
   return $result;
+}
+
+function _hybridauth_session_sync_data($uid) {
+  if ($hybridauth = hybridauth_get_instance()) {
+    $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
+    if (is_array($hybridauth_session_data_current)) {
+      if ($hybridauth_session = _hybridauth_session_load_by_uid($uid)) {
+        $hybridauth_session_data_ser = $hybridauth_session['data'];
+        $hybridauth_session_data_ser = serialize(array_merge(unserialize($hybridauth_session_data_ser), $hybridauth_session_data_current));
+        // Call Hybrid_Auth::restoreSessionData() to set stored data.
+        $hybridauth->restoreSessionData($hybridauth_session_data_ser);
+        _hybridauth_session_save($hybridauth_session_data_ser, $uid);
+      }
+      else {
+        _hybridauth_session_save(serialize($hybridauth_session_data_current), $uid);
+      }
+    }
+    elseif ($hybridauth_session = _hybridauth_session_load_by_uid($uid)) {
+      // Call Hybrid_Auth::restoreSessionData() to set stored data.
+      $hybridauth->restoreSessionData($hybridauth_session['data']);
+    }
+  }
 }
