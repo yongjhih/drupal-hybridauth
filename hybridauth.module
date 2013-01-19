@@ -244,7 +244,7 @@ function hybridauth_theme($existing, $type, $theme, $path) {
   
   $account2 = user_load($account->uid);
   if (!empty($account2->data['hybridauth']) && !module_exists('realname')) {
-    $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
+    $hybridauth_pattern = variable_get('hybridauth_display_name', '[hybridauth_firstName] [hybridauth_lastName]');
     $pattern = str_replace('[user:name]', $account2->name, $hybridauth_pattern);
     $hybridauth_name = token_replace($pattern, array('user' => $account2), array('clear' => TRUE));
     $name = trim(strip_tags($hybridauth_name));
@@ -256,7 +256,7 @@ function hybridauth_theme($existing, $type, $theme, $path) {
  */
 /*function hybridauth_realname_alter(&$realname, $account) {
   if (!empty($account->data['hybridauth']) && variable_get('hybridauth_override_realname', 0)) {
-    $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
+    $hybridauth_pattern = variable_get('hybridauth_display_name', '[hybridauth_firstName] [hybridauth_lastName]');
     $pattern = str_replace('[user:name]', $realname, $hybridauth_pattern);
     $hybridauth_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE));
     $realname = trim(strip_tags($hybridauth_name));
@@ -557,11 +557,9 @@ function _hybridauth_add_icon_pack_files($name) {
 
 function _hybridauth_make_username($data) {
   if (empty($data['username'])) {
-    $pattern = variable_get('hybridauth_username', 'hybridauth_[hybridauth_provider]_[hybridauth_identifier]');
-    $account = new stdClass();
-    $account->hybridauth = $data;
+    $pattern = variable_get('hybridauth_username', 'hybridauth_[provider]_[identifier]');
 
-    $hybridauth_name = $desired_name = token_replace($pattern, 'user', $account, '[', ']', array('clear' => TRUE));
+    $hybridauth_name = $desired_name = token_replace($pattern, 'hybridauth', $data, '[', ']', array('clear' => TRUE));
   }
   else {
     $hybridauth_name = $desired_name = $data['username'];

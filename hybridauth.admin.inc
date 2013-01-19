@@ -183,13 +183,24 @@ function hybridauth_admin_settings() {
   $form['fset_account']['hybridauth_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username pattern'),
-    '#default_value' => variable_get('hybridauth_username', 'hybridauth_[hybridauth_provider]_[hybridauth_identifier]'),
+    '#default_value' => variable_get('hybridauth_username', 'hybridauth_[provider]_[identifier]'),
     '#description' => t('Create username for new users using this pattern; counter will be added in case of username conflict.') . ' '
       . t('You should use only HybridAuth tokens here as the user is not created yet.') . ' '
       . t('Install !link module to get list of all available tokens.',
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
+  if (module_exists('token')) {
+    $form['fset_account']['fset_token_username'] = array(
+      '#type' => 'fieldset',
+      '#title' => t('Replacement patterns'),
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['fset_account']['fset_token_username']['hybridauth_token_tree'] = array(
+      '#value' => theme('token_tree', array('hybridauth'), FALSE),
+    );
+  }
   $form['fset_account']['hybridauth_registration_username_change'] = array(
     '#type' => 'checkbox',
     '#title' => t('Allow username change when registering'),
@@ -199,20 +210,20 @@ function hybridauth_admin_settings() {
   $form['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
-    '#default_value' => variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]'),
+    '#default_value' => variable_get('hybridauth_display_name', '[hybridauth_firstName] [hybridauth_lastName]'),
     '#description' => t('You can use any user tokens here.') . ' ' 
       . t('Install !link module to get list of all available tokens.',
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
     '#required' => TRUE,
   );
   if (module_exists('token')) {
-    $form['fset_account']['fset_token'] = array(
+    $form['fset_account']['fset_token_display_name'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Token'),
+      '#title' => t('Replacement patterns'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['fset_account']['fset_token']['hybridauth_token_tree'] = array(
+    $form['fset_account']['fset_token_display_name']['hybridauth_token_tree'] = array(
       '#value' => theme('token_tree', array('user'), FALSE),
     );
   }
@@ -258,7 +269,7 @@ function hybridauth_admin_settings() {
   if (module_exists('token')) {
     $form['fset_other']['fset_token'] = array(
       '#type' => 'fieldset',
-      '#title' => t('Token'),
+      '#title' => t('Replacement patterns'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );

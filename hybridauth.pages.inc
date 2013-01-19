@@ -59,7 +59,8 @@ function _hybridauth_popup_close($redirect = TRUE) {
   //if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', 1) == 1)
   //  || variable_get('hybridauth_register', 0) == 1) {
     $destination = drupal_substr(drupal_get_destination(), 12);
-    $destination = token_replace($destination, 'user', $user, '[', ']', array('clear' => TRUE));
+    //$destination = token_replace($destination, 'user', $user, '[', ']', array('clear' => TRUE));
+    $destination = token_replace_multiple($destination, array('global' => NULL, 'user' => $user), '[', ']', array('clear' => TRUE));
   //}
   //redirect to front page
   //else {
@@ -162,7 +163,7 @@ function _hybridauth_popup_process_auth($data) {
     }
   }
   // Handle duplicate email addresses.
-  elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = hybridauth_user_load_by_mail($data['email'])) {
+  elseif (variable_get('hybridauth_duplicate_emails', 1) && !empty($data['email']) && $account = user_load(array('mail' => $data['email']))) {
     // Add identity to existing account, only if emailVerified.
     if (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
       _hybridauth_identity_save($data, $account->uid);
@@ -649,11 +650,6 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   }
   
   $form_state['redirect'] = 'user/' . $account->uid . '/hybridauth';
-}
-
-function hybridauth_user_load_by_mail($mail) {
-  $uid = db_result(db_query("SELECT uid FROM {users} WHERE mail = '%s'", $mail));
-  return user_load($uid);
 }
 
 function _hybridauth_user_login($account, $data) {
