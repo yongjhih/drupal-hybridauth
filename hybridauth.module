@@ -415,6 +415,12 @@ function hybridauth_providers_list() {
       'Vkontakte' => t('VKontakte'),
       'Yandex' => t('Yandex'),
     );
+    foreach (file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '/\.php$/') as $file) {
+      if (!array_key_exists($file->name, $raw_providers)) {
+        $raw_providers[$file->name] = $file->name;
+      }
+    }
+    
     $providers = array();
     $weights = array();
     
@@ -579,10 +585,10 @@ function _hybridauth_library_path() {
   if (!isset($library_path)) {
     $library_path = variable_get('hybridauth_library_path', module_exists('libraries') ? libraries_get_path('hybridauth') : 'sites/all/libraries/hybridauth');
     if (file_exists($library_path . '/Hybrid/Auth.php')) {
-      return $library_path;
+      //return $library_path;
     }
     elseif (file_exists($library_path . '/hybridauth/Hybrid/Auth.php')) {
-      return $library_path . '/hybridauth';
+      $library_path .= '/hybridauth';
     }
     else {
       watchdog('hybridauth', 'HybridAuth library is missing.', array(), WATCHDOG_ERROR);

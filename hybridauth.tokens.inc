@@ -28,18 +28,6 @@ function hybridauth_token_info() {
     'type' => 'hybridauth',
   );
   
-  $tokens['hybridauth'] = array (
-    'provider' => array(
-      'name' => t('Authentication provider'),
-      'description' => t('Network providing authentication.'),
-    ),
-  );
-  /*$tokens['hybridauth2'] = array (
-    'provider' => array(
-      'name' => t('Authentication provider'),
-      'description' => t('Network providing authentication.'),
-    ),
-  );*/
   foreach (hybridauth_fields_list() as $key => $value) {
     $tokens['hybridauth'][$key] = array(
       'name' => $value,
