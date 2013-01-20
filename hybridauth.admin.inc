@@ -20,20 +20,13 @@ function hybridauth_admin_settings() {
     '#collapsed' => TRUE,
     '#theme' => 'hybridauth_admin_settings_providers_table',
     '#group' => 'fset_providers',
-    /*'#attached' => array(
+    '#attached' => array(
       'js' => array(
         'vertical-tabs' => drupal_get_path('module', 'hybridauth') . '/js/hybridauth.admin.js',
       ),
-    ),*/
+    ),
   );
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
-    $form['fset_providers'][$provider_id] = array(
-      '#item' => $provider_name,
-    );
-    $form['fset_providers'][$provider_id]['id'] = array(
-      '#type' => 'hidden',
-      '#value' => $provider_id,
-    );
     $form['fset_providers'][$provider_id]['icon'] = array(
       '#value' => theme('hybridauth_provider_icon', 'hybridauth_16', $provider_id),
     );
@@ -324,7 +317,7 @@ function theme_hybridauth_admin_settings_providers_table($form) {
   $rows = array();
   
   foreach (element_children($form) as $provider_id) {
-    if (isset($form[$provider_id]['id'])) {
+    if (isset($form[$provider_id]['icon'])) {
       $row = array(
         drupal_render($form[$provider_id]['hybridauth_provider_' . $provider_id . '_enabled']),
         drupal_render($form[$provider_id]['icon']),
