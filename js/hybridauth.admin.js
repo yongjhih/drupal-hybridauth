@@ -25,13 +25,13 @@ Drupal.verticalTabs.fset_fields = function() {
   });
 
   return vals.join(', ');
-}
+};
 
 Drupal.verticalTabs.fset_widget = function() {
   var vals = [];
 
   return vals.join('<br />');
-}
+};
 
 Drupal.verticalTabs.fset_account = function() {
   var vals = [];
@@ -57,7 +57,7 @@ Drupal.verticalTabs.fset_account = function() {
   });
 
   return vals.join('<br />');
-}
+};
 
 Drupal.verticalTabs.fset_other = function() {
   var vals = [];
@@ -100,8 +100,7 @@ Drupal.verticalTabs.fset_other = function() {
   }
 
   return vals.join('<br />');
-}
-
+};
 
 /*$('#edit-fset-widget', context).drupalSetSummary(function(context) {
     var vals = [];

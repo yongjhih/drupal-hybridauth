@@ -43,7 +43,7 @@ function hybridauth_admin_settings() {
       '#attributes' => array('class' => 'hybridauth-provider-weight'),
     );
     $form['fset_providers'][$provider_id]['settings'] = array(
-      '#value' => l(t('Settings'), 'admin/settings/hybridauth/provider/' . $provider_id, array('query' => drupal_get_destination())),
+      '#value' => l(t('Settings'), 'admin/user/hybridauth/provider/' . $provider_id, array('query' => drupal_get_destination())),
     );
   }
 
