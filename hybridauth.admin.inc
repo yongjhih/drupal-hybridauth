@@ -200,7 +200,7 @@ function hybridauth_admin_settings() {
     '#description' => t('Allow users to change their username when registering through HybridAuth.'),
     '#default_value' => variable_get('hybridauth_registration_username_change', 0),
   );
-  $form['fset_account']['hybridauth_display_name'] = array(
+  /*$form['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
     '#default_value' => variable_get('hybridauth_display_name', '[hybridauth_firstName] [hybridauth_lastName]'),
@@ -219,8 +219,8 @@ function hybridauth_admin_settings() {
     $form['fset_account']['fset_token_display_name']['hybridauth_token_tree'] = array(
       '#value' => theme('token_tree', array('user'), FALSE),
     );
-  }
-  $form['fset_account']['hybridauth_override_realname'] = array(
+  }*/
+  /*$form['fset_account']['hybridauth_override_realname'] = array(
     '#type' => 'checkbox',
     '#title' => t('Override Real name'),
     '#description' => t('Override <a href="!link1">Real name settings</a> using the above display name pattern for users created by HybridAuth. This option is available only if !link2 module is installed.',
@@ -228,7 +228,7 @@ function hybridauth_admin_settings() {
         '!link2' => l(t('Real name'), 'http://drupal.org/project/realname', array('attributes' => array('target' => '_blank'))))),
     '#default_value' => variable_get('hybridauth_override_realname', 0),
     '#disabled' => !module_exists('realname'),
-  );
+  );*/
   $form['fset_account']['hybridauth_disable_username_change'] = array(
     '#type' => 'checkbox',
     '#title' => t('Disable username change'),
