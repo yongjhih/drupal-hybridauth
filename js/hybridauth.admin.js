@@ -44,15 +44,15 @@ Drupal.verticalTabs.fset_account = function() {
       vals.push($.trim($(this).text()));
     }
     var label, value;
-    if (label_for == 'edit-hybridauth-email-verification' || label_for == 'edit-hybridauth-register') {
-      label = '<span style="font-weight:bold;">' + $.trim($(this).text()) + '</span>';
-      $('#' + label_for).find('label').each(function(index, Element) {
+    if (label_for == 'edit-hybridauth-email-verification-0' || label_for == 'edit-hybridauth-register-0') {
+      label = '<span style="font-weight:bold;">' + $.trim($(this).parent().parent().parent().children('label').text()) + '</span>';
+      $(this).parent().parent().parent().children('div.form-radios').find('label').each(function(index, Element) {
         var label_for = $(this).attr('for');
         if ($('#' + label_for).is(':checked')) {
           value = $.trim($(this).text());
         }
       });
-      vals.push(label + ': ' + value);
+      vals.push(label + ' ' + value);
     }
   });
 
@@ -71,15 +71,15 @@ Drupal.verticalTabs.fset_other = function() {
     vals.push(label + ' ' + 'return to the same page');
   }
 
-  /*label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-forms"]').text()) + '</span>';
+  label = '<span style="font-weight:bold;">' + $.trim($('#edit-hybridauth-forms-user-login-wrapper').parent().parent().children('label').text()) + '</span>';
   var list = [];
-  $('#edit-hybridauth-forms').find('label').each(function(index, Element) {
+  $('#edit-hybridauth-forms-user-login-wrapper').parent().find('label').each(function(index, Element) {
     var label_for = $(this).attr('for');
     if ($('#' + label_for).is(':checked')) {
       list.push($.trim($(this).text()));
     }
   });
-  vals.push(label + ': ' + list.join(', '));*/
+  vals.push(label + ' ' + list.join(', '));
 
   /*label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-duplicate-emails"]').text()) + '</span>';
   list = [];
