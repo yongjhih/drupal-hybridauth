@@ -548,10 +548,10 @@ function _hybridauth_make_username($data) {
   if (empty($data['username'])) {
     $pattern = variable_get('hybridauth_username', 'hybridauth_[provider]_[identifier]');
 
-    $hybridauth_name = $desired_name = token_replace($pattern, 'hybridauth', $data, '[', ']', array('clear' => TRUE));
+    $hybridauth_name = $desired_name = trim(token_replace($pattern, 'hybridauth', $data, '[', ']', array('clear' => TRUE)));
   }
   else {
-    $hybridauth_name = $desired_name = $data['username'];
+    $hybridauth_name = $desired_name = trim($data['username']);
   }
   
   $counter = 0;
