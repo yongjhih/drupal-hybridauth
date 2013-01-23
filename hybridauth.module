@@ -600,10 +600,10 @@ function _hybridauth_make_username($data) {
     $account = new stdClass();
     $account->data = array('hybridauth' => $data);
 
-    $hybridauth_name = $desired_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE, 'sanitize' => FALSE));
+    $hybridauth_name = $desired_name = trim(token_replace($pattern, array('user' => $account), array('clear' => TRUE, 'sanitize' => FALSE)));
   }
   else {
-    $hybridauth_name = $desired_name = $data['username'];
+    $hybridauth_name = $desired_name = trim($data['username']);
   }
   
   $counter = 0;
