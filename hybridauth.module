@@ -529,7 +529,7 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
         'key' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_key', '')),
         'secret' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', '')),
       ),
-      'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
+      'scope' => array_filter(variable_get('hybridauth_provider_' . $provider_id . '_scope', '')),
       'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', 'popup'),
       'hauth_return_to' => url('hybridauth/endpoint'),
     );
