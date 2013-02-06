@@ -19,7 +19,7 @@ Drupal.verticalTabs.fset_fields = function() {
 
   $('fieldset.vertical-tabs-fset_fields label').each(function (index, Element) {
     var label_for = $(this).attr('for');
-    if ($('#' + label_for).is(':checked')) {
+    if (label_for && $('#' + label_for).is(':checked')) {
       vals.push($.trim($(this).text()));
     }
   });
