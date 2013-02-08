@@ -247,24 +247,13 @@ function hybridauth_theme($existing, $type, $theme, $path) {
 }*/
 
 /**
- * Implements hook_ctools_plugin_type().
- */
-/*function hybridauth_ctools_plugin_type() {
-  return array(
-    'icon_pack' => array(
-      'load themes' => TRUE, // Themes can offer this plugin.
-    ),
-  );
-}*/
-
-/**
  * Implements hook_ctools_plugin_TYPE().
  */
-/*function hybridauth_ctools_plugin_icon_pack() {
+function hybridauth_ctools_plugin_icon_pack() {
   return array(
     'load themes' => TRUE,
   );
-}*/
+}
 
 /**
  * Load metadata for a single icon pack without loading all icon packs.
