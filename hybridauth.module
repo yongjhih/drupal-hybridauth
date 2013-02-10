@@ -355,10 +355,17 @@ function hybridauth_providers_list() {
   return $providers;
 }
 
+/**
+ * Returns available providers files, keyed by filename without extension.
+ */
 function hybridauth_providers_files() {
-  static $files;
-  if (!isset($files)) {
+  $cache = cache_get('hybridauth_providers_files');
+  if (!empty($cache->data)) {
+    $files = $cache->data;
+  }
+  else {
     $files = file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '\.php$', array('.', '..', 'CVS'), 0, TRUE, 'name');
+    cache_set('hybridauth_providers_files', $files, 'cache', CACHE_TEMPORARY);
   }
   return $files;
 }
