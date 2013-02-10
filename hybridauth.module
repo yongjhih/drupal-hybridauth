@@ -201,7 +201,7 @@ function _hybridauth_form_alter(&$form, &$form_state, $form_id) {
  */
 function hybridauth_form_user_profile_form_alter(&$form, &$form_state, $form_id) {
   //global $user;
-  if ($form['#user_category'] == 'account' &&!empty($form['#user']->data['hybridauth'])) {
+  if ($form['#user_category'] == 'account' && !empty($form['#user']->data['hybridauth'])) {
     if ($form['account']['name']['#access'] && variable_get('hybridauth_disable_username_change', 1)) {
       $form['account']['name']['#access'] = FALSE;
     }
@@ -396,9 +396,9 @@ function hybridauth_providers_list() {
       'Vkontakte' => t('VKontakte'),
       'Yandex' => t('Yandex'),
     );
-    foreach (file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '/\.php$/') as $file) {
-      if (!array_key_exists($file->name, $raw_providers)) {
-        $raw_providers[$file->name] = $file->name;
+    foreach (hybridauth_providers_files() as $name => $file) {
+      if (!array_key_exists($name, $raw_providers)) {
+        $raw_providers[$name] = $name;
       }
     }
     
@@ -416,6 +416,14 @@ function hybridauth_providers_list() {
   }
   
   return $providers;
+}
+
+function hybridauth_providers_files() {
+  static $files;
+  if (!isset($files)) {
+    $files = file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '/\.php$/', array('key' => 'name'));
+  }
+  return $files;
 }
 
 function hybridauth_fields_list() {

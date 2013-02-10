@@ -35,6 +35,9 @@ function hybridauth_admin_settings() {
       '#title' => drupal_placeholder($provider_name),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0),
     );
+    $form['vtabs']['fset_providers'][$provider_id]['file'] = array(
+      '#markup' => array_key_exists($provider_id, hybridauth_providers_files()) ? t('Yes') : t('No'),
+    );
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
       //'#title' => t('Weight'),
@@ -312,6 +315,7 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
   
   $header = array(
     array('data' => t('Name'), 'colspan' => 2),
+    t('Available'),
     t('Weight'),
     t('Operations'),
   );
@@ -322,6 +326,7 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
       $row = array(
         drupal_render($form[$provider_id]['hybridauth_provider_' . $provider_id . '_enabled']),
         drupal_render($form[$provider_id]['icon']),
+        drupal_render($form[$provider_id]['file']),
         drupal_render($form[$provider_id]['hybridauth_provider_' . $provider_id . '_weight']),
         drupal_render($form[$provider_id]['settings']),
       );
