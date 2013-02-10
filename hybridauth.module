@@ -333,9 +333,9 @@ function hybridauth_providers_list() {
       'Vkontakte' => t('VKontakte'),
       'Yandex' => t('Yandex'),
     );
-    foreach (file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '\.php$') as $file) {
-      if (!array_key_exists($file->name, $raw_providers)) {
-        $raw_providers[$file->name] = $file->name;
+    foreach (hybridauth_providers_files() as $name => $file) {
+      if (!array_key_exists($name, $raw_providers)) {
+        $raw_providers[$name] = $name;
       }
     }
     
@@ -353,6 +353,14 @@ function hybridauth_providers_list() {
   }
   
   return $providers;
+}
+
+function hybridauth_providers_files() {
+  static $files;
+  if (!isset($files)) {
+    $files = file_scan_directory(_hybridauth_library_path() . '/Hybrid/Providers', '\.php$', array('.', '..', 'CVS'), 0, TRUE, 'name');
+  }
+  return $files;
 }
 
 function hybridauth_fields_list() {
