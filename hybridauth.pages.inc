@@ -108,8 +108,10 @@ function _hybridauth_popup_auth($hybridauth, $provider_id) {
     _hybridauth_popup_close($redirect);
   }
 
-  // Process Drupal authentication.
   $profile['provider'] = $provider_id;
+  // Invoke hook_hybridauth_profile_alter().
+  drupal_alter('hybridauth_profile', $profile);
+  // Process Drupal authentication.
   _hybridauth_popup_process_auth($profile);
 }
 
