@@ -235,6 +235,7 @@ function _hybridauth_popup_process_auth($data) {
         'status' => 1,
         'access' => REQUEST_TIME,
         'mail' => $data['email'],
+        'roles' => $data['roles'],
         'data' => array('hybridauth' => $data),
       );
       $admin_approval_required = FALSE;
@@ -322,7 +323,8 @@ function _hybridauth_popup_process_auth($data) {
 
 function _hybridauth_check_additional_info($data) {
   $show_form = FALSE;
-  if (variable_get('hybridauth_registration_username_change', 0) && empty($data['username'])) {
+  if ((empty($data['username']) && variable_get('hybridauth_registration_username_change', 0))
+    || (empty($data['roles']) && variable_get('hybridauth_registration_role_change', 0))) {
     $show_form = TRUE;
   }
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
@@ -369,6 +371,15 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
       $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
       $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
+  }
+
+  if (variable_get('hybridauth_registration_role_change', 0)) {
+    $roles = array_intersect_key(user_roles(TRUE), array_filter(variable_get('hybridauth_roles', array())));
+    $form['fset']['roles'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Roles'),
+      '#options' => $roles,
+    );
   }
 
   $hybridauth_fields = hybridauth_fields_list();
@@ -442,6 +453,9 @@ function hybridauth_additional_info_form_submit($form, &$form_state) {
   if (isset($form_state['values']['username'])) {
     $data['username'] = $form_state['values']['username'];
     $manual_fields[] = 'username';
+  }
+  if (isset($form_state['values']['roles'])) {
+    $data['roles'] = $form_state['values']['roles'];
   }
   $data['manual'] = implode(',', $manual_fields);
   

@@ -203,6 +203,27 @@ function hybridauth_admin_settings() {
     '#description' => t('Allow users to change their username when registering through HybridAuth.'),
     '#default_value' => variable_get('hybridauth_registration_username_change', 0),
   );
+  $roles = user_roles(TRUE);
+  unset($roles[DRUPAL_AUTHENTICATED_RID]);
+  if ($roles) {
+    $form['vtabs']['fset_account']['hybridauth_registration_role_change'] = array(
+      '#type' => 'checkbox',
+      '#title' => t('Allow role change when registering'),
+      '#description' => t('Allow users to change their role when registering through HybridAuth.'),
+      '#default_value' => variable_get('hybridauth_registration_role_change', 0),
+    );
+    $form['vtabs']['fset_account']['hybridauth_roles'] = array(
+      '#type' => 'checkboxes',
+      '#title' => t('Roles to be displayed on signup form'),
+      '#options' => $roles,
+      '#default_value' => variable_get('hybridauth_roles', array()),
+      '#states' => array(
+        'visible' => array(
+          ':input[name="hybridauth_registration_role_change"]' => array('checked' => TRUE),
+        ),
+      ),
+    );
+  }
   $form['vtabs']['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
