@@ -1,7 +1,7 @@
 <?php
 
 function hybridauth_endpoint() {
-  // Make sure it's Drupal that starts the session.
+  // Make sure the session is started, HybridAuth library needs it.
   drupal_session_start();
   
   if ($lib_path = _hybridauth_library_path()) {
@@ -42,8 +42,8 @@ function hybridauth_popup($provider_id) {
     print theme('html', array('page' => $page));
     drupal_exit();
   }
-  
-  // Make sure it's Drupal that starts the session.
+
+  // Make sure the session is started, HybridAuth library needs it.
   drupal_session_start();
   
   // Try to get HybridAuth instance.
