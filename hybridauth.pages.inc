@@ -1,6 +1,12 @@
 <?php
 
 function hybridauth_endpoint() {
+  // Make sure the session is started, HybridAuth library needs it.
+  // This is needed only for Pressflow that has drupal_session_start() function.
+  if (function_exists('drupal_session_start')) {
+    drupal_session_start();
+  }
+  
   if ($lib_path = _hybridauth_library_path()) {
     try {
       require_once($lib_path . '/index.php');
@@ -38,6 +44,12 @@ function hybridauth_popup($provider_id) {
     // theme('page', $content, $show_blocks, $show_messages)
     print theme('page', $form, FALSE, TRUE);
     exit();
+  }
+  
+  // Make sure the session is started, HybridAuth library needs it.
+  // This is needed only for Pressflow that has drupal_session_start() function.
+  if (function_exists('drupal_session_start')) {
+    drupal_session_start();
   }
   
   // Try to get HybridAuth instance.
