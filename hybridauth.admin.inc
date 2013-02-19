@@ -206,20 +206,21 @@ function hybridauth_admin_settings() {
   $roles = user_roles(TRUE);
   unset($roles[DRUPAL_AUTHENTICATED_RID]);
   if ($roles) {
-    $form['vtabs']['fset_account']['hybridauth_registration_role_change'] = array(
+    $form['vtabs']['fset_account']['hybridauth_registration_role_choice'] = array(
       '#type' => 'checkbox',
-      '#title' => t('Allow role change when registering'),
-      '#description' => t('Allow users to change their role when registering through HybridAuth.'),
-      '#default_value' => variable_get('hybridauth_registration_role_change', 0),
+      '#title' => t('Suggest role choice when registering'),
+      '#description' => t('Allow users to choose their roles when registering through HybridAuth.'),
+      '#default_value' => variable_get('hybridauth_registration_role_choice', 0),
     );
-    $form['vtabs']['fset_account']['hybridauth_roles'] = array(
+    $form['vtabs']['fset_account']['hybridauth_registration_roles'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Roles to be displayed on signup form'),
+      '#title' => t('Roles to choose from'),
+      '#description' => t('Select roles to suggest to new users when registering through HybridAuth.'),
       '#options' => $roles,
-      '#default_value' => variable_get('hybridauth_roles', array()),
+      '#default_value' => variable_get('hybridauth_registration_roles', array()),
       '#states' => array(
         'visible' => array(
-          ':input[name="hybridauth_registration_role_change"]' => array('checked' => TRUE),
+          ':input[name="hybridauth_registration_role_choice"]' => array('checked' => TRUE),
         ),
       ),
     );
