@@ -237,9 +237,9 @@ function _hybridauth_popup_process_auth($data) {
         'mail' => $data['email'],
         'data' => array('hybridauth' => $data),
       );
-      if (array_key_exists('roles', $data)) {
-        $userinfo['roles'] = $data['roles'];
-      }
+      // Invoke hook_hybridauth_userinfo_alter().
+      drupal_alter('hybridauth_userinfo', $userinfo, $data);
+      
       $admin_approval_required = FALSE;
       // Admin approval is required.
       if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)
@@ -325,8 +325,8 @@ function _hybridauth_popup_process_auth($data) {
 
 function _hybridauth_check_additional_info($data) {
   $show_form = FALSE;
-  if ((empty($data['username']) && variable_get('hybridauth_registration_username_change', 0))
-    || (empty($data['roles']) && variable_get('hybridauth_registration_role_choice', 0))) {
+  
+  if (empty($data['username']) && variable_get('hybridauth_registration_username_change', 0)) {
     $show_form = TRUE;
   }
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
@@ -334,6 +334,12 @@ function _hybridauth_check_additional_info($data) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $show_form = TRUE;
       break;
+    }
+  }
+  // Allow other modules to show pre-registration form.
+  foreach (module_invoke_all('hybridauth_registration_form', $data) as $value) {
+    if ($value) {
+      $show_form = TRUE;
     }
   }
   
@@ -350,7 +356,10 @@ function _hybridauth_check_additional_info($data) {
 
 function hybridauth_additional_info_form($form, &$form_state, $data) {
   $form = array();
-  $form['#data'] = $data;
+  $form['data'] = array(
+    '#type' => 'value',
+    '#value' => $data,
+  );
   $form['fset'] = array(
     '#type' => 'fieldset',
     '#title' => t('Required information'),
@@ -373,15 +382,6 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
       $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
       $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
-  }
-
-  if (variable_get('hybridauth_registration_role_choice', 0)) {
-    $roles = array_intersect_key(user_roles(TRUE), array_filter(variable_get('hybridauth_registration_roles', array())));
-    $form['fset']['roles'] = array(
-      '#type' => 'checkboxes',
-      '#title' => t('Roles'),
-      '#options' => $roles,
-    );
   }
 
   $hybridauth_fields = hybridauth_fields_list();
@@ -441,26 +441,21 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
 }
 
 function hybridauth_additional_info_form_submit($form, &$form_state) {
-  $data = $form['#data'];
+  $data = $form_state['values']['data'];
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
-  $manual_fields = array();
   
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $data[$key] = $form_state['values'][$key];
-      $manual_fields[] = $key;
+      $data['manual'][] = $key;
     }
   }
 
   if (isset($form_state['values']['username'])) {
     $data['username'] = $form_state['values']['username'];
-    $manual_fields[] = 'username';
+    $data['manual'][] = 'username';
   }
-  if (isset($form_state['values']['roles'])) {
-    $data['roles'] = $form_state['values']['roles'];
-    $manual_fields[] = 'roles';
-  }
-  $data['manual'] = implode(',', $manual_fields);
+  $data['manual'] = implode(',', $data['manual']);
   
   _hybridauth_popup_process_auth($data);
 }
