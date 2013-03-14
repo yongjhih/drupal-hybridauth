@@ -378,7 +378,8 @@ function hybridauth_robotstxt() {
   return array(
     '#HybridAuth paths',
     'Disallow: /hybridauth/',
-    'Disallow: /?q=hybridauth/',
+    //RobotsTxt module works only with Clean URLs
+    //'Disallow: /?q=hybridauth/',
   );
 }
 
