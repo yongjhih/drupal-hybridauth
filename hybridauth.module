@@ -292,6 +292,17 @@ function hybridauth_email_registration_name($edit, $account) {
 }
 
 /**
+ * Implements hook_robotstxt().
+ */
+function hybridauth_robotstxt() {
+  return array(
+    '#HybridAuth paths',
+    'Disallow: /hybridauth/',
+    'Disallow: /?q=hybridauth/',
+  );
+}
+
+/**
  * Internal functions.
  */
 function hybridauth_providers_list() {
