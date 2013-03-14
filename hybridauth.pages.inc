@@ -45,6 +45,8 @@ function hybridauth_popup($provider_id) {
 
   // Make sure the session is started, HybridAuth library needs it.
   drupal_session_start();
+  // Flag to show that this session was started by HybridAuth module.
+  $_SESSION['hybridauth_session'] = TRUE;
   
   // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
