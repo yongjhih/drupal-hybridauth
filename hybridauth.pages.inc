@@ -63,7 +63,7 @@ function _hybridauth_popup_close($redirect = TRUE) {
   global $user;
   // Prevent devel module from spewing.
   $GLOBALS['devel_shutdown'] = FALSE;
-  //visitors can register accounts without admin approval
+  // Visitors can register accounts without admin approval.
   //if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS)
   //  || variable_get('hybridauth_register', 0) == 1) {
     $destination = drupal_get_destination();
@@ -75,10 +75,16 @@ function _hybridauth_popup_close($redirect = TRUE) {
   //}
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
-    if (window.opener && redirect){
-      window.opener.parent.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+    if (window.opener && redirect) {
+      window.opener.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      window.self.close();
     }
-    window.self.close();
+    else if (redirect) {
+      window.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+    }
+    else {
+      window.location.replace(window.location.href);
+    }
   ', 'inline');
   $page = element_info('page');
   $page['#children'] = 'Closing...';
