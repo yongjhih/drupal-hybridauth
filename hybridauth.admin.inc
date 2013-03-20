@@ -436,7 +436,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
       '#type' => 'checkboxes',
       '#title' => t('Scope - Permissions to request by default'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', array(
-        'email', 'user_about_me', 'user_birthday', 'user_hometown', 'user_website', 'offline_access', 'read_stream', 'publish_stream', 'read_friendlists',
+        'email', 'user_about_me', 'user_birthday', 'user_hometown', 'user_website', 'offline_access',
       )),
       '#options' => array(
         // See http://developers.facebook.com/docs/reference/api/permissions/
