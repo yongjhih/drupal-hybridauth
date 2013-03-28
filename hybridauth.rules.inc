@@ -32,6 +32,33 @@ function hybridauth_rules_action_info() {
         ), 
       ),
     ),
+    'hybridauth_dmy_to_date' => array(
+      'label' => t('Create date from day/month/year'),
+      'group' => t('HybridAuth'),
+      'parameter' => array(
+        'day' => array(
+          'label' => t('Day'),
+          'type' => 'text',
+          //'description' => t(''),
+        ),
+        'month' => array(
+          'label' => t('Month'),
+          'type' => 'text',
+          //'description' => t(''),
+        ),
+        'year' => array(
+          'label' => t('Year'),
+          'type' => 'text',
+          //'description' => t(''),
+        ),
+      ),
+      'provides' => array(
+        'date' => array(
+          'label' => 'Date',
+          'type' => 'date',
+        ),
+      ),
+    ),
   );
 }
 
@@ -51,6 +78,16 @@ function hybridauth_url_managed_file($url, $directory) {
   }
   
   return array('file' => $file);
+}
+
+function hybridauth_dmy_to_date($day, $month, $year) {
+  // My tests have shown there is no need for any timezone handling.
+  //$timezone = date_default_timezone_get();
+  //date_default_timezone_set('UTC');
+  $timestamp = mktime(0, 0, 0, intval($month), intval($day), intval($year));
+  //$timestamp = mktime(0, 0, 0, $month, $day, $year);
+  //date_default_timezone_set($timezone);
+  return array('date' => $timestamp);
 }
 
 /**
