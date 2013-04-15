@@ -523,6 +523,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
+    '#sticky' => FALSE,
     '#empty' => t('You don\'t have any identities yet.')
   );
   
@@ -566,6 +567,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
         '#theme' => 'table',
         '#header' => $header,
         '#rows' => $rows,
+        '#sticky' => FALSE,
       );
     }
     
@@ -584,6 +586,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
         '#theme' => 'table',
         '#header' => $header,
         '#rows' => $rows,
+        '#sticky' => FALSE,
       );
     }
   }

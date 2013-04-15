@@ -326,6 +326,51 @@ function hybridauth_page_alter(&$page) {
 }
 
 /**
+ * Implements hook_field_extra_fields().
+ */
+function hybridauth_field_extra_fields() {
+  $extra['user']['user']['display'] = array(
+    'hybridauth_identities' => array(
+      'label' => t('HybridAuth identities'),
+      'description' => t('HybridAuth identities.'),
+      'weight' => 10,
+    ),
+  );
+  
+  return $extra;
+}
+
+/**
+ * Implements hook_user_view().
+ */
+function hybridauth_user_view($account, $view_mode, $langcode) {
+  $identities = _hybridauth_identity_load_by_uid($account->uid);
+  $providers = hybridauth_providers_list();
+
+  $header = array(t('Authentication provider'), t('Identity'));
+  $rows = array();
+  $data_array = array();
+  foreach ($identities as $identity) {
+    $data = unserialize($identity['data']);
+    $data_array[] = $data;
+    $rows[] = array(
+      $providers[$data['provider']],
+      l($data['profileURL'], $data['profileURL'], array('attributes' => array('target' => '_blank'), 'external' => TRUE)),
+    );
+  }
+
+  $account->content['hybridauth_identities'] = array(
+    '#type' => 'item',
+    '#title' => t('HybridAuth identities'),
+    '#theme' => 'table',
+    '#header' => $header,
+    '#rows' => $rows,
+    '#sticky' => FALSE,
+    '#empty' => t('You don\'t have any identities yet.')
+  );
+}
+
+/**
  * Implements hook_ctools_plugin_type().
  */
 function hybridauth_ctools_plugin_type() {
