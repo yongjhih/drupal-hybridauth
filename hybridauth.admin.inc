@@ -68,23 +68,13 @@ function hybridauth_admin_settings() {
       'lastName' => t('Last name'),
       'gender' => t('Gender'),
     ),
-    '#description' => t("Select required information. If authentication provider doesn't return it, visitor will need to fill additional form before registration."),
+    '#description' => t("If authentication provider doesn't return it, visitor will need to fill additional form before registration."),
     '#default_value' => variable_get('hybridauth_required_fields', array('email' => 'email')),
   );
   
   $form['vtabs']['fset_widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
-  );
-  $options = array(
-    'popup' => t('Use a new popup window'),
-    'current' => t('Use the current window'),
-  );
-  $form['vtabs']['fset_widget']['hybridauth_window_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Authentication window type'),
-    '#options' => $options,
-    '#default_value' => variable_get('hybridauth_window_type', 'popup'),
   );
   $form['vtabs']['fset_widget']['hybridauth_widget_title'] = array(
     '#type' => 'textfield',
@@ -104,7 +94,7 @@ function hybridauth_admin_settings() {
   );
   $form['vtabs']['fset_widget']['hybridauth_widget_use_overlay'] = array(
     '#type' => 'checkbox',
-    '#title' => t('Display list of enabled providers in an overlay'),
+    '#title' => t('Display list of enabled providers using overlay'),
     '#default_value' => variable_get('hybridauth_widget_use_overlay', 1),
     '#states' => array(
       'invisible' => array(
@@ -261,6 +251,16 @@ function hybridauth_admin_settings() {
   $form['vtabs']['fset_other'] = array(
     '#type' => 'fieldset',
     '#title' => t('Other settings'),
+  );
+  $options = array(
+    'current' => t('Use the current window'),
+    'popup' => t('Use a new popup window'),
+  );
+  $form['vtabs']['fset_other']['hybridauth_window_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Authentication window type'),
+    '#options' => $options,
+    '#default_value' => variable_get('hybridauth_window_type', 'current'),
   );
   $form['vtabs']['fset_other']['hybridauth_destination'] = array(
     '#type' => 'textfield',

@@ -231,7 +231,7 @@ function hybridauth_element_info() {
     '#hybridauth_id' => 'hybridauth',
     '#title' => variable_get('hybridauth_widget_title', 'Or log in with...'),
     '#weight' => variable_get('hybridauth_widget_weight', 100),
-    '#hybridauth_window_type' => variable_get('hybridauth_window_type', 'popup'),
+    '#hybridauth_window_type' => variable_get('hybridauth_window_type', 'current'),
     '#hybridauth_widget_type' => variable_get('hybridauth_widget_type', 'list'),
     '#hybridauth_widget_use_overlay' => variable_get('hybridauth_widget_use_overlay', 1),
     '#hybridauth_widget_link_text' => variable_get('hybridauth_widget_link_text', 'Social network account'),
