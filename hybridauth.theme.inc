@@ -100,4 +100,11 @@ function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
   if (!isset($vars['provider_name'])) {
     $vars['provider_name'] = hybridauth_get_provider_name($vars['provider_id']);
   }
+  $icon_pack_classes = array(
+    'hybridauth-icon',
+    drupal_html_class('hybridauth-icon-' . $vars['icon_pack']),
+    drupal_html_class('hybridauth-' . $vars['provider_id']),
+    drupal_html_class('hybridauth-' . $vars['provider_id'] . '-' . $vars['icon_pack']),
+  );
+  $vars['icon_pack_classes'] = implode(' ', $icon_pack_classes);
 }

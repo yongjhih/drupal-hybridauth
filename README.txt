@@ -23,7 +23,7 @@ HybridAuth:
 
 Dependencies:
 -------------
-- Ctools module (http://drupal.org/project/ctools) - it is used fo an overlay and to manage icon pack plugins.
+- Ctools module (http://drupal.org/project/ctools) - it is used for an overlay and to manage icon pack plugins.
 
 Icon packs:
 -------------
@@ -57,7 +57,7 @@ $plugin = array(
 );
 ***********************************************
 
-Take a look at these modules icon packs in "plugins/icon_pack" and you will figure it out.
+Take a look at this module icon packs in "plugins/icon_pack" and you will figure it out.
 
 Themes can also define their icon packs - instead of implementing hook_ctools_plugin_directory() you should 
 just add this line to the theme .info file:

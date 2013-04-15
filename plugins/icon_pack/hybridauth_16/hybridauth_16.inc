@@ -4,6 +4,6 @@
  * Plugin declaration.
  */
 $plugin = array(
-  'title' => t('Default 16px'),
+  'title' => t('HybridAuth') . ' 16px',
   'css' => 'hybridauth_16.css',
 );
