@@ -247,6 +247,18 @@ function hybridauth_admin_settings() {
     '#description' => t('Remove password fields from user account edit form for users created by HybridAuth.'),
     '#default_value' => variable_get('hybridauth_remove_password_fields', 1),
   );
+
+  $form['vtabs']['fset_forms'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Drupal forms'),
+  );
+  $form['vtabs']['fset_forms']['hybridauth_forms'] = array(
+    '#type' => 'checkboxes',
+    '#title' => t('Drupal forms'),
+    '#options' => _hybridauth_forms_list(),
+    '#description' => t('Add HybridAuth widget to these forms.'),
+    '#default_value' => variable_get('hybridauth_forms', array('user_login', 'user_login_block')),
+  );
   
   $form['vtabs']['fset_other'] = array(
     '#type' => 'fieldset',
@@ -284,28 +296,18 @@ function hybridauth_admin_settings() {
       '#global_types' => TRUE,
     );
   }
-  $form['vtabs']['fset_other']['hybridauth_forms'] = array(
-    '#type' => 'checkboxes',
-    '#title' => t('Drupal forms'),
-    '#options' => array(
-      'user_login' => t('User login form'),
-      'user_login_block' => t('User login block'),
-      'user_register_form' => t('User registration form'),
-      'comment_form' => t('Comment form'),
-    ),
-    '#description' => t('Add default HybridAuth widget to these forms.'),
-    '#default_value' => variable_get('hybridauth_forms', array('user_login', 'user_login_block')),
+  $options = array(
+    0 => t('Allow duplicate email addresses, create new user account and login'),
+    1 => t("Don't allow duplicate email addresses, block registration and advise to login using the existing account"),
+    2 => t("Don't allow duplicate email addresses, add new identity to the existing account and login"),
   );
   $form['vtabs']['fset_other']['hybridauth_duplicate_emails'] = array(
     '#type' => 'radios',
     '#title' => t('Duplicate emails'),
-    '#options' => array(
-      0 => t('Allow duplicate email addresses, create new user account and login'),
-      1 => t("Don't allow duplicate email addresses, block registration and advise to login using the existing account"),
-      2 => t("Don't allow duplicate email addresses, add new identity to the existing account and login"),
-    ),
+    '#options' => $options,
     '#default_value' => variable_get('hybridauth_duplicate_emails', 1),
-    '#description' => t('Select how to handle duplicate email addresses. This situation occurs when the same user is trying to authenticate using different authentication providers, but with the same email address.'),
+    '#description' => t('Select how to handle duplicate email addresses. '
+      . 'This situation occurs when the same user is trying to authenticate using different authentication providers, but with the same email address.'),
   );
   $form['vtabs']['fset_other']['hybridauth_debug'] = array(
     '#type' => 'checkbox',
@@ -315,6 +317,15 @@ function hybridauth_admin_settings() {
   );
   
   return system_settings_form($form);
+}
+
+function _hybridauth_forms_list() {
+  return array(
+    'user_login' => t('User login form'),
+    'user_login_block' => t('User login block'),
+    'user_register_form' => t('User registration form'),
+    'comment_form' => t('Comment form'),
+  );
 }
 
 /**

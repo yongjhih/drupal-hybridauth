@@ -11,11 +11,12 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   }
   
   if ($element['#hybridauth_widget_type'] == 'list') {
-    if ($element['#hybridauth_window_type'] == 'popup') {
-      $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
-    }
-    else {
+    $onclick = '';
+    if ($element['#hybridauth_window_type'] == 'current') {
       $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
+    }
+    elseif ($element['#hybridauth_window_type'] == 'popup') {
+      $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
     }
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
       $providers[] = l(
@@ -77,7 +78,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       ($element['#hybridauth_widget_type'] == 'link') ?
         $element['#hybridauth_widget_link_text'] :
         theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $element['#hybridauth_widget_link_title'])),
-      'hybridauth/providers/nojs',
+      'hybridauth/providers/nojs/' . $element['#hybridauth_widget_icon_pack'],
       array(
         'html' => TRUE,
         'query' => $query,

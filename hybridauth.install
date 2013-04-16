@@ -42,14 +42,16 @@ function hybridauth_uninstall() {
   variable_del('hybridauth_email_verification');
   variable_del('hybridauth_username');
   variable_del('hybridauth_registration_username_change');
-  variable_del('hybridauth_registration_role_choice');
-  variable_del('hybridauth_registration_roles');
   variable_del('hybridauth_display_name');
   variable_del('hybridauth_override_realname');
   variable_del('hybridauth_destination');
   variable_del('hybridauth_forms');
   variable_del('hybridauth_duplicate_emails');
   variable_del('hybridauth_debug');
+  
+  // Some old variables not present in the code now.
+  variable_del('hybridauth_registration_role_choice');
+  variable_del('hybridauth_registration_roles');
 }
 
 /**

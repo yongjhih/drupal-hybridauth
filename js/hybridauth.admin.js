@@ -107,12 +107,28 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
     
     return vals.join('<br />');
   });
+
+  $('#edit-fset-forms', context).drupalSetSummary(function(context) {
+    var vals = [];
+
+    var label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-forms"]', context).text()) + '</span>';
+    var list = [];
+    $('#edit-hybridauth-forms', context).find('label').each(function(index, Element) {
+      var label_for = $(this).attr('for');
+      if ($('#' + label_for).is(':checked')) {
+        list.push($.trim($(this).text()));
+      }
+    });
+    vals.push(label + ': ' + list.join(', '));
+
+    return vals.join('<br />');
+  });
   
   $('#edit-fset-other', context).drupalSetSummary(function(context) {
     var vals = [];
 
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-window-type"]', context).text()) + '</span>';
-    list = [];
+    var list = [];
     $('#edit-hybridauth-window-type', context).find('label').each(function(index, Element) {
       var label_for = $(this).attr('for');
       if ($('#' + label_for).is(':checked')) {
@@ -129,16 +145,6 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
     else {
       vals.push(label + ': ' + 'return to the same page');
     }
-    
-    label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-forms"]', context).text()) + '</span>';
-    var list = [];
-    $('#edit-hybridauth-forms', context).find('label').each(function(index, Element) {
-      var label_for = $(this).attr('for');
-      if ($('#' + label_for).is(':checked')) {
-        list.push($.trim($(this).text()));
-      }
-    });
-    vals.push(label + ': ' + list.join(', '));
     
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-duplicate-emails"]', context).text()) + '</span>';
     list = [];

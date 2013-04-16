@@ -74,9 +74,9 @@ function hybridauth_menu() {
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['hybridauth/providers/%ctools_js'] = array(
+  $items['hybridauth/providers/%ctools_js/%'] = array(
     'page callback' => 'hybridauth_providers',
-    'page arguments' => array(2),
+    'page arguments' => array(2, 3),
     'access callback' => TRUE,
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
@@ -366,7 +366,7 @@ function hybridauth_user_view($account, $view_mode, $langcode) {
     '#header' => $header,
     '#rows' => $rows,
     '#sticky' => FALSE,
-    '#empty' => t('You don\'t have any identities yet.')
+    '#empty' => t('There are no connected identities.')
   );
 }
 

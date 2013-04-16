@@ -16,11 +16,12 @@ function hybridauth_endpoint() {
   return MENU_ACCESS_DENIED;
 }
 
-function hybridauth_providers($js) {
+function hybridauth_providers($js, $icon_pack) {
   $build = array(
     '#type' => 'hybridauth_widget',
     '#title' => '',
     '#hybridauth_widget_type' => 'list',
+    '#hybridauth_widget_icon_pack' => $icon_pack,
   );
   
   if ($js) {
