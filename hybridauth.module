@@ -540,6 +540,15 @@ function hybridauth_fields_list() {
   );
 }
 
+function hybridauth_forms_list() {
+  return array(
+    'user_login' => t('User login form'),
+    'user_login_block' => t('User login block'),
+    'user_register_form' => t('User registration form'),
+    'comment_form' => t('Comment form'),
+  );
+}
+
 /**
  * Returns auth provider name by provider ID.
  */

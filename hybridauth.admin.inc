@@ -255,7 +255,7 @@ function hybridauth_admin_settings() {
   $form['vtabs']['fset_forms']['hybridauth_forms'] = array(
     '#type' => 'checkboxes',
     '#title' => t('Drupal forms'),
-    '#options' => _hybridauth_forms_list(),
+    '#options' => hybridauth_forms_list(),
     '#description' => t('Add HybridAuth widget to these forms.'),
     '#default_value' => variable_get('hybridauth_forms', array('user_login', 'user_login_block')),
   );
@@ -317,15 +317,6 @@ function hybridauth_admin_settings() {
   );
   
   return system_settings_form($form);
-}
-
-function _hybridauth_forms_list() {
-  return array(
-    'user_login' => t('User login form'),
-    'user_login_block' => t('User login block'),
-    'user_register_form' => t('User registration form'),
-    'comment_form' => t('Comment form'),
-  );
 }
 
 /**

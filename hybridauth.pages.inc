@@ -346,6 +346,7 @@ function _hybridauth_check_additional_info($data) {
     }
   }
   // Allow other modules to show pre-registration form.
+  // Invoke hook_hybridauth_registration_form().
   foreach (module_invoke_all('hybridauth_registration_form', $data) as $value) {
     if ($value) {
       $show_form = TRUE;

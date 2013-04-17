@@ -41,45 +41,41 @@ function hybridauth_bonus_form_hybridauth_admin_settings_alter(&$form, &$form_st
   $form['vtabs']['fset_bonus_forms']['hybridauth_bonus_customize_widget_per_form'] = array(
     '#type' => 'checkbox',
     '#title' => t('Customize HybridAuth widget per form'),
-    //'#description' => t(''),
     '#default_value' => variable_get('hybridauth_bonus_customize_widget_per_form', 0),
   );
-  foreach (_hybridauth_forms_list() as $f_id => $f_title) {
+  foreach (hybridauth_forms_list() as $f_id => $f_title) {
     $form['vtabs']['fset_bonus_forms'][$f_id] = array(
       '#type' => 'fieldset',
       '#title' => $f_title,
       '#collapsible' => TRUE,
-      //'#collapsed' => TRUE,
+      '#collapsed' => TRUE,
       '#states' => array(
         'visible' => array(
           ':input[name="hybridauth_bonus_customize_widget_per_form"]' => array('checked' => TRUE),
         ),
       ),
     );
-    $form['vtabs']['fset_bonus_forms'][$f_id]['hybridauth_bonus_widget_title_' . $f_id] = array(
-      '#type' => 'textfield',
-      '#title' => t('Widget title'),
-      '#default_value' => variable_get('hybridauth_bonus_widget_title_' . $f_id, 'Or log in with...'),
-    );
-    
-    
-    $options = array();
-    foreach (hybridauth_get_icon_packs() as $name => $icon_pack) {
-      $options[$name] = $icon_pack['title'];
+    foreach ($form['vtabs']['fset_widget'] as $key => $value) {
+      $new_key = str_replace('hybridauth_', 'hybridauth_bonus_', $key) . '_' . $f_id;
+      $form['vtabs']['fset_bonus_forms'][$f_id][$new_key] = $value;
+      $form['vtabs']['fset_bonus_forms'][$f_id][$new_key]['#default_value'] = variable_get($new_key, $value['#default_value']);
+      
+      if ($key == 'hybridauth_widget_use_overlay' || $key == 'hybridauth_widget_link_title') {
+        $form['vtabs']['fset_bonus_forms'][$f_id][$new_key]['#states'] = array(
+          'invisible' => array(
+            ':input[name="hybridauth_bonus_widget_type_' . $f_id . '"]' => array('value' => 'list'),
+          ),
+        );
+      }
+      if ($key == 'hybridauth_widget_link_text') {
+        $form['vtabs']['fset_bonus_forms'][$f_id][$new_key]['#states'] = array(
+          'visible' => array(
+            ':input[name="hybridauth_bonus_widget_type_' . $f_id . '"]' => array('value' => 'link'),
+          ),
+        );
+      }
     }
-    $form['vtabs']['fset_bonus_forms'][$f_id]['hybridauth_bonus_widget_icon_pack_' . $f_id] = array(
-      '#type' => 'select',
-      '#title' => t('Icon package'),
-      '#options' => $options,
-      '#default_value' => variable_get('hybridauth_bonus_widget_icon_pack_' . $f_id, 'hybridauth_32'),
-    );
-    $form['vtabs']['fset_bonus_forms'][$f_id]['hybridauth_bonus_widget_weight_' . $f_id] = array(
-      '#type' => 'weight',
-      '#title' => t('Widget weight'),
-      '#delta' => 100,
-      '#description' => t('Determines the order of the elements on the form - heavier elements get positioned later.'),
-      '#default_value' => variable_get('hybridauth_bonus_widget_weight_' . $f_id, 100),
-    );
+    
   }
 }
 
@@ -90,6 +86,7 @@ function hybridauth_bonus_hybridauth_registration_form($data) {
   if (empty($data['roles']) && variable_get('hybridauth_bonus_registration_role_choice', 0)) {
     return TRUE;
   }
+  return FALSE;
 }
 
 /**
@@ -143,11 +140,16 @@ function hybridauth_bonus_form_comment_form_alter(&$form, &$form_state, $form_id
 }
 
 function _hybridauth_bonus_form_alter(&$form, &$form_state, $form_id) {
-  if (!variable_get('hybridauth_bonus_customize_widget_per_form', 0)) {
+  if (!variable_get('hybridauth_bonus_customize_widget_per_form', 0) || !array_key_exists($form_id, hybridauth_forms_list())) {
     return;
   }
+  
   if (isset($form['hybridauth'])) {
     $form['hybridauth']['#title'] = variable_get('hybridauth_bonus_widget_title_' . $form_id, 'Or log in with...');
+    $form['hybridauth']['#hybridauth_widget_type'] = variable_get('hybridauth_bonus_widget_type_' . $form_id, 'list');
+    $form['hybridauth']['#hybridauth_widget_use_overlay'] = variable_get('hybridauth_bonus_widget_use_overlay_' . $form_id, 1);
+    $form['hybridauth']['#hybridauth_widget_link_text'] = variable_get('hybridauth_bonus_widget_link_text_' . $form_id, 'Social network account');
+    $form['hybridauth']['#hybridauth_widget_link_title'] = variable_get('hybridauth_bonus_widget_link_title_' . $form_id, 'Social network account');
     $form['hybridauth']['#hybridauth_widget_icon_pack'] = variable_get('hybridauth_bonus_widget_icon_pack_' . $form_id, 'hybridauth_32');
     $form['hybridauth']['#weight'] = variable_get('hybridauth_bonus_widget_weight_' . $form_id, 100);
   }
