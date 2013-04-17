@@ -62,6 +62,9 @@ function hybridauth_rules_action_info() {
   );
 }
 
+/**
+ * Rules action.
+ */
 function hybridauth_url_managed_file($url, $directory) {
   if ($url) {
     $url_info = parse_url($url);
@@ -80,6 +83,9 @@ function hybridauth_url_managed_file($url, $directory) {
   return array('file' => $file);
 }
 
+/**
+ * Rules action.
+ */
 function hybridauth_dmy_to_date($day, $month, $year) {
   // My tests have shown there is no need for any timezone handling.
   // $timezone = date_default_timezone_get();
@@ -106,6 +112,9 @@ function hybridauth_rules_data_info() {
   return $types;
 }
 
+/**
+ * Rules data properties for HybridAuth data type.
+ */
 function _hybridauth_rules_data_properties() {
   $properties = array();
 
@@ -216,6 +225,9 @@ function hybridauth_rules_condition_info() {
   return $conditions;
 }
 
+/**
+ * Rules condition.
+ */
 function hybridauth_user_created_hybridauth($account) {
   global $_hybridauth_data;
   return (!empty($_hybridauth_data) || !empty($account->data['hybridauth']));

@@ -70,16 +70,10 @@ function _hybridauth_window_close($redirect = TRUE) {
   global $user;
   // Prevent devel module from spewing.
   $GLOBALS['devel_shutdown'] = FALSE;
-  // Visitors can register accounts without admin approval.
-  //if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_VISITORS)
-  //  || variable_get('hybridauth_register', 0) == 1) {
-    $destination = drupal_get_destination();
-    $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
-  //}
-  // Redirect to front page.
-  //else {
-  //  $destination = '';
-  //}
+
+  $destination = drupal_get_destination();
+  $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
+
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
     if (window.opener && redirect) {
@@ -124,7 +118,7 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
       case 0:
         // Unspecified error.
       case 1:
-      // Hybridauth configuration error.
+        // Hybridauth configuration error.
       case 2:
         // Provider not properly configured.
       case 3:
@@ -155,8 +149,7 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
 }
 
 /**
- * A helper function that takes a successful HA authentication and handles 
- * the Drupal side of things.
+ * Handle the Drupal authentication.
  */
 function _hybridauth_window_process_auth($data) {
   global $user;

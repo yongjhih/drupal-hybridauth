@@ -174,7 +174,7 @@ function _hybridauth_ulogin_data_map() {
 
 function _hybridauth_ulogin_data_convert($ulogin_data) {
   $data_map = _hybridauth_ulogin_data_map();
-  $hybridauth_data = array();  
+  $hybridauth_data = array();
   foreach ($ulogin_data as $key => $value) {
     if (array_key_exists($key, $data_map) && $data_map[$key]) {
       $hybridauth_data[$data_map[$key]] = $value;

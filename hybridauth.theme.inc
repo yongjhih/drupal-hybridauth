@@ -71,11 +71,11 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'closeText' => t('Close'),
           'closeImage' => '',
           // 'loadingText' => t('Loading...'),
-          // 'throbber' => theme('image', array(
-          //   'path' => ctools_image_path('throbber.gif'),
-          //   'title' => t('Loading...'),
-          //   'alt' => t('Loading'),
-          // )),
+          /* 'throbber' => theme('image', array(
+            'path' => ctools_image_path('throbber.gif'),
+            'title' => t('Loading...'),
+            'alt' => t('Loading'),
+          )), */
         ),
       );
       drupal_add_js($settings, 'setting');

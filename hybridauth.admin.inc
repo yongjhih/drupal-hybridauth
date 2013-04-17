@@ -349,13 +349,13 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
     }
   }
 
-  // Finally, output the sortable table. Make sure the id variable is the same 
+  // Finally, output the sortable table. Make sure the id variable is the same
   // as the table id in drupal_add_tabledrag().
   $output = theme('table', array('header' => $header, 'rows' => $rows, 'attributes' => array('id' => 'hybridauth-providers')));
   $output .= drupal_render_children($form);
 
-  // This function is the instantiator of the sorter. Make sure the 0th 
-  // parameter is the id of your table, and the 3rd parameter is the class of 
+  // This function is the instantiator of the sorter. Make sure the 0th
+  // parameter is the id of your table, and the 3rd parameter is the class of
   // your weight variable.
   drupal_add_tabledrag('hybridauth-providers', 'order', 'sibling', 'hybridauth-provider-weight');
 
@@ -378,6 +378,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
+
     case 'Twitter':
       $help = t('
           <p>Enter your consumer key and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
@@ -387,6 +388,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
+
     case 'Google':
       $origin_uri_parts = parse_url(url('<front>', array('absolute' => TRUE)));
       $help = t('
@@ -401,9 +403,9 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
+
     default:
       $help = t('Enter the application ID, consumer key, and/or secret key as required.');
-      break;
   }
 
   $form['keys'] = array(
