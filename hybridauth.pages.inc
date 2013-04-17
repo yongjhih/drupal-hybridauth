@@ -116,10 +116,11 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
 
     switch ($e->getCode()) {
       case 5:
-        // Authentication failed. The user has canceled the authentication or 
+        // Authentication failed. The user has canceled the authentication or
         // the provider refused the connection.
         $redirect = FALSE;
         break;
+
       case 0:
         // Unspecified error.
       case 1:
@@ -129,7 +130,7 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
       case 3:
         // Unknown or disabled provider.
       case 4:
-        // Missing provider application credentials (your application id, key 
+        // Missing provider application credentials (your application id, key
         // or secret).
       case 6:
         // User profile request failed.
@@ -249,8 +250,8 @@ function _hybridauth_window_process_auth($data) {
       _hybridauth_check_additional_info($data);
 
       // TODO: remove this global if possible.
-      global $hybridauth_data;
-      $hybridauth_data = $data;
+      global $_hybridauth_data;
+      $_hybridauth_data = $data;
       // Register this new user.
       $name = _hybridauth_make_username($data);
       $userinfo = array(
@@ -465,7 +466,7 @@ function hybridauth_additional_info_form_validate($form, &$form_state) {
   }
 
   if (isset($form_state['values']['email'])) {
-    // Trim whitespace from mail, to prevent confusing 'e-mail not valid' 
+    // Trim whitespace from mail, to prevent confusing 'e-mail not valid'
     // warnings often caused by cutting and pasting.
     $mail = trim($form_state['values']['email']);
     form_set_value($form['fset']['email'], $mail, $form_state);
@@ -553,7 +554,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     '#header' => $header,
     '#rows' => $rows,
     '#sticky' => FALSE,
-    '#empty' => t('You don\'t have any identities yet.')
+    '#empty' => t("You don't have any identities yet."),
   );
 
   // Add more identities.
@@ -562,7 +563,7 @@ function hybridauth_user_identity($form, &$form_state, $account) {
       '#type' => 'hybridauth_widget',
       '#title' => t('Add more identities'),
       '#weight' => 10,
-      '#hybridauth_widget_type' =>'list',
+      '#hybridauth_widget_type' => 'list',
       '#hybridauth_destination' => '',
     );
   }

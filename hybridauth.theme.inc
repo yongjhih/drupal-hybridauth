@@ -4,6 +4,9 @@
  * Theme functions for integrating the HybridAuth module.
  */
 
+/**
+ * Template preprocess function for hybridauth_widget.
+ */
 function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
   $providers = array();
@@ -100,6 +103,9 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $vars['providers'] = $providers;
 }
 
+/**
+ * Template preprocess function for hybridauth_provider_icon.
+ */
 function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
   _hybridauth_add_icon_pack_files($vars['icon_pack']);
   if (!isset($vars['provider_name'])) {

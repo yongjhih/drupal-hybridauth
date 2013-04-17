@@ -217,6 +217,6 @@ function hybridauth_rules_condition_info() {
 }
 
 function hybridauth_user_created_hybridauth($account) {
-  global $hybridauth_data;
-  return (!empty($hybridauth_data) || !empty($account->data['hybridauth']));
+  global $_hybridauth_data;
+  return (!empty($_hybridauth_data) || !empty($account->data['hybridauth']));
 }

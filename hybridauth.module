@@ -421,8 +421,8 @@ function hybridauth_ctools_plugin_directory($module, $type) {
  * Implements hook_email_registration_name().
  */
 function hybridauth_email_registration_name($edit, $account) {
-  global $hybridauth_data;
-  if (!empty($hybridauth_data) || !empty($account->data['hybridauth'])) {
+  global $_hybridauth_data;
+  if (!empty($_hybridauth_data) || !empty($account->data['hybridauth'])) {
     return $account->name;
   }
   return NULL;
@@ -689,7 +689,6 @@ function _hybridauth_library_path() {
   if (!isset($library_path)) {
     $library_path = variable_get('hybridauth_library_path', module_exists('libraries') ? libraries_get_path('hybridauth') : 'sites/all/libraries/hybridauth');
     if (file_exists($library_path . '/Hybrid/Auth.php')) {
-      // return $library_path;
     }
     elseif (file_exists($library_path . '/hybridauth/Hybrid/Auth.php')) {
       $library_path .= '/hybridauth';
