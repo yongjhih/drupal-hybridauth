@@ -357,9 +357,18 @@ function _hybridauth_check_additional_info($data) {
     $form = drupal_get_form('hybridauth_additional_info_form', $data);
 
     $page = element_info('page');
-    $page['#children'] = theme('status_messages') . drupal_render($form);
+    $window_type = variable_get('hybridauth_window_type', 'current');
 
-    print theme('html', array('page' => $page));
+    if ($window_type == 'popup') {
+      $page['#children'] = theme('status_messages') . drupal_render($form);
+      print theme('html', array('page' => $page));
+    }
+    elseif ($window_type == 'current') {
+      $page['content']['system_main']['messages'] = array('#type' => 'markup', '#markup' => theme('status_messages'));
+      $page['content']['system_main']['required_info_form'] = $form;
+      print drupal_render($page);
+    }
+    
     drupal_exit();
   }
 }
