@@ -245,6 +245,7 @@ function hybridauth_element_info() {
     '#hybridauth_widget_link_title' => variable_get('hybridauth_widget_link_title', 'Social network account'),
     '#hybridauth_widget_icon_pack' => variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'),
     '#hybridauth_destination' => variable_get('hybridauth_destination', ''),
+    '#hybridauth_onclick' => FALSE,
     '#attached' => array(
       'js' => array(
         drupal_get_path('module', 'hybridauth') . '/js/hybridauth.js' => array(

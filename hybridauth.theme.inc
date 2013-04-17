@@ -19,7 +19,10 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
 
   if ($element['#hybridauth_widget_type'] == 'list') {
     $onclick = '';
-    if ($element['#hybridauth_window_type'] == 'current') {
+    if (!empty($element['#hybridauth_onclick'])) {
+      $onclick = $element['#hybridauth_onclick'];
+    }
+    elseif ($element['#hybridauth_window_type'] == 'current') {
       $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
     }
     elseif ($element['#hybridauth_window_type'] == 'popup') {
