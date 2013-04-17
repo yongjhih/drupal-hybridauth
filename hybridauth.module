@@ -134,13 +134,15 @@ function hybridauth_block_view($delta = '') {
 function hybridauth_user_login(&$edit, $account) {
   if ($hybridauth_session_data = _hybridauth_session_load_by_uid($account->uid)) {
     if ($hybridauth = hybridauth_get_instance()) {
-      $hybridauth_session_data = $hybridauth_session_data['data'];
-      $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
-      if (is_array($hybridauth_session_data_current)) {
-        $hybridauth_session_data = serialize(array_merge(unserialize($hybridauth_session_data), $hybridauth_session_data_current));
+      if (is_object($hybridauth)) {
+        $hybridauth_session_data = $hybridauth_session_data['data'];
+        $hybridauth_session_data_current = unserialize($hybridauth->getSessionData());
+        if (is_array($hybridauth_session_data_current)) {
+          $hybridauth_session_data = serialize(array_merge(unserialize($hybridauth_session_data), $hybridauth_session_data_current));
+        }
+        // Call Hybrid_Auth::restoreSessionData() to set stored data.
+        $hybridauth->restoreSessionData($hybridauth_session_data);
       }
-      // Call Hybrid_Auth::restoreSessionData() to set stored data.
-      $hybridauth->restoreSessionData($hybridauth_session_data);
     }
   }
 }
@@ -151,9 +153,11 @@ function hybridauth_user_login(&$edit, $account) {
 function hybridauth_user_logout($account) {
   // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
-    // Call Hybrid_Auth::getSessionData() to get stored data.
-    if ($hybridauth_session_data = $hybridauth->getSessionData()) {
-      _hybridauth_session_save($hybridauth_session_data, $account->uid);
+    if (is_object($hybridauth)) {
+      // Call Hybrid_Auth::getSessionData() to get stored data.
+      if ($hybridauth_session_data = $hybridauth->getSessionData()) {
+        _hybridauth_session_save($hybridauth_session_data, $account->uid);
+      }
     }
   }
 }
@@ -591,6 +595,9 @@ function hybridauth_get_enabled_providers() {
   return $providers;
 }
 
+/**
+ * Returns HybridAuth object or exception code.
+ */
 function hybridauth_get_instance() {
   $controller = &drupal_static(__FUNCTION__, NULL);
 
@@ -598,13 +605,14 @@ function hybridauth_get_instance() {
     $controller = FALSE;
 
     if ($lib_path = _hybridauth_library_path()) {
+      require_once $lib_path . '/Hybrid/Auth.php';
+      $config = hybridauth_get_config();
       try {
-        require_once $lib_path . '/Hybrid/Auth.php';
-        $config = hybridauth_get_config();
         $controller = new Hybrid_Auth($config);
       }
       catch(Exception $e) {
         watchdog_exception('hybridauth', $e);
+        $controller = $e->getCode();
       }
     }
   }
@@ -668,13 +676,10 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
 function hybridauth_get_connected_providers() {
   $connected_providers = array();
   if (user_is_logged_in() && $hybridauth = hybridauth_get_instance()) {
-    try {
+    if (is_object($hybridauth)) {
       foreach ($hybridauth->getConnectedProviders() as $provider_id) {
         $connected_providers[$provider_id] = hybridauth_get_provider_name($provider_id);
       }
-    }
-    catch (Exception $e) {
-      watchdog_exception('hybridauth', $e);
     }
   }
 

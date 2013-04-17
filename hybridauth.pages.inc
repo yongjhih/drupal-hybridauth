@@ -98,25 +98,32 @@ function _hybridauth_window_close($redirect = TRUE) {
 }
 
 function _hybridauth_window_auth($hybridauth, $provider_id) {
-  $params = array(
-    'hauth_return_to' => url('hybridauth/window/' . $provider_id, array('absolute' => TRUE, 'query' => drupal_get_query_parameters())),
-  );
-  if (isset($_GET['openid_identifier'])) {
-    $params['openid_identifier'] = $_GET['openid_identifier'];
+  $error_code = NULL;
+  if (is_object($hybridauth)) {
+    $params = array(
+      'hauth_return_to' => url('hybridauth/window/' . $provider_id, array('absolute' => TRUE, 'query' => drupal_get_query_parameters())),
+    );
+    if (isset($_GET['openid_identifier'])) {
+      $params['openid_identifier'] = $_GET['openid_identifier'];
+    }
+    try {
+      $adapter = $hybridauth->authenticate($provider_id, $params);
+      $profile = (array) ($adapter->getUserProfile());
+    }
+    catch(Exception $e) {
+      watchdog_exception('hybridauth', $e);
+      $error_code = $e->getCode();
+    }
   }
-
-  try {
-    $adapter = $hybridauth->authenticate($provider_id, $params);
-    $profile = (array) ($adapter->getUserProfile());
+  else {
+    $error_code = $hybridauth;
   }
-  catch (Exception $e) {
-    $redirect = TRUE;
-
-    switch ($e->getCode()) {
+  
+  if (!is_null($error_code)) {
+    switch ($error_code) {
       case 5:
         // Authentication failed. The user has canceled the authentication or
         // the provider refused the connection.
-        $redirect = FALSE;
         break;
 
       case 0:
@@ -141,8 +148,7 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
 
-    watchdog_exception('hybridauth', $e);
-    _hybridauth_window_close($redirect);
+    _hybridauth_window_close(FALSE);
   }
 
   $profile['provider'] = $provider_id;
@@ -727,8 +733,10 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   }
 
   if ($hybridauth = hybridauth_get_instance()) {
-    $adapter = $hybridauth->getAdapter($del_identity['provider']);
-    $adapter->logout();
+    if (is_object($hybridauth)) {
+      $adapter = $hybridauth->getAdapter($del_identity['provider']);
+      $adapter->logout();
+    }
   }
 
   $form_state['redirect'] = 'user/' . $account->uid . '/hybridauth';
