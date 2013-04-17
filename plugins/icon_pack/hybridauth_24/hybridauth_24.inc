@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * HybridAuth 24px icon pack.
+ */
 
 /**
  * Plugin declaration.

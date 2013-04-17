@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Functions for integrating the Rules module with HybridAuth.
+ * Functions for integrating the HybridAuth module with Rules.
  */
 
 /**
@@ -29,7 +29,7 @@ function hybridauth_rules_action_info() {
         'file' => array(
           'label' => 'Managed file entity',
           'type' => 'file',
-        ), 
+        ),
       ),
     ),
     'hybridauth_dmy_to_date' => array(
@@ -39,17 +39,17 @@ function hybridauth_rules_action_info() {
         'day' => array(
           'label' => t('Day'),
           'type' => 'text',
-          //'description' => t(''),
+          // 'description' => t(''),
         ),
         'month' => array(
           'label' => t('Month'),
           'type' => 'text',
-          //'description' => t(''),
+          // 'description' => t(''),
         ),
         'year' => array(
           'label' => t('Year'),
           'type' => 'text',
-          //'description' => t(''),
+          // 'description' => t(''),
         ),
       ),
       'provides' => array(
@@ -68,25 +68,25 @@ function hybridauth_url_managed_file($url, $directory) {
     $directory = file_default_scheme() . '://' . $directory . '/' . $url_info['host'] . dirname($url_info['path']);
     file_prepare_directory($directory, FILE_CREATE_DIRECTORY);
     $content = drupal_http_request($url);
-	  $file = file_save_data($content->data, $directory . '/' . basename($url_info['path']), FILE_EXISTS_REPLACE);
-	  
-	  $path_info = pathinfo($url);
-	  if (empty($path_info['extension'])) {
-	    $info = image_get_info($file->uri);
-	    $file = file_move($file, $directory . '/' . basename($url_info['path']) . '.' . $info['extension'], FILE_EXISTS_REPLACE);
-	  }
+    $file = file_save_data($content->data, $directory . '/' . basename($url_info['path']), FILE_EXISTS_REPLACE);
+
+    $path_info = pathinfo($url);
+    if (empty($path_info['extension'])) {
+      $info = image_get_info($file->uri);
+      $file = file_move($file, $directory . '/' . basename($url_info['path']) . '.' . $info['extension'], FILE_EXISTS_REPLACE);
+    }
   }
-  
+
   return array('file' => $file);
 }
 
 function hybridauth_dmy_to_date($day, $month, $year) {
   // My tests have shown there is no need for any timezone handling.
-  //$timezone = date_default_timezone_get();
-  //date_default_timezone_set('UTC');
+  // $timezone = date_default_timezone_get();
+  // date_default_timezone_set('UTC');
   $timestamp = mktime(0, 0, 0, intval($month), intval($day), intval($year));
-  //$timestamp = mktime(0, 0, 0, $month, $day, $year);
-  //date_default_timezone_set($timezone);
+  // $timestamp = mktime(0, 0, 0, $month, $day, $year);
+  // date_default_timezone_set($timezone);
   return array('date' => $timestamp);
 }
 
@@ -96,24 +96,24 @@ function hybridauth_dmy_to_date($day, $month, $year) {
  */
 function hybridauth_rules_data_info() {
   $types = array();
-  
+
   $types['hybridauth'] = array(
     'label' => 'HybridAuth identity data',
     'wrap' => TRUE,
     'property info' => _hybridauth_rules_data_properties(),
   );
-  
+
   return $types;
 }
 
 function _hybridauth_rules_data_properties() {
   $properties = array();
-  
+
   if (function_exists('hybridauth_token_info')) {
     $token_info = hybridauth_token_info();
   }
   else {
-    include_once(drupal_get_path('module', 'hybridauth') . '/hybridauth.tokens.inc');
+    include_once drupal_get_path('module', 'hybridauth') . '/hybridauth.tokens.inc';
     $token_info = hybridauth_token_info();
   }
   foreach ($token_info['tokens']['hybridauth'] as $key => $value) {
@@ -123,7 +123,7 @@ function _hybridauth_rules_data_properties() {
       'description' => $value['description'],
     );
   }
-  
+
   return $properties;
 }
 
@@ -133,7 +133,7 @@ function _hybridauth_rules_data_properties() {
  */
 function hybridauth_rules_event_info() {
   $events = array();
-  
+
   $events['hybridauth_identity_added'] = array(
     'label' => t('User added HybridAuth identity'),
     'group' => t('HybridAuth'),
@@ -194,7 +194,7 @@ function hybridauth_rules_event_info() {
     ),
     'module' => 'hybridauth',
   );
-  
+
   return $events;
 }
 
@@ -204,7 +204,7 @@ function hybridauth_rules_event_info() {
  */
 function hybridauth_rules_condition_info() {
   $conditions = array();
-  
+
   $conditions['hybridauth_user_created_hybridauth'] = array(
     'label' => t('User created by HybridAuth'),
     'group' => t('HybridAuth'),
@@ -212,7 +212,7 @@ function hybridauth_rules_condition_info() {
       'account' => array('label' => t('User'), 'type' => 'user'),
     ),
   );
-  
+
   return $conditions;
 }
 

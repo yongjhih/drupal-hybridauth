@@ -1,4 +1,8 @@
 <?php
+/**
+ * @file
+ * Theme functions for integrating the HybridAuth module.
+ */
 
 function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
@@ -9,7 +13,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   else {
     $query = drupal_get_destination();
   }
-  
+
   if ($element['#hybridauth_widget_type'] == 'list') {
     $onclick = '';
     if ($element['#hybridauth_window_type'] == 'current') {
@@ -54,7 +58,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
             'contentBottom' => 45,
           ),
           'modalTheme' => 'HybridAuthModalDialog',
-          //'throbberTheme' => 'HybridAuthModalThrobber',
+          // 'throbberTheme' => 'HybridAuthModalThrobber',
           'modalOptions' => array(
             'opacity' => 0.55,
             'background' => '#000',
@@ -63,17 +67,17 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'animationSpeed' => 'slow',
           'closeText' => t('Close'),
           'closeImage' => '',
-          //'loadingText' => t('Loading...'),
-          //'throbber' => theme('image', array(
-          //  'path' => ctools_image_path('throbber.gif'),
-          //  'title' => t('Loading...'),
-          //  'alt' => t('Loading'),
-          //)),
+          // 'loadingText' => t('Loading...'),
+          // 'throbber' => theme('image', array(
+          //   'path' => ctools_image_path('throbber.gif'),
+          //   'title' => t('Loading...'),
+          //   'alt' => t('Loading'),
+          // )),
         ),
       );
       drupal_add_js($settings, 'setting');
     }
-    
+
     $providers[] = l(
       ($element['#hybridauth_widget_type'] == 'link') ?
         $element['#hybridauth_widget_link_text'] :
@@ -90,7 +94,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       )
     );
   }
-  
+
   _hybridauth_add_icon_pack_files($element['#hybridauth_widget_icon_pack']);
 
   $vars['providers'] = $providers;

@@ -1,7 +1,6 @@
 name = HybridAuth uLogin
 description = "Migrate uLogin identities to HybridAuth."
 core = 7.x
-php = 5.2
 package = "User interface"
 configure = admin/config/people/hybridauth/ulogin
 dependencies[] = hybridauth

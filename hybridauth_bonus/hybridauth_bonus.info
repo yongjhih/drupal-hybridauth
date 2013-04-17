@@ -1,7 +1,6 @@
 name = HybridAuth Bonus
 description = "Provides HybridAuth bonus features, like roles choosing upon registration."
 core = 7.x
-php = 5.2
 package = "User interface"
 configure = admin/config/people/hybridauth
 dependencies[] = hybridauth

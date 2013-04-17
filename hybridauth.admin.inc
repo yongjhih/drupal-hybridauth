@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @file
  * Administrative pages forms and functions for the HybridAuth module.
@@ -10,7 +9,7 @@ function hybridauth_admin_settings() {
     drupal_set_message(t('Currently only administrators can create new user accounts. Either change the "Who can register accounts?" option under "Account settings" tab or at the core <a href="!link">Account settings</a>.',
       array('!link' => url('admin/config/people/accounts'))), 'warning');
   }
-  
+
   $form = array();
   $form['vtabs'] = array(
     '#type' => 'vertical_tabs',
@@ -18,7 +17,7 @@ function hybridauth_admin_settings() {
       'js' => array(drupal_get_path('module', 'hybridauth') . '/js/hybridauth.admin.js'),
     ),
   );
-  
+
   $form['vtabs']['fset_providers'] = array(
     '#type' => 'fieldset',
     '#title' => t('Authentication providers'),
@@ -40,7 +39,7 @@ function hybridauth_admin_settings() {
     );
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
-      //'#title' => t('Weight'),
+      // '#title' => t('Weight'),
       '#delta' => 20,
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_weight', 0),
       '#attributes' => array('class' => array('hybridauth-provider-weight')),
@@ -71,7 +70,7 @@ function hybridauth_admin_settings() {
     '#description' => t("If authentication provider doesn't return it, visitor will need to fill additional form before registration."),
     '#default_value' => variable_get('hybridauth_required_fields', array('email' => 'email')),
   );
-  
+
   $form['vtabs']['fset_widget'] = array(
     '#type' => 'fieldset',
     '#title' => t('Widget settings'),
@@ -139,7 +138,7 @@ function hybridauth_admin_settings() {
     '#description' => t('Determines the order of the elements on the form - heavier elements get positioned later.'),
     '#default_value' => variable_get('hybridauth_widget_weight', 100),
   );
-  
+
   $form['vtabs']['fset_account'] = array(
     '#type' => 'fieldset',
     '#title' => t('Account settings'),

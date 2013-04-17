@@ -6,32 +6,32 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
   if (typeof jQuery.fn.drupalSetSummary == 'undefined') {
     return;
   }
-  
+
   $('#edit-fset-providers, #edit-fset-fields', context).drupalSetSummary(function(context) {
     var vals = [];
-    
+
     $('label', context).each(function (index, Element) {
       var label_for = $(this).attr('for');
       if ($('#' + label_for).is(':checked')) {
         vals.push($.trim($(this).text()));
       }
     });
-    
+
     return vals.join(', ');
   });
-  
+
   $('#edit-fset-widget', context).drupalSetSummary(function(context) {
     var vals = [];
-    
+
     var value = $('#edit-hybridauth-widget-title', context).attr('value');
     var label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-title"]', context).text()) + '</span>';
     if (value) {
       vals.push(label + ': ' + value);
     }
     else {
-      vals.push(label + ': ' + 'None');
+      vals.push(label + ': ' + Drupal.t('None'));
     }
-    
+
     var widget_type;
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-type"]', context).text()) + '</span>';
     var list = [];
@@ -43,7 +43,7 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
       }
     });
     vals.push(label + ': ' + list.join(', '));
-    
+
     if (widget_type == 'link') {
       value = $('#edit-hybridauth-widget-link-text', context).attr('value');
       label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-text"]', context).text()) + '</span>';
@@ -51,10 +51,10 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
         vals.push(label + ': ' + value);
       }
       else {
-        vals.push(label + ': ' + 'None');
+        vals.push(label + ': ' + Drupal.t('None'));
       }
     }
-    
+
     if (widget_type == 'link' || widget_type == 'button') {
       value = $('#edit-hybridauth-widget-link-title', context).attr('value');
       label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-link-title"]', context).text()) + '</span>';
@@ -62,24 +62,24 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
         vals.push(label + ': ' + value);
       }
       else {
-        vals.push(label + ': ' + 'None');
+        vals.push(label + ': ' + Drupal.t('None'));
       }
     }
-    
+
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-icon-pack"]', context).text()) + '</span>';
     value = $('#edit-hybridauth-widget-icon-pack', context).find('option:selected').text();
     vals.push(label + ': ' + value);
-    
+
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-weight"]', context).text()) + '</span>';
     value = $('#edit-hybridauth-widget-weight', context).find('option:selected').text();
     vals.push(label + ': ' + value);
-    
+
     return vals.join('<br />');
   });
-  
+
   $('#edit-fset-account', context).drupalSetSummary(function(context) {
     var vals = [];
-    
+
     $('label', context).each(function (index, Element) {
       var label_for = $(this).attr('for');
       if ((label_for == 'edit-hybridauth-disable-username-change' || label_for == 'edit-hybridauth-remove-password-fields'
@@ -104,7 +104,7 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
         vals.push(label + ': ' + value);
       }*/
     });
-    
+
     return vals.join('<br />');
   });
 
@@ -123,7 +123,7 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
 
     return vals.join('<br />');
   });
-  
+
   $('#edit-fset-other', context).drupalSetSummary(function(context) {
     var vals = [];
 
@@ -136,16 +136,16 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
       }
     });
     vals.push(label + ': ' + list.join(', '));
-    
+
     var value = $('#edit-hybridauth-destination', context).attr('value');
     var label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-destination"]', context).text()) + '</span>';
     if (value) {
       vals.push(label + ': ' + value);
     }
     else {
-      vals.push(label + ': ' + 'return to the same page');
+      vals.push(label + ': ' + Drupal.t('return to the same page'));
     }
-    
+
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-duplicate-emails"]', context).text()) + '</span>';
     list = [];
     $('#edit-hybridauth-duplicate-emails', context).find('label').each(function(index, Element) {
@@ -155,7 +155,7 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
       }
     });
     vals.push(label + ': ' + list.join(', '));
-    
+
     label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-debug"]', context).text()) + '</span>';
     if ($('#edit-hybridauth-debug', context).is(':checked')) {
       vals.push(label + ': ' + Drupal.t('Enabled'));
@@ -163,7 +163,7 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
     else {
       vals.push(label + ': ' + Drupal.t('Disabled'));
     }
-    
+
     return vals.join('<br />');
   });
 };

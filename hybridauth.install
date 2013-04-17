@@ -1,15 +1,8 @@
 <?php
-
 /**
  * @file
  * Install, update and uninstall functions for the HybridAuth module.
  */
-
-/**
- * Implements hook_install().
- */
-function hybridauth_install() {
-}
 
 /**
  * Implements hook_uninstall().
@@ -24,7 +17,7 @@ function hybridauth_uninstall() {
     variable_del('hybridauth_provider_' . $provider_id . '_keys_secret');
     variable_del('hybridauth_provider_' . $provider_id . '_scope');
   }
-  
+
   variable_del('hybridauth_library_path');
   variable_del('hybridauth_required_fields');
   variable_del('hybridauth_window_type');
@@ -48,7 +41,7 @@ function hybridauth_uninstall() {
   variable_del('hybridauth_forms');
   variable_del('hybridauth_duplicate_emails');
   variable_del('hybridauth_debug');
-  
+
   // Some old variables not present in the code now.
   variable_del('hybridauth_registration_role_choice');
   variable_del('hybridauth_registration_roles');
@@ -59,14 +52,13 @@ function hybridauth_uninstall() {
  */
 function hybridauth_requirements($phase) {
   $requirements = array();
-  // Ensure translations don't break at install time
+  // Ensure translations don't break at install time.
   $t = get_t();
-  
+
   if ($phase == 'runtime') {
     if ($lib_path = _hybridauth_library_path()) {
       try {
-        require_once($lib_path . '/Hybrid/Auth.php');
-        
+        require_once $lib_path . '/Hybrid/Auth.php';
         $requirements['hybridauth'] = array(
           'title' => $t('HybridAuth library'),
           'value' => Hybrid_Auth::$version,
@@ -89,7 +81,7 @@ function hybridauth_requirements($phase) {
       );
     }
   }
-  
+
   return $requirements;
 }
 
@@ -98,7 +90,7 @@ function hybridauth_requirements($phase) {
  */
 function hybridauth_schema() {
   $schema = array();
-  
+
   $schema['hybridauth_identity'] = array(
     'description' => 'Holds identities from HybridAuth library.',
     'fields' => array(
@@ -150,7 +142,7 @@ function hybridauth_schema() {
     ),
     'primary key' => array('id'),
   );
-  
+
   $schema['hybridauth_session'] = array(
     'description' => 'Holds sessions data from HybridAuth library.',
     'fields' => array(
@@ -182,7 +174,7 @@ function hybridauth_schema() {
     ),
     'primary key' => array('uid'),
   );
-  
+
   return $schema;
 }
 

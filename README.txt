@@ -52,8 +52,6 @@ And then place your icon pack plugins into 'plugins/icon_pack/iconpackname".
 This directory should contain 2 or 3 files - plugin definition and css/js files:
 plugins/icon_pack/iconpackname/iconpackname.inc
 <code>
-<?php
-
 /**
  * Plugin declaration.
  */
