@@ -80,6 +80,10 @@ function _hybridauth_window_close($redirect = TRUE) {
       window.opener.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
       window.self.close();
     }
+    else if (window.opener) {
+      window.opener.location.replace(window.opener.location.href);
+      window.self.close();
+    }
     else if (redirect) {
       window.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
     }
