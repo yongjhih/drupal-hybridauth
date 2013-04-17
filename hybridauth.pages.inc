@@ -41,11 +41,7 @@ function hybridauth_providers($js, $icon_pack) {
 function hybridauth_window_start($provider_id) {
   // If provider is OpenID, but we don't have the openid_identifier.
   if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
-    $form = drupal_get_form('hybridauth_openid_form');
-    $page = element_info('page');
-    $page['#children'] = theme('status_messages') . drupal_render($form);
-    print theme('html', array('page' => $page));
-    drupal_exit();
+    _hibridauth_window_render_form('hybridauth_openid_form');
   }
 
   // Make sure the session is started, HybridAuth library needs it.
@@ -376,23 +372,26 @@ function _hybridauth_check_additional_info($data) {
   }
 
   if ($show_form) {
-    $form = drupal_get_form('hybridauth_additional_info_form', $data);
-
-    $page = element_info('page');
-    $window_type = variable_get('hybridauth_window_type', 'current');
-
-    if ($window_type == 'popup') {
-      $page['#children'] = theme('status_messages') . drupal_render($form);
-      print theme('html', array('page' => $page));
-    }
-    elseif ($window_type == 'current') {
-      $page['content']['system_main']['messages'] = array('#type' => 'markup', '#markup' => theme('status_messages'));
-      $page['content']['system_main']['required_info_form'] = $form;
-      print drupal_render($page);
-    }
-
-    drupal_exit();
+    _hibridauth_window_render_form('hybridauth_additional_info_form');
   }
+}
+
+function _hibridauth_window_render_form($form_id) {
+  $form = drupal_get_form($form_id);
+  $page = element_info('page');
+  $window_type = variable_get('hybridauth_window_type', 'current');
+
+  if ($window_type == 'popup') {
+    $page['#children'] = theme('status_messages') . drupal_render($form);
+    print theme('html', array('page' => $page));
+  }
+  elseif ($window_type == 'current') {
+    $page['content']['system_main']['messages'] = array('#type' => 'markup', '#markup' => theme('status_messages'));
+    $page['content']['system_main']['required_info_form'] = $form;
+    print drupal_render($page);
+  }
+
+  drupal_exit();
 }
 
 function hybridauth_additional_info_form($form, &$form_state, $data) {
