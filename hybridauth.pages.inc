@@ -41,7 +41,8 @@ function hybridauth_providers($js, $icon_pack) {
 function hybridauth_window_start($provider_id) {
   // If provider is OpenID, but we don't have the openid_identifier.
   if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
-    _hibridauth_window_render_form('hybridauth_openid_form');
+    $form = drupal_get_form('hybridauth_openid_form');
+    _hybridauth_window_render_form($form);
   }
 
   // Make sure the session is started, HybridAuth library needs it.
@@ -372,12 +373,12 @@ function _hybridauth_check_additional_info($data) {
   }
 
   if ($show_form) {
-    _hibridauth_window_render_form('hybridauth_additional_info_form');
+    $form = drupal_get_form('hybridauth_additional_info_form', $data);
+    _hybridauth_window_render_form($form);
   }
 }
 
-function _hibridauth_window_render_form($form_id) {
-  $form = drupal_get_form($form_id);
+function _hybridauth_window_render_form($form) {
   $page = element_info('page');
   $window_type = variable_get('hybridauth_window_type', 'current');
 
