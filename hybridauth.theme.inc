@@ -19,7 +19,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
 
   if ($element['#hybridauth_widget_type'] == 'list') {
     $onclick = '';
-    if (!isset($element['#hybridauth_onclick'])) {}
+    if ($element['#hybridauth_onclick'] === FALSE) {}
     elseif (!empty($element['#hybridauth_onclick'])) {
       $onclick = $element['#hybridauth_onclick'];
     }
