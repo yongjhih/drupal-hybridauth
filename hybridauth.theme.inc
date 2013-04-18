@@ -14,7 +14,7 @@ function template_preprocess_hybridauth_widget(&$vars) {
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
       $providers[] = l(
         theme('hybridauth_provider_icon', $element['#hybridauth_widget_icon_pack'], $provider_id, $provider_name),
-        'hybridauth/popup/' . $provider_id,
+        'hybridauth/window/' . $provider_id,
         array(
           'html' => TRUE,
           'query' => $query,
@@ -22,7 +22,7 @@ function template_preprocess_hybridauth_widget(&$vars) {
             'title' => $provider_name,
             'class' => 'hybridauth-widget-provider',
             'rel' => 'nofollow',
-            'onclick' => "event.preventDefault(); popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;",
+            'onclick' => "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;",
           ),
         )
       );

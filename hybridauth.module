@@ -54,8 +54,8 @@ function hybridauth_menu() {
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['hybridauth/popup/%'] = array(
-    'page callback' => 'hybridauth_popup',
+  $items['hybridauth/window/%'] = array(
+    'page callback' => 'hybridauth_window_start',
     'page arguments' => array(2),
     'access callback' => TRUE,
     'file' => 'hybridauth.pages.inc',

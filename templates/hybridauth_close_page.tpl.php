@@ -8,8 +8,18 @@
   var redirect = <?php $redirect  ? print 'true' : print 'false'; ?>;
   if (window.opener && redirect){
     window.opener.parent.location.href = "<?php print url($destination, array('absolute' => TRUE)); ?>";
+    window.self.close();
   }
-  window.self.close();
+  else if (window.opener) {
+    window.opener.location.replace(window.opener.location.href);
+    window.self.close();
+  }
+  else if (redirect) {
+    window.location.href = "<?php print url($destination, array('absolute' => TRUE)); ?>";
+  }
+  else {
+    window.location.replace(window.location.href);
+  }
   //--><!]]>
 </script>
 </head>
