@@ -19,7 +19,8 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
 
   if ($element['#hybridauth_widget_type'] == 'list') {
     $onclick = '';
-    if (!empty($element['#hybridauth_onclick'])) {
+    if (!isset($element['#hybridauth_onclick'])) {}
+    elseif (!empty($element['#hybridauth_onclick'])) {
       $onclick = $element['#hybridauth_onclick'];
     }
     elseif ($element['#hybridauth_window_type'] == 'current') {
@@ -39,8 +40,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
             'title' => $provider_name,
             'class' => array('hybridauth-widget-provider'),
             'rel' => array('nofollow'),
-            'onclick' => $onclick,
-          ),
+          ) + ($onclick ? array('onclick' => $onclick) : array()),
         )
       );
     }
