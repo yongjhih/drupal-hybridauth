@@ -1,7 +1,7 @@
 <?php
 /**
  * @file
- * Theme functions for integrating the HybridAuth module.
+ * Theme functions for the HybridAuth module.
  */
 
 /**
@@ -10,7 +10,16 @@
 function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
   $providers = array();
-  if ($element['#hybridauth_destination']) {
+  // Process destination; HTTP_REFERER is needed for widget in modals.
+  if ($element['#hybridauth_destination'] == '[HTTP_REFERER]') {
+    if (isset($_SERVER['HTTP_REFERER'])) {
+      $query = array('destination' => $_SERVER['HTTP_REFERER']);
+    }
+    else {
+      $query = drupal_get_destination();
+    }
+  }
+  elseif ($element['#hybridauth_destination']) {
     $query = array('destination' => $element['#hybridauth_destination']);
   }
   else {
