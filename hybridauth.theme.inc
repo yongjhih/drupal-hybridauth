@@ -1,9 +1,25 @@
 <?php
+/**
+ * @file
+ * Theme functions for the HybridAuth module.
+ */
 
+/**
+ * Template preprocess function for hybridauth_widget.
+ */
 function template_preprocess_hybridauth_widget(&$vars) {
   $element = $vars['element'];
   $providers = array();
-  if ($element['#hybridauth_destination']) {
+  // Process destination; HTTP_REFERER is needed for widget in modals.
+  if ($element['#hybridauth_destination'] == '[HTTP_REFERER]') {
+    if (isset($_SERVER['HTTP_REFERER'])) {
+      $query = array('destination' => $_SERVER['HTTP_REFERER']);
+    }
+    else {
+      $query = drupal_get_destination();
+    }
+  }
+  elseif ($element['#hybridauth_destination']) {
     $query = array('destination' => $element['#hybridauth_destination']);
   }
   else {
@@ -90,6 +106,9 @@ function template_preprocess_hybridauth_widget(&$vars) {
   $vars['providers'] = $providers;
 }
 
+/**
+ * Template preprocess function for hybridauth_provider_icon.
+ */
 function template_preprocess_hybridauth_provider_icon(&$vars) {
   _hybridauth_add_icon_pack_files($vars['icon_pack']);
   if (!isset($vars['provider_name'])) {
