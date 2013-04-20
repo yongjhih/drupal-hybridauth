@@ -652,22 +652,26 @@ function hybridauth_get_config() {
  * Returns provider config.
  */
 function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
+  $config = NULL;
   $enabled = variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0);
   if (!$enabled_only || $enabled) {
-    return array(
+    $config = array(
       'enabled' => $enabled,
       'keys' => array(
         'id' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_id', '')),
         'key' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_key', '')),
         'secret' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', '')),
       ),
-      'scope' => array_filter(variable_get('hybridauth_provider_' . $provider_id . '_scope', array())),
+      'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
       'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', 'popup'),
       'hauth_return_to' => url('hybridauth/endpoint'),
     );
+    if ($provider_id == 'Facebook') {
+      $config['scope'] = array_filter($config['scope']);
+    }
   }
 
-  return NULL;
+  return $config;
 }
 
 /**
