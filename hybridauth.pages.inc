@@ -20,6 +20,9 @@ function hybridauth_endpoint() {
   return MENU_ACCESS_DENIED;
 }
 
+/**
+ * Returns HybridAuth widget with list of providers icons.
+ */
 function hybridauth_providers($js, $icon_pack) {
   $build = array(
     '#type' => 'hybridauth_widget',
@@ -47,8 +50,6 @@ function hybridauth_window_start($provider_id) {
 
   // Make sure the session is started, HybridAuth library needs it.
   drupal_session_start();
-  // Flag to show that this session was started by HybridAuth module.
-  $_SESSION['hybridauth_session'] = TRUE;
 
   // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
@@ -145,6 +146,8 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
 
+    // Destroy the session started in hybridauth_window_start().
+    session_destroy();
     _hybridauth_window_close(FALSE);
   }
 

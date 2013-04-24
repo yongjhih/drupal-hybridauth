@@ -324,23 +324,6 @@ function hybridauth_realname_alter(&$realname, $account) {
 }
 
 /**
- * Implements hook_page_alter().
- */
-function hybridauth_page_alter(&$page) {
-  // Destroy the session of anonymous user if it was started by HybridAuth.
-  if (!user_is_logged_in() && isset($_SESSION) && array_key_exists('hybridauth_session', $_SESSION)) {
-    if ($_SESSION['hybridauth_session']) {
-      // Set this to FALSE first time so that we can show Drupal messages.
-      $_SESSION['hybridauth_session'] = FALSE;
-    }
-    else {
-      // Destroy the session.
-      session_destroy();
-    }
-  }
-}
-
-/**
  * Implements hook_field_extra_fields().
  */
 function hybridauth_field_extra_fields() {
