@@ -146,8 +146,11 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
 
-    // Destroy the session started in hybridauth_window_start().
-    session_destroy();
+    // Destroy the session started in hybridauth_window_start() if user is not
+    // logged in.
+    if (!user_is_logged_in()) {
+      session_destroy();
+    }
     _hybridauth_window_close(FALSE);
   }
 
