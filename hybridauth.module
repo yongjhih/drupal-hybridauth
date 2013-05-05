@@ -647,10 +647,11 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
         'secret' => trim(variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', '')),
       ),
       'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
-      'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', 'popup'),
+      //'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', 'popup'),
+      'display' => variable_get('hybridauth_window_type', 'current') ? 'page' : 'popup',
       'hauth_return_to' => url('hybridauth/endpoint'),
     );
-    if ($provider_id == 'Facebook') {
+    if (is_array($config['scope'])) {
       $config['scope'] = array_filter($config['scope']);
     }
   }
