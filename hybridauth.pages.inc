@@ -62,7 +62,7 @@ function hybridauth_window_start($provider_id) {
 }
 
 /**
- * Close the popup (if used) and redirect.
+ * Close the popup (if used) and redirect if there was no error.
  */
 function _hybridauth_window_close($redirect = TRUE) {
   global $user;
@@ -71,6 +71,7 @@ function _hybridauth_window_close($redirect = TRUE) {
 
   $destination = drupal_get_destination();
   $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
+  $destination_error = $_GET['destination_error'];
 
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
@@ -86,7 +87,7 @@ function _hybridauth_window_close($redirect = TRUE) {
       window.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
     }
     else {
-      window.location.replace(window.location.href);
+      window.location.replace("' . url($destination_error, array('absolute' => TRUE)) . '");
     }
   ', 'inline');
   $page = element_info('page');
@@ -142,7 +143,8 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
       case 8:
         // Provider does not support this feature.
       default:
-        // Report the error and log it.
+        // Report the error - this message is not shown to anonymous users as
+        // we destroy the session - see below.
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
 

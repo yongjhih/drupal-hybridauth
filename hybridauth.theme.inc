@@ -9,23 +9,30 @@
  */
 function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
-  $providers = array();
-  // Process destination; HTTP_REFERER is needed for widget in modals.
+
+  $query = array();
+  // Process destination; HTTP_REFERER is needed for widget in modals
+  // to return to the current page.
   if ($element['#hybridauth_destination'] == '[HTTP_REFERER]') {
     if (isset($_SERVER['HTTP_REFERER'])) {
-      $query = array('destination' => $_SERVER['HTTP_REFERER']);
-    }
-    else {
-      $query = drupal_get_destination();
+      $query = array(
+        'destination' => $_SERVER['HTTP_REFERER'],
+        'destination_error' => $_SERVER['HTTP_REFERER'],
+      );
     }
   }
   elseif ($element['#hybridauth_destination']) {
-    $query = array('destination' => $element['#hybridauth_destination']);
+    $query = array(
+      'destination' => $element['#hybridauth_destination'],
+      'destination_error' => drupal_get_destination(),
+    );
   }
-  else {
+  if (!$query) {
     $query = drupal_get_destination();
+    $query['destination_error'] = $query['destination'];
   }
 
+  $providers = array();
   if ($element['#hybridauth_widget_type'] == 'list') {
     $onclick = '';
     if ($element['#hybridauth_onclick'] === FALSE) {}
