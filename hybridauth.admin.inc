@@ -279,7 +279,7 @@ function hybridauth_admin_settings() {
     '#options' => array(
       'user_login' => t('User login form'),
       'user_login_block' => t('User login block'),
-      'user_register_form' => t('User registration form'),
+      'user_register' => t('User registration form'),
       'comment_form' => t('Comment form'),
     ),
     '#description' => t('Add default HybridAuth widget to these forms.'),
