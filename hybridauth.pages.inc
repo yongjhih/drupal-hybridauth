@@ -73,10 +73,16 @@ function _hybridauth_window_close($redirect = TRUE) {
   $destination = token_replace($destination['destination'], array('user' => $user), array('clear' => TRUE));
   $destination_error = $_GET['destination_error'];
 
+  $destination_options = drupal_parse_url($destination) + array('absolute' => TRUE);
+  $destination_error_options = drupal_parse_url($destination_error) + array('absolute' => TRUE);
+
+  $destination = url($destination_options['path'], $destination_options);
+  $destination_error = url($destination_error_options['path'], $destination_error_options);
+
   drupal_add_js('
     var redirect = ' . ($redirect ? 'true' : 'false') . ';
     if (window.opener && redirect) {
-      window.opener.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      window.opener.location.href = "' . $destination . '";
       window.self.close();
     }
     else if (window.opener) {
@@ -84,10 +90,10 @@ function _hybridauth_window_close($redirect = TRUE) {
       window.self.close();
     }
     else if (redirect) {
-      window.location.href = "' . url($destination, array('absolute' => TRUE)) . '";
+      window.location.href = "' . $destination . '";
     }
     else {
-      window.location.replace("' . url($destination_error, array('absolute' => TRUE)) . '");
+      window.location.replace("' . $destination_error . '");
     }
   ', 'inline');
   $page = element_info('page');
