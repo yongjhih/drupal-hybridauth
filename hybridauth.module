@@ -366,6 +366,9 @@ function hybridauth_user_view($account, $view_mode, $langcode) {
     '#rows' => $rows,
     '#sticky' => FALSE,
     '#empty' => t('There are no connected identities.'),
+    // Adding the #name property so that our container has the 'form-item-hybridauth' class.
+    // @see theme_form_element().
+    '#name' => 'hybridauth',
   );
 }
 
