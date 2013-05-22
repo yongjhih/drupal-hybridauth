@@ -111,6 +111,8 @@ function hybridauth_menu() {
  */
 function hybridauth_block_info() {
   $blocks['hybridauth']['info'] = t('User login - HybridAuth widget only');
+  // Shouldn't be cached.
+  $blocks['hybridauth']['cache'] = DRUPAL_NO_CACHE;
 
   return $blocks;
 }
