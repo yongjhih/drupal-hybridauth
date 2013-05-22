@@ -99,7 +99,8 @@ function hybridauth_block($op = 'list', $delta = 0, $edit = array()) {
     return array(
       'hybridauth' => array(
         'info' => t('User login - HybridAuth widget only'),
-        'cache' => BLOCK_CACHE_GLOBAL,
+        // Shouldn't be cached.
+        'cache' => BLOCK_NO_CACHE,
       ),
     );
   }
