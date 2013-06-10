@@ -51,11 +51,12 @@ function hybridauth_uninstall() {
  * Implements hook_requirements().
  */
 function hybridauth_requirements($phase) {
+  module_load_include('module', 'hybridauth');
   $requirements = array();
   // Ensure translations don't break at install time.
   $t = get_t();
 
-  if ($phase == 'runtime') {
+  if ($phase == 'install' || $phase == 'runtime') {
     if ($lib_path = _hybridauth_library_path()) {
       try {
         require_once $lib_path . '/Hybrid/Auth.php';
