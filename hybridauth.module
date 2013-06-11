@@ -11,8 +11,8 @@ function hybridauth_hook_info() {
   $hooks = array(
     'hybridauth_username_alter',
     'hybridauth_profile_alter',
-    'hybridauth_registration_form',
     'hybridauth_userinfo_alter',
+    'hybridauth_registration_form',
   );
 
   return array_fill_keys($hooks, array('group' => 'hybridauth'));
