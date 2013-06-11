@@ -305,12 +305,14 @@ function hybridauth_username_alter(&$name, $account) {
     return;
   }
 
-  $account2 = user_load($account->uid);
-  if (!empty($account2->data['hybridauth']) && !module_exists('realname')) {
-    $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
-    $pattern = str_replace('[user:name]', $account2->name, $hybridauth_pattern);
-    $hybridauth_name = token_replace($pattern, array('user' => $account2), array('clear' => TRUE));
-    $name = trim(strip_tags($hybridauth_name));
+  $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
+  if (!empty($hybridauth_pattern) && !module_exists('realname')) {
+    $account2 = user_load($account->uid);
+    if (!empty($account2->data['hybridauth'])) {
+      $pattern = str_replace('[user:name]', $account2->name, $hybridauth_pattern);
+      $hybridauth_name = token_replace($pattern, array('user' => $account2), array('clear' => TRUE));
+      $name = trim(strip_tags($hybridauth_name));
+    }
   }
 }
 
@@ -320,9 +322,11 @@ function hybridauth_username_alter(&$name, $account) {
 function hybridauth_realname_alter(&$realname, $account) {
   if (!empty($account->data['hybridauth']) && variable_get('hybridauth_override_realname', 0)) {
     $hybridauth_pattern = variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
-    $pattern = str_replace('[user:name]', $realname, $hybridauth_pattern);
-    $hybridauth_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE));
-    $realname = trim(strip_tags($hybridauth_name));
+    if (!empty($hybridauth_pattern)) {
+      $pattern = str_replace('[user:name]', $realname, $hybridauth_pattern);
+      $hybridauth_name = token_replace($pattern, array('user' => $account), array('clear' => TRUE));
+      $realname = trim(strip_tags($hybridauth_name));
+    }
   }
 }
 

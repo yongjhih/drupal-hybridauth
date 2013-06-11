@@ -206,10 +206,9 @@ function hybridauth_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
     '#default_value' => variable_get('hybridauth_display_name', '[user:hybridauth:firstName] [user:hybridauth:lastName]'),
-    '#description' => t('You can use any user tokens here.') . ' '
+    '#description' => t('Leave empty to not alter display name. You can use any user tokens here.') . ' '
       . t('Install !link module to get list of all available tokens.',
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),
-    '#required' => TRUE,
   );
   if (module_exists('token')) {
     $form['vtabs']['fset_account']['fset_token'] = array(
