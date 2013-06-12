@@ -1,10 +1,10 @@
 <?php
-
 /**
  * @file
  * Main file for the HybridAuth module.
  */
 
+define('HYBRIDAUTH_HASH_SALT', 'hybridauth_hash_salt');
 if (module_exists('token')) {
   include_once(drupal_get_path('module', 'hybridauth') . '/hybridauth.tokens.inc');
 }
@@ -606,6 +606,11 @@ function _hybridauth_user_login_access_by_uid($uid) {
   return !($login == 280281600); //Dries birthday timestamp, Nov 19, 1978 :)
 }
 
+function _hybridauth_provider_identifier($identifier) {
+  $provider_identifier = (strlen($identifier) > 32) ? md5($identifier . HYBRIDAUTH_HASH_SALT) : $identifier;
+  return $provider_identifier;
+}
+
 function _hybridauth_identity_save($data, $uid = NULL) {
   global $user;
   $uid = $uid ? $uid : $user->uid;
@@ -615,13 +620,13 @@ function _hybridauth_identity_save($data, $uid = NULL) {
 
   //TODO: use drupal_write_record()?
   db_query("INSERT INTO {hybridauth_identity} (uid, provider, provider_identifier, data) VALUES (%d, '%s', '%s', '%s')",
-    $uid, $data['provider'], $data['identifier'], serialize($data));
+    $uid, $data['provider'], _hybridauth_provider_identifier($data['identifier']), serialize($data));
 
   _hybridauth_session_sync_data($uid);
 }
 
 function _hybridauth_identity_load($data) {
-  $result = db_query("SELECT * FROM {hybridauth_identity} WHERE provider = '%s' AND provider_identifier = '%s'", $data['provider'], $data['identifier']);
+  $result = db_query("SELECT * FROM {hybridauth_identity} WHERE provider = '%s' AND provider_identifier = '%s'", $data['provider'], _hybridauth_provider_identifier($data['identifier']));
   return db_fetch_array($result);
 }
 
