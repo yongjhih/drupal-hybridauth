@@ -646,6 +646,9 @@ function hybridauth_user_identity_delete($form, &$form_state, $account, $id) {
   if (!$del_identity || $account->uid != $del_identity['uid']) {
     drupal_set_message(t('You are trying to delete non-existing identity.'), 'error');
     drupal_access_denied();
+    // See https://drupal.org/node/2020351 and 
+    // https://api.drupal.org/api/drupal/includes%21common.inc/function/drupal_access_denied/7
+    drupal_exit();
   }
   $del_identity_data = unserialize($del_identity['data']);
   $username = format_username($account);
