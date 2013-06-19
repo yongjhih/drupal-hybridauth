@@ -270,7 +270,7 @@ function _hybridauth_window_process_auth($data) {
       $name = _hybridauth_make_username($data);
       $userinfo = array(
         'name' => $name,
-        'pass' => user_password(),
+        'pass' => empty($data['pass']) ? user_password() : $data['pass'],
         'init' => $name,
         'status' => 1,
         'access' => REQUEST_TIME,
@@ -371,6 +371,9 @@ function _hybridauth_check_additional_info($data) {
   if (empty($data['username']) && variable_get('hybridauth_registration_username_change', 0)) {
     $show_form = TRUE;
   }
+  if (empty($data['pass']) && variable_get('hybridauth_registration_password', 0)) {
+    $show_form = TRUE;
+  }
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
@@ -438,6 +441,13 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
       $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
   }
+  if (variable_get('hybridauth_registration_password', 0)) {
+    $form['fset']['pass'] = array(
+      '#type' => 'password_confirm',
+      //'#title' => t('Password'),
+      '#required' => TRUE,
+    );
+  }
 
   $hybridauth_fields = hybridauth_fields_list();
   $required_fields = array_filter(variable_get('hybridauth_required_fields', array('email' => 'email')));
@@ -502,13 +512,23 @@ function hybridauth_additional_info_form_submit($form, &$form_state) {
   foreach ($required_fields as $key => $value) {
     if (empty($data[$key]) && !($data[$key] === 0)) {
       $data[$key] = $form_state['values'][$key];
-      $data['manual'][] = $key;
+      if (!isset($data['manual']) || is_array($data['manual'])) {
+        $data['manual'][] = $key;
+      }
     }
   }
 
   if (isset($form_state['values']['username'])) {
     $data['username'] = $form_state['values']['username'];
-    $data['manual'][] = 'username';
+    if (!isset($data['manual']) || is_array($data['manual'])) {
+      $data['manual'][] = 'username';
+    }
+  }
+  if (isset($form_state['values']['pass'])) {
+    $data['pass'] = $form_state['values']['pass'];
+    if (!isset($data['manual']) || is_array($data['manual'])) {
+      $data['manual'][] = 'pass';
+    }
   }
   $data['manual'] = implode(',', $data['manual']);
 

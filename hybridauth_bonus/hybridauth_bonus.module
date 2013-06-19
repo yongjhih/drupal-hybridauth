@@ -94,14 +94,15 @@ function hybridauth_bonus_hybridauth_registration_form($data) {
  */
 function hybridauth_bonus_form_hybridauth_additional_info_form_alter(&$form, &$form_state, $form_id) {
   if (variable_get('hybridauth_bonus_registration_role_choice', 0)) {
-    // $form['#validate'][] = 'hybridauth_bonus_form_hybridauth_additional_info_form_validate';
-    array_unshift($form['#submit'], 'hybridauth_bonus_form_hybridauth_additional_info_form_submit');
     $roles = array_intersect_key(user_roles(TRUE), array_filter(variable_get('hybridauth_bonus_registration_roles', array())));
     $form['fset']['roles'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Roles'),
       '#options' => $roles,
     );
+
+    // $form['#validate'][] = 'hybridauth_bonus_form_hybridauth_additional_info_form_validate';
+    array_unshift($form['#submit'], 'hybridauth_bonus_form_hybridauth_additional_info_form_submit');
   }
 }
 
@@ -111,7 +112,9 @@ function hybridauth_bonus_form_hybridauth_additional_info_form_alter(&$form, &$f
 function hybridauth_bonus_form_hybridauth_additional_info_form_submit($form, &$form_state) {
   if (isset($form_state['values']['roles'])) {
     $form_state['values']['data']['roles'] = $form_state['values']['roles'];
-    $form_state['values']['data']['manual'][] = 'roles';
+    if (!isset($form_state['values']['data']['manual']) || is_array($form_state['values']['data']['manual'])) {
+      $form_state['values']['data']['manual'][] = 'roles';
+    }
   }
 }
 

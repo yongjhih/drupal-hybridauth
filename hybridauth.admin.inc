@@ -202,6 +202,12 @@ function hybridauth_admin_settings() {
     '#description' => t('Allow users to change their username when registering through HybridAuth.'),
     '#default_value' => variable_get('hybridauth_registration_username_change', 0),
   );
+  $form['vtabs']['fset_account']['hybridauth_registration_password'] = array(
+    '#type' => 'checkbox',
+    '#title' => t('Ask user for a password when registering'),
+    '#description' => t('Ask users to set password for account when registering through HybridAuth.'),
+    '#default_value' => variable_get('hybridauth_registration_password', 0),
+  );
   $form['vtabs']['fset_account']['hybridauth_display_name'] = array(
     '#type' => 'textfield',
     '#title' => t('Display name pattern'),
