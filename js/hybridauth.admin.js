@@ -84,7 +84,8 @@ Drupal.behaviors.hybridauth_vtabs_SettingsSummary.attach = function(context, set
       var label_for = $(this).attr('for');
       if ((label_for == 'edit-hybridauth-disable-username-change' || label_for == 'edit-hybridauth-remove-password-fields'
         || label_for == 'edit-hybridauth-pictures' || label_for == 'edit-hybridauth-override-realname'
-        || label_for == 'edit-hybridauth-registration-username-change') && $('#' + label_for).is(':checked')) {
+        || label_for == 'edit-hybridauth-registration-username-change' || label_for == 'edit-hybridauth-registration-password')
+        && $('#' + label_for).is(':checked')) {
         vals.push($.trim($(this).text()));
       }
       var label, value;
