@@ -155,6 +155,7 @@ function hybridauth_admin_settings() {
       0 => t('Follow core') . ': ' . $core_settings[variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL)],
       1 => t('Visitors'),
       2 => t('Visitors, but administrator approval is required'),
+      3 => t('Nobody, only login for existing accounts is possible'),
     ),
     '#description' => t('Select who can register accounts through HybridAuth.') . ' '
       . t('The core settings are available at <a href="!link">Account settings</a>.',

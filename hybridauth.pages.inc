@@ -259,7 +259,7 @@ function _hybridauth_window_process_auth($data) {
   else {
     // Visitors can create accounts.
     if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL))
-      || variable_get('hybridauth_register', 0)) {
+      || variable_get('hybridauth_register', 0) != 3) {
       // Check profile information for required fields.
       _hybridauth_check_additional_info($data);
 
@@ -290,7 +290,7 @@ function _hybridauth_window_process_auth($data) {
       $account = user_save(drupal_anonymous_user(), $userinfo);
       // Terminate if an error occurred during user_save().
       if (!$account) {
-        drupal_set_message(t("Error saving user account."), 'error');
+        drupal_set_message(t('Error saving user account.'), 'error');
         _hybridauth_window_close();
       }
       // Invoke hybridauth_user_insert rules event.
@@ -355,6 +355,10 @@ function _hybridauth_window_process_auth($data) {
           rules_invoke_event('hybridauth_user_login', $user, $data);
         }
       }
+    }
+    // Visitors can't register accounts through HybridAuth.
+    elseif (variable_get('hybridauth_register', 0) == 3) {
+      drupal_set_message(t('New account registration is not allowed.'), 'error');
     }
     // Only admin can create accounts.
     else {
