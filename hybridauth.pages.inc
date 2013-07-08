@@ -255,6 +255,12 @@ function _hybridauth_window_process_auth($data) {
       }
     }
   }
+  // Check if other modules want to block this registration.
+  elseif ($message = _hybridauth_registration_block($data)) {
+    if (is_string($message)) {
+      drupal_set_message($message, 'error');
+    }
+  }
   // Create new user account.
   else {
     // Visitors can create accounts.

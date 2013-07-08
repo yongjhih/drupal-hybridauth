@@ -41,3 +41,13 @@ function hook_hybridauth_userinfo_alter(&$userinfo, $data) {
 function hook_hybridauth_registration_form($data) {
 
 }
+
+/**
+ * This hook allows other modules to block new registrations through HybridAuth
+ * based on the data received from authentication provider.
+ * Return translated message to show to the user if the registration should be
+ * blocked. Return just TRUE if you don't want to show any message.
+ */
+function hook_hybridauth_registration_block($data) {
+  
+}

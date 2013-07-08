@@ -849,3 +849,12 @@ function _hybridauth_session_delete_by_uid($uid) {
     ->execute();
   return $result;
 }
+
+function _hybridauth_registration_block($data) {
+  $result = array_filter(module_invoke_all('hybridauth_registration_block', $data));
+  if (count($result)) {
+    return array_shift($result);
+  }
+
+  return FALSE;
+}
