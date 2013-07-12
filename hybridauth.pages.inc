@@ -257,6 +257,8 @@ function _hybridauth_window_process_auth($data) {
   }
   // Check if other modules want to block this registration.
   elseif ($message = _hybridauth_registration_block($data)) {
+    // Destroy the session with the blocked authorized identity.
+    session_destroy();
     if (is_string($message)) {
       drupal_set_message($message, 'error');
     }
