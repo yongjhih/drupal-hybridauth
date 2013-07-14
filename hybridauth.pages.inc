@@ -569,6 +569,7 @@ function hybridauth_openid_form($form, &$form_state) {
 
 function hybridauth_openid_form_submit($form, &$form_state) {
   $query = drupal_get_query_parameters() + drupal_get_destination();
+  // Unset destination in global $_GET so that drupal_goto() doesn't use it.
   unset($_GET['destination']);
   $query['openid_identifier'] = $form_state['values']['openid_identifier'];
 

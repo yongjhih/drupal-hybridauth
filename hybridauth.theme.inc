@@ -22,14 +22,18 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
     }
   }
   elseif ($element['#hybridauth_destination']) {
+    $destination = drupal_get_destination();
     $query = array(
       'destination' => $element['#hybridauth_destination'],
-      'destination_error' => drupal_get_destination(),
+      'destination_error' => $destination['destination'],
     );
   }
   if (!$query) {
-    $query = drupal_get_destination();
-    $query['destination_error'] = $query['destination'];
+    $destination = drupal_get_destination();
+    $query = array(
+      'destination' => $destination['destination'],
+      'destination_error' => $destination['destination'],
+    );
   }
 
   $providers = array();
