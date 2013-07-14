@@ -369,10 +369,12 @@ function _hybridauth_window_process_auth($data) {
     // Visitors can't register accounts through HybridAuth.
     elseif (variable_get('hybridauth_register', 0) == 3) {
       drupal_set_message(t('New account registration is not allowed.'), 'error');
+      _hybridauth_window_close(FALSE);
     }
     // Only admin can create accounts.
     else {
       drupal_set_message(t('Only site administrators can create new user accounts.'), 'error');
+      _hybridauth_window_close(FALSE);
     }
   }
 

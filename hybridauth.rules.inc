@@ -59,6 +59,17 @@ function hybridauth_rules_action_info() {
         ),
       ),
     ),
+    'hybridauth_set_destination' => array(
+      'label' => t('Set destination'),
+      'group' => t('HybridAuth'),
+      'parameter' => array(
+        'destination' => array(
+          'label' => t('Day'),
+          'type' => 'text',
+          // 'description' => t(''),
+        ),
+      ),
+    ),
   );
 }
 
@@ -94,6 +105,14 @@ function hybridauth_dmy_to_date($day, $month, $year) {
   // $timestamp = mktime(0, 0, 0, $month, $day, $year);
   // date_default_timezone_set($timezone);
   return array('date' => $timestamp);
+}
+
+/**
+ * Rules action.
+ */
+function hybridauth_set_destination($destination) {
+  drupal_static_reset('drupal_get_destination');
+  $_GET['destination'] = $destination;
 }
 
 /**
