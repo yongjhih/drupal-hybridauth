@@ -196,10 +196,7 @@ function _hybridauth_window_process_auth($data) {
     else {
       _hybridauth_identity_save($data);
       drupal_set_message(t('New identity added.'));
-      // Invoke hybridauth_identity_added rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_identity_added', $user, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_identity_added', $user, $data);
       _hybridauth_window_close();
     }
   }
@@ -219,10 +216,7 @@ function _hybridauth_window_process_auth($data) {
     else {
       $form_state['uid'] = $identity['uid'];
       user_login_submit(array(), $form_state);
-      // Invoke hybridauth_user_login rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_user_login', $user, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_user_login', $user, $data);
     }
   }
   // Handle duplicate email addresses.
@@ -231,16 +225,10 @@ function _hybridauth_window_process_auth($data) {
     if (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] == $data['emailVerified']) {
       _hybridauth_identity_save($data, $account->uid);
       drupal_set_message(t('New identity added.'));
-      // Invoke hybridauth_identity_added rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_identity_added', $account, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_identity_added', $account, $data);
       $form_state['uid'] = $account->uid;
       user_login_submit(array(), $form_state);
-      // Invoke hybridauth_user_login rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_user_login', $user, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_user_login', $user, $data);
     }
     // Block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
     // (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] != $data['emailVerified'])
@@ -303,15 +291,9 @@ function _hybridauth_window_process_auth($data) {
         drupal_set_message(t('Error saving user account.'), 'error');
         _hybridauth_window_close();
       }
-      // Invoke hybridauth_user_insert rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_user_insert', $account, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_user_insert', $account, $data);
       _hybridauth_identity_save($data, $account->uid);
-      // Invoke hybridauth_identity_added rules event.
-      if (module_exists('rules')) {
-        rules_invoke_event('hybridauth_identity_added', $account, $data);
-      }
+      _hybridauth_invoke_hooks('hybridauth_identity_added', $account, $data);
 
       $user_save_trigger = FALSE;
       $user_email_verify_trigger = FALSE;
@@ -360,10 +342,7 @@ function _hybridauth_window_process_auth($data) {
       if ($user_login_trigger) {
         $form_state['uid'] = $account->uid;
         user_login_submit(array(), $form_state);
-        // Invoke hybridauth_user_login rules event.
-        if (module_exists('rules')) {
-          rules_invoke_event('hybridauth_user_login', $user, $data);
-        }
+        _hybridauth_invoke_hooks('hybridauth_user_login', $user, $data);
       }
     }
     // Visitors can't register accounts through HybridAuth.
@@ -780,10 +759,7 @@ function hybridauth_user_identity_delete_submit($form, &$form_state) {
   $deleted = _hybridauth_identity_delete_by_id($del_identity['id']);
   if ($deleted) {
     drupal_set_message(t('Identity deleted.'));
-    // Invoke hybridauth_identity_deleted rules event.
-    if (module_exists('rules')) {
-      rules_invoke_event('hybridauth_identity_deleted', $account, $del_identity_data);
-    }
+    _hybridauth_invoke_hooks('hybridauth_identity_deleted', $account, $del_identity_data);
   }
 
   if ($hybridauth = hybridauth_get_instance()) {
