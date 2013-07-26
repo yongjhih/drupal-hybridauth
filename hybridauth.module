@@ -243,6 +243,7 @@ function hybridauth_user_profile_form_validate_filter($value) {
  */
 function hybridauth_element_info() {
   $types = array();
+  $path = drupal_get_path('module', 'hybridauth');
 
   $types['hybridauth_widget'] = array(
     '#input' => FALSE,
@@ -262,12 +263,15 @@ function hybridauth_element_info() {
     '#hybridauth_onclick' => '',
     '#attached' => array(
       'js' => array(
-        drupal_get_path('module', 'hybridauth') . '/js/hybridauth.js' => array(
+        $path . '/js/hybridauth.modal.js' => array(
           'type' => 'file',
         ),
       ),
       'css' => array(
-        drupal_get_path('module', 'hybridauth') . '/css/hybridauth.css' => array(
+        $path . '/css/hybridauth.css' => array(
+          'type' => 'file',
+        ),
+        $path . '/css/hybridauth.modal.css' => array(
           'type' => 'file',
         ),
       ),
