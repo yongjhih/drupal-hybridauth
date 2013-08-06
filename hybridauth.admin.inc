@@ -370,6 +370,8 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
 
 function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = NULL) {
   $form = array();
+  $language_default = language_default();
+  $language_default->prefix = '';
 
   switch ($provider_id) {
     case 'Facebook':
@@ -388,9 +390,11 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     case 'Twitter':
       $help = t('
           <p>Enter your consumer key and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
+          <p>You must set <strong>Callback URL</strong> to <strong>%callback_uri</strong>.</p>
         ',
         array(
           '!apps_uri' => 'https://dev.twitter.com/apps',
+          '%callback_uri' => url('hybridauth/endpoint', array('absolute' => TRUE, 'query' => array('hauth.done' => 'Twitter'), 'language' => $language_default)),
         )
       );
       break;
@@ -404,7 +408,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         ',
         array(
           '!apps_uri' => 'https://code.google.com/apis/console#access',
-          '%redirect_uri' => url('hybridauth/endpoint', array('absolute' => TRUE, 'query' => array('hauth.done' => 'Google'))),
+          '%redirect_uri' => url('hybridauth/endpoint', array('absolute' => TRUE, 'query' => array('hauth.done' => 'Google'), 'language' => $language_default)),
           '%origin_uri' => $origin_uri_parts['scheme'] . '://' . $origin_uri_parts['host'],
         )
       );
