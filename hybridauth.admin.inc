@@ -283,7 +283,7 @@ function hybridauth_admin_settings() {
     '#type' => 'textfield',
     '#title' => t('Redirect after login'),
     '#default_value' => variable_get('hybridauth_destination', ''),
-    '#description' => t('Drupal path to redirect to, like "node/1". Leave empty to return to the same page.') . ' '
+    '#description' => t('Drupal path to redirect to, like "node/1". Leave empty to return to the same page (set to [HTTP_REFERER] for widget in modal dialogs loaded by AJAX).') . '<br/>'
       . t('You can use any user or global tokens here.') . ' '
       . t('Install !link module to get list of all available tokens.',
         array('!link' => l(t('Token'), 'http://drupal.org/project/token', array('attributes' => array('target' => '_blank'))))),

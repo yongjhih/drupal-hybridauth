@@ -11,15 +11,14 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   $element = $vars['element'];
 
   $query = array();
+  $element['#hybridauth_destination'] = trim($element['#hybridauth_destination']);
   // Process destination; HTTP_REFERER is needed for widget in modals
   // to return to the current page.
-  if ($element['#hybridauth_destination'] == '[HTTP_REFERER]') {
-    if (isset($_SERVER['HTTP_REFERER'])) {
-      $query = array(
-        'destination' => $_SERVER['HTTP_REFERER'],
-        'destination_error' => $_SERVER['HTTP_REFERER'],
-      );
-    }
+  if ($element['#hybridauth_destination'] == '[HTTP_REFERER]' && isset($_SERVER['HTTP_REFERER'])) {
+    $query = array(
+      'destination' => $_SERVER['HTTP_REFERER'],
+      'destination_error' => $_SERVER['HTTP_REFERER'],
+    );
   }
   elseif ($element['#hybridauth_destination']) {
     $destination = drupal_get_destination();
