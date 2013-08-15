@@ -128,7 +128,7 @@ function hybridauth_block_info() {
  * Implements hook_block_view().
  */
 function hybridauth_block_view($delta = '') {
-  if ($delta == 'hybridauth' && !user_is_logged_in()) {
+  if ($delta == 'hybridauth' && !user_is_logged_in() && user_access('use hybridauth')) {
     $block = array();
     $block['subject'] = t('User login');
     $element['#type'] = 'hybridauth_widget';
@@ -206,7 +206,7 @@ function hybridauth_form_comment_form_alter(&$form, &$form_state, $form_id) {
  * Adds HybridAuth widget to enabled forms.
  */
 function _hybridauth_form_alter(&$form, &$form_state, $form_id) {
-  if (user_access('use hybridauth') && user_is_anonymous() &&
+  if (!user_is_logged_in() && user_access('use hybridauth') &&
     in_array($form_id, array_filter(variable_get('hybridauth_forms', array('user_login', 'user_login_block'))))) {
     $form['hybridauth'] = array(
       '#type' => 'hybridauth_widget',
