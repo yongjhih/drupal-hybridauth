@@ -52,21 +52,21 @@ function hybridauth_admin_settings() {
 
   $form['fset_fields'] = array(
     '#type' => 'fieldset',
-    '#title' => t('Required fields'),
+    '#title' => t('Required information'),
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'fset_fields',
   );
   $form['fset_fields']['hybridauth_required_fields'] = array(
     '#type' => 'checkboxes',
-    '#title' => t('Required fields'),
+    '#title' => t('Required information'),
     '#options' => array(
       'email' => t('Email address'),
       'firstName' => t('First name'),
       'lastName' => t('Last name'),
       'gender' => t('Gender'),
     ),
-    '#description' => t("Select required fields. If authentication provider doesn't return them, visitor will need to fill additional form with these fields before registration."),
+    '#description' => t("Select required information. If authentication provider doesn't return it, visitor will need to fill additional form before registration."),
     '#default_value' => variable_get('hybridauth_required_fields', array('email' => 'email')),
   );
   
@@ -76,6 +76,16 @@ function hybridauth_admin_settings() {
     '#collapsible' => TRUE,
     '#collapsed' => TRUE,
     '#group' => 'fset_widget',
+  );
+  $options = array(
+    'popup' => t('Use a new popup window'),
+    'current' => t('Use the current window'),
+  );
+  $form['fset_widget']['hybridauth_window_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Authentication window type'),
+    '#options' => $options,
+    '#default_value' => variable_get('hybridauth_window_type', 'popup'),
   );
   $form['fset_widget']['hybridauth_widget_title'] = array(
     '#type' => 'textfield',

@@ -30,6 +30,7 @@ function hybridauth_uninstall() {
   
   variable_del('hybridauth_library_path');
   variable_del('hybridauth_required_fields');
+  variable_del('hybridauth_window_type');
   variable_del('hybridauth_widget_title');
   variable_del('hybridauth_widget_type');
   variable_del('hybridauth_widget_use_overlay');
