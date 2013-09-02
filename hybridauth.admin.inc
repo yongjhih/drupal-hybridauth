@@ -424,7 +424,7 @@ function hybridauth_admin_provider_settings(&$form_state, $provider_id = NULL) {
     unset($form['keys']['hybridauth_provider_' . $provider_id . '_keys_key']);
   }
   
-  if (in_array($provider_id, array('Facebook'))) {
+  if ($provider_id =='Facebook') {
     $form['advanced'] = array(
       '#type' => 'fieldset',
       '#title' => 'Advanced settings',
@@ -433,7 +433,7 @@ function hybridauth_admin_provider_settings(&$form_state, $provider_id = NULL) {
     );
     $form['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
       '#type' => 'checkboxes',
-      '#title' => t('Scope - Permissions to request by default'),
+      '#title' => t('Scope'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', array(
         'email', 'user_about_me', 'user_birthday', 'user_hometown', 'user_website', 'offline_access',
       )),
@@ -482,6 +482,20 @@ function hybridauth_admin_provider_settings(&$form_state, $provider_id = NULL) {
         'sms'                   => t('<strong>sms</strong> -- Enables your application to send messages to the user and respond to messages from the user via text message'),
         'publish_actions'       => t('<strong>publish_actions</strong> -- Enables your application to publish user scores and achievements.'),
       ),
+    );
+  }
+  if ($provider_id == 'Google') {
+    $form['advanced'] = array(
+      '#type' => 'fieldset',
+      '#title' => 'Advanced settings',
+      '#collapsible' => TRUE,
+      '#collapsed' => TRUE,
+    );
+    $form['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
+      '#type' => 'textfield',
+      '#title' => t('Scope'),
+      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'),
+      '#size' => 150,
     );
   }
   
