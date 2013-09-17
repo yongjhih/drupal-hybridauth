@@ -56,7 +56,8 @@ function hybridauth_bonus_form_hybridauth_admin_settings_alter(&$form, &$form_st
         ),
       ),
     );
-    foreach ($form['vtabs']['fset_widget'] as $key => $value) {
+    foreach (element_children($form['vtabs']['fset_widget']) as $key) {
+      $value = $form['vtabs']['fset_widget'][$key];
       $new_key = str_replace('hybridauth_', 'hybridauth_bonus_', $key) . '_' . $f_id;
       $form['vtabs']['fset_bonus_forms'][$f_id][$new_key] = $value;
       $form['vtabs']['fset_bonus_forms'][$f_id][$new_key]['#default_value'] = variable_get($new_key, $value['#default_value']);
