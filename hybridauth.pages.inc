@@ -301,13 +301,22 @@ function _hybridauth_window_process_auth($data) {
       // Save user picture.
       if (variable_get('user_pictures', 0) && variable_get('hybridauth_pictures', 1)) {
         $photo_url = $data['photoURL'];
-        if ($photo_url) {
+        if (valid_url($photo_url)) {
           $photo = drupal_http_request($photo_url);
-          $file = file_save_data($photo->data);
-          // To make user_save() to process the file and move it.
-          $file->status = 0;
-          $edit['picture'] = $file;
-          $user_save_trigger = TRUE;
+          if ($photo->error) {
+            watchdog('hybridauth', 'Error while executing drupal_http_request() to %url: %error.', array('%url' => $photo_url, '%error' => $photo->error), WATCHDOG_ERROR);
+          }
+          else {
+            if ($file = file_save_data($photo->data)) {
+              // To make user_save() to process the file and move it.
+              $file->status = 0;
+              $edit['picture'] = $file;
+              $user_save_trigger = TRUE;
+            }
+            else {
+              watchdog('hybridauth', 'Failed to save user image from url %url.', array('%url' => $photo_url), WATCHDOG_ERROR);
+            }
+          }
         }
       }
       // Admin approval is required.
