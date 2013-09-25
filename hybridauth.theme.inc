@@ -59,6 +59,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
             'title' => $provider_name,
             'class' => array('hybridauth-widget-provider'),
             'rel' => array('nofollow'),
+            // jQuery Mobile compatibility - so it doesn't use AJAX.
             'data-ajax' => 'false',
           ) + ($onclick ? array('onclick' => $onclick) : array()),
         )
@@ -116,7 +117,6 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
           'title' => $element['#hybridauth_widget_link_title'],
           'class' => $class,
           'rel' => array('nofollow'),
-          'data-ajax' => 'false',
         ),
       )
     );
