@@ -553,6 +553,7 @@ function hybridauth_report() {
     '#theme' => 'table',
     '#header' => $header,
     '#rows' => $rows,
+    '#empty' => t('There are no HybridAuth identities yet.'),
   );
   return $form;
 }

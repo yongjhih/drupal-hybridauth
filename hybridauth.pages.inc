@@ -79,23 +79,14 @@ function _hybridauth_window_close($redirect = TRUE) {
   $destination = url($destination_options['path'], $destination_options);
   $destination_error = url($destination_error_options['path'], $destination_error_options);
 
-  drupal_add_js('
-    var redirect = ' . ($redirect ? 'true' : 'false') . ';
-    if (window.opener && redirect) {
-      window.opener.location.href = "' . $destination . '";
-      window.self.close();
-    }
-    else if (window.opener) {
-      window.opener.location.replace(window.opener.location.href);
-      window.self.close();
-    }
-    else if (redirect) {
-      window.location.href = "' . $destination . '";
-    }
-    else {
-      window.location.replace("' . $destination_error . '");
-    }
-  ', 'inline');
+  drupal_add_js(array(
+    'hybridauth'=> array(
+      'redirect' => $redirect ? 1 : 0,
+      'destination' => $destination,
+      'destionation_error' => $destination_error,
+    )
+  ), 'setting');
+  drupal_add_js(drupal_get_path('module', 'hybridauth') . '/js/hybridauth.close.js');
   $page = element_info('page');
   // Don't show messages on this closing page, show them later.
   $page['#show_messages'] = FALSE;
@@ -303,7 +294,7 @@ function _hybridauth_window_process_auth($data) {
         $photo_url = $data['photoURL'];
         if (valid_url($photo_url)) {
           $photo = drupal_http_request($photo_url);
-          if ($photo->error) {
+          if (isset($photo->error)) {
             watchdog('hybridauth', 'Error while executing drupal_http_request() to %url: %error.', array('%url' => $photo_url, '%error' => $photo->error), WATCHDOG_ERROR);
           }
           else {
