@@ -394,14 +394,14 @@ function _hybridauth_window_render_form($form) {
   $page = element_info('page');
   $window_type = variable_get('hybridauth_window_type', 'current');
 
-  if ($window_type == 'popup') {
-    $page['#children'] = theme('status_messages') . drupal_render($form);
-    print theme('html', array('page' => $page));
-  }
-  elseif ($window_type == 'current') {
+  if ($window_type == 'current') {
     $page['content']['system_main']['messages'] = array('#type' => 'markup', '#markup' => theme('status_messages'));
     $page['content']['system_main']['required_info_form'] = $form;
     print drupal_render($page);
+  }
+  else { // 'popup' or modal ('colorbox', 'shadowbox', 'fancybox', 'lightbox2')
+    $page['#children'] = theme('status_messages') . drupal_render($form);
+    print theme('html', array('page' => $page));
   }
 
   drupal_exit();

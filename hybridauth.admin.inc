@@ -273,6 +273,18 @@ function hybridauth_admin_settings() {
     'current' => t('Use the current window'),
     'popup' => t('Use a new popup window'),
   );
+  if (module_exists('colorbox')) {
+    $options['colorbox'] = t('Colorbox');
+  }
+  /*if (module_exists('shadowbox')) {
+    $options['shadowbox'] = t('Shadowbox');
+  }
+  if (module_exists('fancybox')) {
+    $options['fancybox'] = t('fancyBox');
+  }*/
+  if (module_exists('lightbox2')) {
+    $options['lightbox2'] = t('Lightbox2');
+  }
   $form['vtabs']['fset_other']['hybridauth_window_type'] = array(
     '#type' => 'radios',
     '#title' => t('Authentication window type'),

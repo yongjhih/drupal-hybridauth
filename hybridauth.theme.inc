@@ -37,6 +37,22 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
 
   $providers = array();
   if ($element['#hybridauth_widget_type'] == 'list') {
+    $class = array('hybridauth-widget-provider');
+    $rel = array('nofollow');
+    // Add Colorbox-specific things.
+    if ($element['#hybridauth_window_type'] == 'colorbox') {
+      $query += array(
+        'width' => 800,
+        'height' => 500,
+        'iframe' => 'true',
+      );
+      $class[] = 'colorbox-load';
+    }
+    // Add Lightbox2-specific settings.
+    if ($element['#hybridauth_window_type'] == 'lightbox2') {
+      $rel = array('lightframe', 'nofollow');
+    }
+
     $onclick = '';
     if ($element['#hybridauth_onclick'] === FALSE) {}
     elseif (!empty($element['#hybridauth_onclick'])) {
@@ -49,16 +65,17 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
     }
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
+      $path = 'hybridauth/window/' . $provider_id;
       $providers[] = l(
         theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $provider_name)),
-        'hybridauth/window/' . $provider_id,
+        $path,
         array(
           'html' => TRUE,
           'query' => $query,
           'attributes' => array(
             'title' => $provider_name,
-            'class' => array('hybridauth-widget-provider'),
-            'rel' => array('nofollow'),
+            'class' => $class,
+            'rel' => $rel,
             // jQuery Mobile compatibility - so it doesn't use AJAX.
             'data-ajax' => 'false',
           ) + ($onclick ? array('onclick' => $onclick) : array()),
