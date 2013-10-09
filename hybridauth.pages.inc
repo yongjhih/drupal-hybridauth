@@ -83,7 +83,7 @@ function _hybridauth_window_close($redirect = TRUE) {
     'hybridauth'=> array(
       'redirect' => $redirect ? 1 : 0,
       'destination' => $destination,
-      'destionation_error' => $destination_error,
+      'destination_error' => $destination_error,
     )
   ), 'setting');
   drupal_add_js(drupal_get_path('module', 'hybridauth') . '/js/hybridauth.close.js');
@@ -118,6 +118,11 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
   }
   
   if (!is_null($error_code)) {
+    // Destroy the session started in hybridauth_window_start() if user is not
+    // logged in.
+    if (!user_is_logged_in()) {
+      session_destroy();
+    }
     switch ($error_code) {
       case 5:
         // Authentication failed. The user has canceled the authentication or
@@ -147,11 +152,6 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
         drupal_set_message(t('There was an error processing your request.'), 'error');
     }
 
-    // Destroy the session started in hybridauth_window_start() if user is not
-    // logged in.
-    if (!user_is_logged_in()) {
-      session_destroy();
-    }
     _hybridauth_window_close(FALSE);
   }
 

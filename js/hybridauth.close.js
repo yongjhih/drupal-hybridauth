@@ -13,7 +13,7 @@
       win.location.href = Drupal.settings.hybridauth.destination;
     }
     else {
-      win.location.replace(Drupal.settings.hybridauth.destination_error);
+      win.location.href = Drupal.settings.hybridauth.destination_error;
     }
     // Close the popup window.
     if (window.opener) {
