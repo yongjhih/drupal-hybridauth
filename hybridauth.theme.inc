@@ -48,6 +48,15 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       );
       $class[] = 'colorbox-load';
     }
+    // Add Shadowbox specific settings.
+    if ($element['#hybridauth_window_type'] == 'shadowbox') {
+      $rel = array('shadowbox', 'nofollow');
+    }
+    // Add fancyBox-specific settings.
+    if ($element['#hybridauth_window_type'] == 'fancybox') {
+      $class[] = 'fancybox';
+      $class[] = 'fancybox.iframe';
+    }
     // Add Lightbox2-specific settings.
     if ($element['#hybridauth_window_type'] == 'lightbox2') {
       $rel = array('lightframe', 'nofollow');
