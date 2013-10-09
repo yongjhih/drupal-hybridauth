@@ -70,7 +70,7 @@ function hybridauth_requirements($phase) {
       catch(Exception $e) {
         $requirements['hybridauth'] = array(
           'title' => $t('HybridAuth library'),
-          'value' => $e->getMessage(),
+          'description' => $e->getMessage(),
           'severity' => REQUIREMENT_ERROR,
         );
       }
@@ -78,7 +78,7 @@ function hybridauth_requirements($phase) {
     else {
       $requirements['hybridauth'] = array(
         'title' => $t('HybridAuth library'),
-        'value' => $t('HybridAuth library is missing'),
+        'description' => $t('HybridAuth library is missing'),
         'severity' => REQUIREMENT_ERROR,
       );
     }
