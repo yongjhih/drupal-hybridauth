@@ -45,7 +45,7 @@ function hybridauth_window_start($provider_id) {
   // If provider is OpenID, but we don't have the openid_identifier.
   if ($provider_id == 'OpenID' && !isset($_GET['openid_identifier'])) {
     $form = drupal_get_form('hybridauth_openid_form');
-    _hybridauth_window_render_form($form);
+    _hybridauth_window_render_form($form, $provider_id);
   }
 
   // Make sure the session is started, HybridAuth library needs it.
@@ -386,13 +386,13 @@ function _hybridauth_check_additional_info($data) {
 
   if ($show_form) {
     $form = drupal_get_form('hybridauth_additional_info_form', $data);
-    _hybridauth_window_render_form($form);
+    _hybridauth_window_render_form($form, $data['provider']);
   }
 }
 
-function _hybridauth_window_render_form($form) {
+function _hybridauth_window_render_form($form, $provider_id) {
   $page = element_info('page');
-  $window_type = variable_get('hybridauth_window_type', 'current');
+  $window_type = variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current');
 
   if ($window_type == 'current') {
     $page['content']['system_main']['messages'] = array('#type' => 'markup', '#markup' => theme('status_messages'));

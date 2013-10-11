@@ -39,52 +39,62 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
   if ($element['#hybridauth_widget_type'] == 'list') {
     $class = array('hybridauth-widget-provider');
     $rel = array('nofollow');
-    // Add Colorbox-specific things.
-    if ($element['#hybridauth_window_type'] == 'colorbox') {
-      $query += array(
-        'width' => 800,
-        'height' => 500,
-        'iframe' => 'true',
-      );
-      $class[] = 'colorbox-load';
-    }
-    // Add Shadowbox specific settings.
-    if ($element['#hybridauth_window_type'] == 'shadowbox') {
-      $rel = array('shadowbox', 'nofollow');
-    }
-    // Add fancyBox-specific settings.
-    if ($element['#hybridauth_window_type'] == 'fancybox') {
-      $class[] = 'fancybox';
-      $class[] = 'fancybox.iframe';
-    }
-    // Add Lightbox2-specific settings.
-    if ($element['#hybridauth_window_type'] == 'lightbox2') {
-      $rel = array('lightframe', 'nofollow');
-    }
 
-    $onclick = '';
-    if ($element['#hybridauth_onclick'] === FALSE) {}
-    elseif (!empty($element['#hybridauth_onclick'])) {
-      $onclick = $element['#hybridauth_onclick'];
-    }
-    elseif ($element['#hybridauth_window_type'] == 'current') {
-      $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
-    }
-    elseif ($element['#hybridauth_window_type'] == 'popup') {
-      $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
-    }
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
+      $window_type = variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current');
+      $query_mod = $query;
+      $class_mod = $class;
+      $rel_mod = $rel;
+
+      switch ($window_type) {
+        // Add Colorbox-specific things.
+        case 'colorbox':
+          $query_mod += array(
+            'width' => 800,
+            'height' => 500,
+            'iframe' => 'true',
+          );
+          $class_mod[] = 'colorbox-load';
+          break;
+        // Add Shadowbox specific settings.
+        case 'shadowbox':
+          $rel_mod = array('shadowbox', 'nofollow');
+          break;
+        // Add fancyBox-specific settings.
+        case 'fancybox':
+          $class_mod[] = 'fancybox';
+          $class_mod[] = 'fancybox.iframe';
+          break;
+        // Add Lightbox2-specific settings.
+        case 'lightbox2':
+          $rel_mod = array('lightframe', 'nofollow');
+          break;
+      }
+
+      // Determine onclick behavior.
+      $onclick = '';
+      if ($element['#hybridauth_onclick'] === FALSE) {}
+      elseif (!empty($element['#hybridauth_onclick'])) {
+        $onclick = $element['#hybridauth_onclick'];
+      }
+      elseif ($window_type == 'current') {
+        $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
+      }
+      elseif ($window_type == 'popup') {
+        $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
+      }
+
       $path = 'hybridauth/window/' . $provider_id;
       $providers[] = l(
         theme('hybridauth_provider_icon', array('icon_pack' => $element['#hybridauth_widget_icon_pack'], 'provider_id' => $provider_id, 'provider_name' => $provider_name)),
         $path,
         array(
           'html' => TRUE,
-          'query' => $query,
+          'query' => $query_mod,
           'attributes' => array(
             'title' => $provider_name,
-            'class' => $class,
-            'rel' => $rel,
+            'class' => $class_mod,
+            'rel' => $rel_mod,
             // jQuery Mobile compatibility - so it doesn't use AJAX.
             'data-ajax' => 'false',
           ) + ($onclick ? array('onclick' => $onclick) : array()),

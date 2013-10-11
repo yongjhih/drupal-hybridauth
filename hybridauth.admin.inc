@@ -269,34 +269,6 @@ function hybridauth_admin_settings() {
     '#type' => 'fieldset',
     '#title' => t('Other settings'),
   );
-  $options = array(
-    'current' => t('Current window'),
-    'popup' => t('New popup window'),
-  );
-  $modal_description = FALSE;
-  if (module_exists('colorbox')) {
-    $options['colorbox'] = t('Colorbox modal window');
-    $modal_description = TRUE;
-  }
-  if (module_exists('shadowbox')) {
-    $options['shadowbox'] = t('Shadowbox modal window');
-    $modal_description = TRUE;
-  }
-  if (module_exists('fancybox')) {
-    $options['fancybox'] = t('fancyBox modal window');
-    $modal_description = TRUE;
-  }
-  if (module_exists('lightbox2')) {
-    $options['lightbox2'] = t('Lightbox2 modal window');
-    $modal_description = TRUE;
-  }
-  $form['vtabs']['fset_other']['hybridauth_window_type'] = array(
-    '#type' => 'radios',
-    '#title' => t('Authentication window type'),
-    '#options' => $options,
-    '#default_value' => variable_get('hybridauth_window_type', 'current'),
-    '#description' => $modal_description ? t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them.") : '',
-  );
   $form['vtabs']['fset_other']['hybridauth_destination'] = array(
     '#type' => 'textfield',
     '#title' => t('Redirect after login'),
@@ -404,7 +376,6 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
-
     case 'Twitter':
       $help = t('
           <p>Enter your consumer key and private key. You can get these by creating a new application at <a href="!apps_uri">!apps_uri</a>.</p>
@@ -416,7 +387,6 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
-
     case 'Google':
       $origin_uri_parts = parse_url(url('<front>', array('absolute' => TRUE)));
       $help = t('
@@ -431,49 +401,114 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
         )
       );
       break;
-
     default:
       $help = t('Enter the application ID, consumer key, and/or secret key as required.');
   }
 
-  $form['keys'] = array(
+  $form['provider'] = array(
     '#type' => 'fieldset',
+    '#title' => hybridauth_get_provider_name($provider_id) . ' ' . t('settings'),
     '#description' => $help,
   );
-  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
+  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Application ID'),
-    '#description' => t('The application ID'),
+    '#description' => t('The application ID.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_id', ''),
   );
-  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
+  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Application consumer key'),
-    '#description' => t('The Application consumer key'),
+    '#description' => t('The Application consumer key.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_key', ''),
   );
-  $form['keys']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
+  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
     '#type' => 'textfield',
     '#title' => t('Application consumer secret'),
-    '#description' => t('The application consumer secret key'),
+    '#description' => t('The application consumer secret key.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_secret', ''),
   );
 
   if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'Yahoo'))) {
-    unset($form['keys']['hybridauth_provider_' . $provider_id . '_keys_id']);
+    unset($form['provider']['hybridauth_provider_' . $provider_id . '_keys_id']);
   }
   if (in_array($provider_id, array('Facebook', 'Google', 'Live', 'Vkontakte'))) {
-    unset($form['keys']['hybridauth_provider_' . $provider_id . '_keys_key']);
+    unset($form['provider']['hybridauth_provider_' . $provider_id . '_keys_key']);
   }
 
+  $form['provider']['window_settings'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Authentication window settings'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+  );
+  $options = array(
+    'current' => t('Current window'),
+    'popup' => t('New popup window'),
+  );
+  $modal_description = FALSE;
+  if (module_exists('colorbox')) {
+    $options['colorbox'] = t('Colorbox modal window');
+    $modal_description = TRUE;
+  }
+  if (module_exists('shadowbox')) {
+    $options['shadowbox'] = t('Shadowbox modal window');
+    $modal_description = TRUE;
+  }
+  if (module_exists('fancybox')) {
+    $options['fancybox'] = t('fancyBox modal window');
+    $modal_description = TRUE;
+  }
+  if (module_exists('lightbox2')) {
+    $options['lightbox2'] = t('Lightbox2 modal window');
+    $modal_description = TRUE;
+  }
+  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_type'] = array(
+    '#type' => 'radios',
+    '#title' => t('Authentication window type'),
+    '#options' => $options,
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current'),
+    '#description' => $modal_description ? t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them.") : '',
+  );
+  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Width'),
+    '#description' => t('Authentication window width.'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_width', 800),
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#size' => 4,
+    '#maxlength' => 4,
+    '#field_suffix' => 'px',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
+      ),
+    ),
+  );
+  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_height'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Height'),
+    '#description' => t('Authentication window height.'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_height', 500),
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#size' => 4,
+    '#maxlength' => 4,
+    '#field_suffix' => 'px',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
+      ),
+    ),
+  );
+
   if ($provider_id == 'Facebook') {
-    $form['advanced'] = array(
+    $form['provider']['advanced'] = array(
       '#type' => 'fieldset',
-      '#title' => 'Advanced settings',
+      '#title' => t('Advanced settings'),
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
+    $form['provider']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Scope'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', array(
@@ -527,13 +562,13 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     );
   }
   if ($provider_id == 'Google') {
-    $form['advanced'] = array(
+    $form['provider']['advanced'] = array(
       '#type' => 'fieldset',
       '#title' => 'Advanced settings',
       '#collapsible' => TRUE,
       '#collapsed' => TRUE,
     );
-    $form['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
+    $form['provider']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
       '#type' => 'textfield',
       '#title' => t('Scope'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'),

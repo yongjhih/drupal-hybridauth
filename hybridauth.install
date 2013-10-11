@@ -16,11 +16,13 @@ function hybridauth_uninstall() {
     variable_del('hybridauth_provider_' . $provider_id . '_keys_key');
     variable_del('hybridauth_provider_' . $provider_id . '_keys_secret');
     variable_del('hybridauth_provider_' . $provider_id . '_scope');
+    variable_del('hybridauth_provider_' . $provider_id . '_window_type');
+    variable_del('hybridauth_provider_' . $provider_id . '_window_width');
+    variable_del('hybridauth_provider_' . $provider_id . '_window_height');
   }
 
   variable_del('hybridauth_library_path');
   variable_del('hybridauth_required_fields');
-  variable_del('hybridauth_window_type');
   variable_del('hybridauth_widget_title');
   variable_del('hybridauth_widget_type');
   variable_del('hybridauth_widget_use_overlay');
@@ -46,6 +48,7 @@ function hybridauth_uninstall() {
   // Some old variables not present in the code now.
   variable_del('hybridauth_registration_role_choice');
   variable_del('hybridauth_registration_roles');
+  variable_del('hybridauth_window_type');
 }
 
 /**
