@@ -631,8 +631,11 @@ function hybridauth_get_config() {
   $config = &drupal_static(__FUNCTION__, NULL);
 
   if (!isset($config)) {
-    if (variable_get('hybridauth_debug', FALSE) && !file_exists(file_directory_temp() . '/hybridauth.debug.log')) {
-      file_put_contents(file_directory_temp() . '/hybridauth.debug.log', '');
+    if (variable_get('hybridauth_debug', FALSE)) {
+      $logfile = file_directory_temp() . '/hybridauth.debug.log';
+      if (file_put_contents($logfile, PHP_EOL . 'HYBRIDAUTH DEBUG LOG START' . PHP_EOL . PHP_EOL, FILE_APPEND) === FALSE) {
+        watchdog('hybridauth', 'Failed to write to debug log file @logfile.', array('@logfile' => $logfile), WATCHDOG_ERROR);
+      }
     }
 
     $config = array(

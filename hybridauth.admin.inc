@@ -273,24 +273,29 @@ function hybridauth_admin_settings() {
     'current' => t('Current window'),
     'popup' => t('New popup window'),
   );
+  $modal_description = FALSE;
   if (module_exists('colorbox')) {
     $options['colorbox'] = t('Colorbox modal window');
+    $modal_description = TRUE;
   }
   if (module_exists('shadowbox')) {
     $options['shadowbox'] = t('Shadowbox modal window');
+    $modal_description = TRUE;
   }
   if (module_exists('fancybox')) {
     $options['fancybox'] = t('fancyBox modal window');
+    $modal_description = TRUE;
   }
   if (module_exists('lightbox2')) {
     $options['lightbox2'] = t('Lightbox2 modal window');
+    $modal_description = TRUE;
   }
   $form['vtabs']['fset_other']['hybridauth_window_type'] = array(
     '#type' => 'radios',
     '#title' => t('Authentication window type'),
     '#options' => $options,
     '#default_value' => variable_get('hybridauth_window_type', 'current'),
-    '#description' => t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them."),
+    '#description' => $modal_description ? t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them.") : '',
   );
   $form['vtabs']['fset_other']['hybridauth_destination'] = array(
     '#type' => 'textfield',
