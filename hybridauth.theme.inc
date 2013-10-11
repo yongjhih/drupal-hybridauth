@@ -42,6 +42,8 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
 
     foreach (hybridauth_get_enabled_providers() as $provider_id => $provider_name) {
       $window_type = variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current');
+      $window_width = variable_get('hybridauth_provider_' . $provider_id . '_window_width', 800);
+      $window_height = variable_get('hybridauth_provider_' . $provider_id . '_window_height', 500);
       $query_mod = $query;
       $class_mod = $class;
       $rel_mod = $rel;
@@ -49,25 +51,26 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
       switch ($window_type) {
         // Add Colorbox-specific things.
         case 'colorbox':
+          $class_mod[] = 'colorbox-load';
           $query_mod += array(
-            'width' => 800,
-            'height' => 500,
+            'width' => $window_width,
+            'height' => $window_height,
             'iframe' => 'true',
           );
-          $class_mod[] = 'colorbox-load';
           break;
         // Add Shadowbox specific settings.
         case 'shadowbox':
-          $rel_mod = array('shadowbox', 'nofollow');
+          $rel_mod = array('shadowbox;width=' . $window_width . ';height=' . $window_height, 'nofollow');
           break;
         // Add fancyBox-specific settings.
         case 'fancybox':
           $class_mod[] = 'fancybox';
           $class_mod[] = 'fancybox.iframe';
+          $class_mod[] = '{width:' . $window_width . ',height:' . $window_height . '}';
           break;
         // Add Lightbox2-specific settings.
         case 'lightbox2':
-          $rel_mod = array('lightframe', 'nofollow');
+          $rel_mod = array('lightframe[|width:' . $window_width . 'px; height:' . $window_height . 'px;]', 'nofollow');
           break;
       }
 
@@ -81,7 +84,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
         $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
       }
       elseif ($window_type == 'popup') {
-        $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=800,height=500'); popup_window.focus(); return false;";
+        $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=" . $window_width . ",height=" . $window_height . "'); popup_window.focus(); return false;";
       }
 
       $path = 'hybridauth/window/' . $provider_id;
