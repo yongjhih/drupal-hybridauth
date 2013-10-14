@@ -626,8 +626,8 @@ function hybridauth_get_config() {
   $config = &drupal_static(__FUNCTION__, NULL);
 
   if (!isset($config)) {
-    if (variable_get('hybridauth_debug', FALSE)) {
-      $logfile = file_directory_temp() . '/hybridauth.debug.log';
+    $logfile = file_directory_temp() . '/hybridauth.debug.log';
+    if (variable_get('hybridauth_debug', 0)) {
       if (file_put_contents($logfile, PHP_EOL . 'HYBRIDAUTH DEBUG LOG START' . PHP_EOL . PHP_EOL, FILE_APPEND) === FALSE) {
         watchdog('hybridauth', 'Failed to write to debug log file @logfile.', array('@logfile' => $logfile), WATCHDOG_ERROR);
       }
@@ -636,8 +636,8 @@ function hybridauth_get_config() {
     $config = array(
       'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE)),
       'providers' => array(),
-      'debug_mode' => variable_get('hybridauth_debug', FALSE),
-      'debug_file' => file_directory_temp() . '/hybridauth.debug.log',
+      'debug_mode' => variable_get('hybridauth_debug', 0),
+      'debug_file' => $logfile,
     );
 
     foreach (hybridauth_providers_list() as $provider_id => $provider_name) {

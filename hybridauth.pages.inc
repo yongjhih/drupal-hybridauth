@@ -601,11 +601,13 @@ function hybridauth_user_identity($form, &$form_state, $account) {
     );
   }
 
-  $connected_providers = hybridauth_get_connected_providers();
-  $form['connected_providers'] = array(
-    '#markup' => t('Currently connected to (session data):') . ' ' . implode(', ', $connected_providers),
-    '#weight' => 15,
-  );
+  if (variable_get('hybridauth_debug', 0)) {
+    $connected_providers = hybridauth_get_connected_providers();
+    $form['connected_providers'] = array(
+      '#markup' => t('Currently connected to (session data):') . ' ' . implode(', ', $connected_providers),
+      '#weight' => 15,
+    );
+  }
 
   // Tokens browser for admins.
   if (user_access('administer site configuration') || user_access('administer users')) {

@@ -308,7 +308,7 @@ function hybridauth_admin_settings() {
     '#type' => 'checkbox',
     '#title' => t('Debug mode'),
     '#description' => t('When in debug mode, extra error information will be logged/displayed. This should be disabled when not in development.'),
-    '#default_value' => variable_get('hybridauth_debug', FALSE),
+    '#default_value' => variable_get('hybridauth_debug', 0),
   );
 
   return system_settings_form($form);
