@@ -81,10 +81,11 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
         $onclick = $element['#hybridauth_onclick'];
       }
       elseif ($window_type == 'current') {
-        $onclick = "jQuery(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');";
+        $class_mod[] = 'hybridauth-onclick-current';
       }
       elseif ($window_type == 'popup') {
-        $onclick = "popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=" . $window_width . ",height=" . $window_height . "'); popup_window.focus(); return false;";
+        $onclick = "var popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=" . $window_width . ",height=" . $window_height . "'); popup_window.focus(); return false;";
+        $class_mod[] = 'hybridauth-onclick-popup';
       }
 
       $path = 'hybridauth/window/' . $provider_id;

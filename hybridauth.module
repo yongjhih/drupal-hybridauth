@@ -59,6 +59,7 @@ function hybridauth_menu() {
     'page arguments' => array('hybridauth_admin_provider_settings', 5),
     'access arguments' => array('administer site configuration'),
     'file' => 'hybridauth.admin.inc',
+    'type' => MENU_CALLBACK,
   );
   $items['admin/reports/hybridauth'] = array(
     'title' => 'HybridAuth identities',
@@ -262,17 +263,12 @@ function hybridauth_element_info() {
     '#hybridauth_onclick' => '',
     '#attached' => array(
       'js' => array(
-        $path . '/js/hybridauth.modal.js' => array(
-          'type' => 'file',
-        ),
+        $path . '/js/hybridauth.modal.js',
+        $path . '/js/hybridauth.onclick.js',
       ),
       'css' => array(
-        $path . '/css/hybridauth.css' => array(
-          'type' => 'file',
-        ),
-        $path . '/css/hybridauth.modal.css' => array(
-          'type' => 'file',
-        ),
+        $path . '/css/hybridauth.css',
+        $path . '/css/hybridauth.modal.css',
       ),
     ),
   );
