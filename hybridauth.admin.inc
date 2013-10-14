@@ -360,6 +360,9 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
 
 function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = NULL) {
   $form = array();
+  $form['vtabs'] = array(
+    '#type' => 'vertical_tabs',
+  );
   $language_default = language_default();
   $language_default->prefix = '';
 
@@ -405,24 +408,24 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
       $help = t('Enter the application ID, consumer key, and/or secret key as required.');
   }
 
-  $form['provider'] = array(
+  $form['vtabs']['application'] = array(
     '#type' => 'fieldset',
-    '#title' => hybridauth_get_provider_name($provider_id) . ' ' . t('settings'),
+    '#title' => t('Application settings'),
     '#description' => $help,
   );
-  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
+  $form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_id'] = array(
     '#type' => 'textfield',
     '#title' => t('Application ID'),
     '#description' => t('The application ID.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_id', ''),
   );
-  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
+  $form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_key'] = array(
     '#type' => 'textfield',
     '#title' => t('Application consumer key'),
     '#description' => t('The Application consumer key.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_keys_key', ''),
   );
-  $form['provider']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
+  $form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_secret'] = array(
     '#type' => 'textfield',
     '#title' => t('Application consumer secret'),
     '#description' => t('The application consumer secret key.'),
@@ -430,17 +433,15 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   );
 
   if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'Yahoo'))) {
-    unset($form['provider']['hybridauth_provider_' . $provider_id . '_keys_id']);
+    unset($form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_id']);
   }
   if (in_array($provider_id, array('Facebook', 'Google', 'Live', 'Vkontakte'))) {
-    unset($form['provider']['hybridauth_provider_' . $provider_id . '_keys_key']);
+    unset($form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_key']);
   }
 
-  $form['provider']['window_settings'] = array(
+  $form['vtabs']['window_settings'] = array(
     '#type' => 'fieldset',
     '#title' => t('Authentication window settings'),
-    '#collapsible' => TRUE,
-    '#collapsed' => TRUE,
   );
   $options = array(
     'current' => t('Current window'),
@@ -463,14 +464,14 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     $options['lightbox2'] = t('Lightbox2 modal window');
     $modal_description = TRUE;
   }
-  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_type'] = array(
+  $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_type'] = array(
     '#type' => 'radios',
     '#title' => t('Authentication window type'),
     '#options' => $options,
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current'),
     '#description' => $modal_description ? t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them.") : '',
   );
-  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
+  $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
     '#type' => 'textfield',
     '#title' => t('Width'),
     '#description' => t('Authentication window width.'),
@@ -485,7 +486,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
       ),
     ),
   );
-  $form['provider']['window_settings']['hybridauth_provider_' . $provider_id . '_window_height'] = array(
+  $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_height'] = array(
     '#type' => 'textfield',
     '#title' => t('Height'),
     '#description' => t('Authentication window height.'),
@@ -502,13 +503,11 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   );
 
   if ($provider_id == 'Facebook') {
-    $form['provider']['advanced'] = array(
+    $form['vtabs']['advanced'] = array(
       '#type' => 'fieldset',
       '#title' => t('Advanced settings'),
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
     );
-    $form['provider']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
+    $form['vtabs']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
       '#type' => 'checkboxes',
       '#title' => t('Scope'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', array(
@@ -562,13 +561,11 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     );
   }
   if ($provider_id == 'Google') {
-    $form['provider']['advanced'] = array(
+    $form['vtabs']['advanced'] = array(
       '#type' => 'fieldset',
       '#title' => 'Advanced settings',
-      '#collapsible' => TRUE,
-      '#collapsed' => TRUE,
     );
-    $form['provider']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
+    $form['vtabs']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
       '#type' => 'textfield',
       '#title' => t('Scope'),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'),
