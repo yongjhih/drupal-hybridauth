@@ -90,7 +90,7 @@ function _hybridauth_window_close($redirect = TRUE) {
   $page = element_info('page');
   // Don't show messages on this closing page, show them later.
   $page['#show_messages'] = FALSE;
-  $page['#children'] = 'Closing...';
+  $page['#children'] = t('Closing...');
   print theme('html', array('page' => $page));
   drupal_exit();
 }
