@@ -471,36 +471,28 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_type', 'current'),
     '#description' => $modal_description ? t("Be careful with modal windows - some authentication providers (Twitter, LinkedIn) won't work with them.") : '',
   );
-  $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
+  $base = array(
     '#type' => 'textfield',
+    '#element_validate' => array('element_validate_integer_positive'),
+    '#size' => 4,
+    '#maxlength' => 4,
+    '#field_suffix' => 'px',
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
+      ),
+    ),
+  );
+  $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
     '#title' => t('Width'),
     '#description' => t('Authentication window width.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_width', 800),
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#size' => 4,
-    '#maxlength' => 4,
-    '#field_suffix' => 'px',
-    '#states' => array(
-      'invisible' => array(
-        ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
-      ),
-    ),
-  );
+  ) + $base;
   $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_height'] = array(
-    '#type' => 'textfield',
     '#title' => t('Height'),
     '#description' => t('Authentication window height.'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_height', 500),
-    '#element_validate' => array('element_validate_integer_positive'),
-    '#size' => 4,
-    '#maxlength' => 4,
-    '#field_suffix' => 'px',
-    '#states' => array(
-      'invisible' => array(
-        ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
-      ),
-    ),
-  );
+  ) + $base;
 
   if ($provider_id == 'Facebook') {
     $form['vtabs']['advanced'] = array(

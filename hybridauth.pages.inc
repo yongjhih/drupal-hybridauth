@@ -435,6 +435,10 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
       $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
       $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
+    elseif (module_exists('friendly_register')) {
+      friendly_register_load_resources();
+      $form['fset']['username']['#attributes']['class'][] = 'friendly-register-name';
+    }
   }
   if (variable_get('hybridauth_registration_password', 0)) {
     $form['fset']['pass'] = array(
