@@ -84,7 +84,6 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
         $class_mod[] = 'hybridauth-onclick-current';
       }
       elseif ($window_type == 'popup') {
-        $onclick = "var popup_window = window.open(this.href, 'hybridauth', 'location=no,menubar=no,resizable=yes,scrollbars=yes,status=no,titlebar=yes,toolbar=no,channelmode=yes,fullscreen=yes,width=" . $window_width . ",height=" . $window_height . "'); popup_window.focus(); return false;";
         $class_mod[] = 'hybridauth-onclick-popup';
       }
 
@@ -101,6 +100,9 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
             'rel' => $rel_mod,
             // jQuery Mobile compatibility - so it doesn't use AJAX.
             'data-ajax' => 'false',
+            // Add authentication window width and height.
+            'data-hybridauth-width' => $window_width,
+            'data-hybridauth-height' => $window_height,
           ) + ($onclick ? array('onclick' => $onclick) : array()),
         )
       );
