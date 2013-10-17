@@ -98,6 +98,7 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
             'title' => $provider_name,
             'class' => $class_mod,
             'rel' => $rel_mod,
+            'data-hybridauth-provider' => $provider_id,
             // jQuery Mobile compatibility - so it doesn't use AJAX.
             'data-ajax' => 'false',
             // Add authentication window width and height.

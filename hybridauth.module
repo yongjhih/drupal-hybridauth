@@ -262,6 +262,10 @@ function hybridauth_element_info() {
     //'#hybridauth_destination_error' => '',
     '#hybridauth_onclick' => '',
     '#attached' => array(
+      // Add cookie library for last used provider feature.
+      'library' => array(
+        array('system', 'jquery.cookie'),
+      ),
       'js' => array(
         $path . '/js/hybridauth.modal.js',
         $path . '/js/hybridauth.onclick.js',
