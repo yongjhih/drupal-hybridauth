@@ -478,7 +478,6 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
     '#element_validate' => array('element_validate_integer_positive'),
     '#size' => 4,
     '#maxlength' => 4,
-    '#field_suffix' => 'px',
     '#states' => array(
       'invisible' => array(
         ':input[name="hybridauth_provider_' . $provider_id . '_window_type"]' => array('value' => 'current'),
@@ -487,16 +486,26 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   );
   $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_width'] = array(
     '#title' => t('Width'),
-    '#description' => t('Authentication window width.'),
+    '#description' => t('Authentication window width (pixels).'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_width', 800),
   ) + $base;
   $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_height'] = array(
     '#title' => t('Height'),
-    '#description' => t('Authentication window height.'),
+    '#description' => t('Authentication window height (pixels).'),
     '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_window_height', 500),
   ) + $base;
 
   if ($provider_id == 'Facebook') {
+    $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_display'] = array(
+      '#type' => 'radios',
+      '#title' => t('Display type'),
+      '#options' => array(
+        'page' => t('Page'),
+        'popup' => t('Popup'),
+      ),
+      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_display', ''),
+      '#description' => t('Determines how the authentication window is rendered.'),
+    );
     $form['vtabs']['advanced'] = array(
       '#type' => 'fieldset',
       '#title' => t('Advanced settings'),
