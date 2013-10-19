@@ -437,7 +437,7 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   if (in_array($provider_id, array('LinkedIn', 'MySpace', 'Twitter', 'Yahoo'))) {
     unset($form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_id']);
   }
-  if (in_array($provider_id, array('Facebook', 'Google', 'Live', 'Vkontakte'))) {
+  if (in_array($provider_id, array('Facebook', 'Google', 'Live', 'Vkontakte', 'QQ'))) {
     unset($form['vtabs']['application']['hybridauth_provider_' . $provider_id . '_keys_key']);
   }
 
