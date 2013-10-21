@@ -3,8 +3,8 @@
   float: left;
   width: 24px;
   height: 24px;
-  opacity: 0.75;
-  filter: alpha(opacity=75);
+  opacity: 0.5;
+  filter: alpha(opacity=50);
 }
 .hybridauth-icon-hybridauth-24:hover {
   opacity: 1;
