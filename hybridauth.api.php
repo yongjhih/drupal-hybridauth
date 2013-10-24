@@ -87,6 +87,17 @@ function hook_hybridauth_identity_deleted($account, $data) {
 }
 
 /**
+ * Invoked when a new user account is about to be created through HybridAuth.
+ * @param object $account
+ *   User account object.
+ * @param array $data
+ *   HybridAuth identity data.
+ */
+function hook_hybridauth_user_preinsert($account, $data) {
+
+}
+
+/**
  * Invoked when a new user account is created through HybridAuth.
  * @param object $account
  *   User account object.

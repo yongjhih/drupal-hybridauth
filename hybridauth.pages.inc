@@ -249,6 +249,8 @@ function _hybridauth_window_process_auth($data) {
     // Visitors can create accounts.
     if ((!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL))
       || variable_get('hybridauth_register', 0) != 3) {
+      _hybridauth_invoke_hooks('hybridauth_user_preinsert', $user, $data);
+
       // Check profile information for required fields.
       _hybridauth_check_additional_info($data);
 

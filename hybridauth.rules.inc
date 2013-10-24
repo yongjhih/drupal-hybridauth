@@ -64,11 +64,19 @@ function hybridauth_rules_action_info() {
       'group' => t('HybridAuth'),
       'parameter' => array(
         'destination' => array(
-          'label' => t('Day'),
+          'label' => t('Destination'),
           'type' => 'text',
           // 'description' => t(''),
         ),
       ),
+    ),
+    'hybridauth_session_destroy' => array(
+      'label' => t('Destroy session'),
+      'group' => t('HybridAuth'),
+    ),
+    'hybridauth_window_close' => array(
+      'label' => t('Close HybridAuth window'),
+      'group' => t('HybridAuth'),
     ),
   );
 }
@@ -130,6 +138,20 @@ function hybridauth_dmy_to_date($day, $month, $year) {
 function hybridauth_set_destination($destination) {
   drupal_static_reset('drupal_get_destination');
   $_GET['destination'] = $destination;
+}
+
+/**
+ * Rules action.
+ */
+function hybridauth_session_destroy() {
+  session_destroy();
+}
+
+/**
+ * Rules action.
+ */
+function hybridauth_window_close() {
+  _hybridauth_window_close();
 }
 
 /**
@@ -200,6 +222,21 @@ function hybridauth_rules_event_info() {
     'variables' => array(
       'hybridauth_user' => array(
         'label' => t('User deleting the identity'),
+        'type' => 'user',
+      ),
+      'hybridauth' => array(
+        'label' => t('HybridAuth identity data'),
+        'type' => 'hybridauth',
+      ),
+    ),
+    'module' => 'hybridauth',
+  );
+  $events['hybridauth_user_preinsert'] = array(
+    'label' => t('User is about to be created through HybridAuth'),
+    'group' => t('HybridAuth'),
+    'variables' => array(
+      'hybridauth_user' => array(
+        'label' => t('registering user'),
         'type' => 'user',
       ),
       'hybridauth' => array(
