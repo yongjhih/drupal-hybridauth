@@ -18,6 +18,7 @@ function hybridauth_hook_info() {
     'hybridauth_registration_block',
     'hybridauth_identity_added',
     'hybridauth_identity_deleted',
+    'hybridauth_user_preinsert',
     'hybridauth_user_insert',
     'hybridauth_user_login',
   );
