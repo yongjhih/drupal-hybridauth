@@ -735,7 +735,7 @@ function _hybridauth_add_icon_pack_files($name) {
 
 function _hybridauth_make_username($data) {
   if (empty($data['username'])) {
-    $pattern = variable_get('hybridauth_username', 'hybridauth_[user:hybridauth:provider]_[user:hybridauth:identifier]');
+    $pattern = variable_get('hybridauth_username', '[user:hybridauth:firstName] [user:hybridauth:lastName]');
     $account = new stdClass();
     $account->data = array('hybridauth' => $data);
 
