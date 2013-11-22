@@ -574,7 +574,7 @@ function _hybridauth_add_icon_pack_files($name) {
 
 function _hybridauth_make_username($data) {
   if (empty($data['username'])) {
-    $pattern = variable_get('hybridauth_username', 'hybridauth_[provider]_[identifier]');
+    $pattern = variable_get('hybridauth_username', '[firstName] [lastName]');
 
     $hybridauth_name = $desired_name = trim(token_replace($pattern, 'hybridauth', $data, '[', ']', array('clear' => TRUE)));
   }

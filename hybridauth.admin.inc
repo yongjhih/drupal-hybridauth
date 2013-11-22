@@ -189,7 +189,7 @@ function hybridauth_admin_settings() {
   $form['fset_account']['hybridauth_username'] = array(
     '#type' => 'textfield',
     '#title' => t('Username pattern'),
-    '#default_value' => variable_get('hybridauth_username', 'hybridauth_[provider]_[identifier]'),
+    '#default_value' => variable_get('hybridauth_username', '[firstName] [lastName]'),
     '#description' => t('Create username for new users using this pattern; counter will be added in case of username conflict.') . ' '
       . t('You should use only HybridAuth tokens here as the user is not created yet.') . ' '
       . t('Install !link module to get list of all available tokens.',
