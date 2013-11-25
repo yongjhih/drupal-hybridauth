@@ -30,7 +30,7 @@ function hybridauth_menu() {
     'access arguments' => array('administer site configuration'),
     'file' => 'hybridauth.admin.inc',
   );
-  $items['admin/user/hybridauth/provider/%'] = array(
+  $items['admin/user/hybridauth/provider/%hybridauth_provider'] = array(
     'title callback' => 'hybridauth_get_provider_name',
     'title arguments' => array(4),
     'page callback' => 'drupal_get_form',
@@ -54,7 +54,7 @@ function hybridauth_menu() {
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
   );
-  $items['hybridauth/window/%'] = array(
+  $items['hybridauth/window/%hybridauth_provider'] = array(
     'page callback' => 'hybridauth_window_start',
     'page arguments' => array(2),
     'access callback' => TRUE,
@@ -89,6 +89,18 @@ function hybridauth_menu() {
   );
   
   return $items;
+}
+
+/**
+ * Menu argument loader.
+ */
+function hybridauth_provider_load($requested_provider_id) {
+  foreach (array_keys(hybridauth_providers_list()) as $provider_id) {
+    if (strtolower($requested_provider_id) === strtolower($provider_id)) {
+      return $provider_id;
+    }
+  }
+  return $requested_provider_id;
 }
 
 /**
