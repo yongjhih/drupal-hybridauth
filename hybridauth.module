@@ -775,6 +775,66 @@ function _hybridauth_make_username($data) {
   }
 }
 
+/**
+ * Implements hook_mail().
+ */
+function hybridauth_mail($key, &$message, $params) {
+  $language = $message['language'];
+  $variables = array('user' => $params['account']);
+  $message['subject'] .= _hybridauth_mail_text($key . '_subject', $language, $variables);
+  $message['body'][] = _hybridauth_mail_text($key . '_body', $language, $variables);
+}
+
+/**
+ * Returns a mail string for a variable name.
+ *
+ * Used by hybridauth_mail() and the settings forms to retrieve strings.
+ */
+function _hybridauth_mail_text($key, $language = NULL, $variables = array(), $replace = TRUE) {
+  $langcode = isset($language) ? $language->language : NULL;
+  $text = '';
+  if ($admin_setting = variable_get($key, FALSE)) {
+    // An admin setting overrides the default string.
+    $text = $admin_setting;
+  }
+  else {
+    // No override, return default string.
+    switch ($key) {
+      case 'hybridauth_email_verification_subject':
+        $text = t('Account details for [user:name] at [site:name]', array(), array('langcode' => $langcode));
+        break;
+      case 'hybridauth_email_verification_body':
+        $text = t("[user:name],
+
+Thank you for registering at [site:name]. You need to confirm your e-mail address by clicking this link or copying and pasting it to your browser:
+
+[user:one-time-login-url]
+
+This link can only be used once to log in and activate your account.
+
+After that, you will be able to log in at [site:login-url] using your [user:hybridauth:provider] account.
+
+--  [site:name] team", array(), array('langcode' => $langcode));
+        break;
+    }
+  }
+
+  if ($replace) {
+    // We do not sanitize the token replacement, since the output of this
+    // replacement is intended for an e-mail message, not a web browser.
+    return token_replace($text, $variables, array('language' => $language, 'callback' => 'user_mail_tokens', 'sanitize' => FALSE, 'clear' => TRUE));
+  }
+
+  return $text;
+}
+
+function _hybridauth_mail_notify($op, $account, $language = NULL) {
+  $params['account'] = $account;
+  $language = $language ? $language : user_preferred_language($account);
+  $mail = drupal_mail('hybridauth', $op, $account->mail, $language, $params);
+  return empty($mail) ? NULL : $mail['result'];
+}
+
 function _hybridauth_user_is_blocked_by_uid($uid) {
   return db_select('users')
     ->fields('users', array('name'))

@@ -174,11 +174,43 @@ function hybridauth_admin_settings() {
       1 => t('Require e-mail verification'),
       2 => t("Don't require e-mail verification"),
     ),
-    '#description' => t('Select how to handle not verified e-mail addresses (authentication provider gives non-verified e-mail address).') . ' '
+    '#description' => t("Select how to handle not verified e-mail addresses (authentication provider gives non-verified e-mail address or doesn't provide one at all).") . ' '
       . t('The core settings are available at <a href="!link">Account settings</a>.',
         array('!link' => url('admin/config/people/accounts'))),
     '#default_value' => variable_get('hybridauth_email_verification', 0),
   );
+  // E-mail address verification template.
+  $form['vtabs']['fset_account']['fset_email_verification_template'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('E-mail verification template'),
+    '#collapsible' => TRUE,
+    '#collapsed' => TRUE,
+    '#states' => array(
+      'invisible' => array(
+        ':input[name="hybridauth_email_verification"]' => array('value' => '2'),
+      ),
+    ),
+  );
+  $form['vtabs']['fset_account']['fset_email_verification_template']['hybridauth_email_verification_subject'] = array(
+    '#type' => 'textfield',
+    '#title' => t('Subject'),
+    '#default_value' => _hybridauth_mail_text('hybridauth_email_verification_subject', NULL, array(), FALSE),
+    '#maxlength' => 180,
+  );
+  $form['vtabs']['fset_account']['fset_email_verification_template']['hybridauth_email_verification_body'] = array(
+    '#type' => 'textarea',
+    '#title' => t('Body'),
+    '#default_value' => _hybridauth_mail_text('hybridauth_email_verification_body', NULL, array(), FALSE),
+    '#rows' => 12,
+  );
+  if (module_exists('token')) {
+    $form['vtabs']['fset_account']['fset_email_verification_template']['hybridauth_token_tree'] = array(
+      '#theme' => 'token_tree',
+      '#token_types' => array('user'),
+      '#global_types' => TRUE,
+      '#dialog' => TRUE,
+    );
+  }
   $form['vtabs']['fset_account']['hybridauth_pictures'] = array(
     '#type' => 'checkbox',
     '#title' => t('Save HybridAuth provided picture as user picture'),
@@ -451,19 +483,19 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   );
   $modal_description = FALSE;
   if (module_exists('colorbox')) {
-    $options['colorbox'] = t('Colorbox modal window');
+    $options['colorbox'] = t('Colorbox');
     $modal_description = TRUE;
   }
   if (module_exists('shadowbox')) {
-    $options['shadowbox'] = t('Shadowbox modal window');
+    $options['shadowbox'] = t('Shadowbox');
     $modal_description = TRUE;
   }
   if (module_exists('fancybox')) {
-    $options['fancybox'] = t('fancyBox modal window');
+    $options['fancybox'] = t('fancyBox');
     $modal_description = TRUE;
   }
   if (module_exists('lightbox2')) {
-    $options['lightbox2'] = t('Lightbox2 modal window');
+    $options['lightbox2'] = t('Lightbox2');
     $modal_description = TRUE;
   }
   $form['vtabs']['window_settings']['hybridauth_provider_' . $provider_id . '_window_type'] = array(

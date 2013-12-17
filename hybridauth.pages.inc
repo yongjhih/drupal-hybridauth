@@ -202,7 +202,7 @@ function _hybridauth_window_process_auth($data) {
       $data = unserialize($identity['data']);
       drupal_set_message(t('You need to verify your e-mail address - !email.', array('!email' => $data['email'])), 'error');
       drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
-      _user_mail_notify('register_no_approval_required', user_load($identity['uid']));
+      _hybridauth_mail_notify('hybridauth_email_verification', user_load($identity['uid']));
     }
     else {
       $form_state['uid'] = $identity['uid'];
@@ -336,7 +336,7 @@ function _hybridauth_window_process_auth($data) {
         $account = user_save($account, $edit);
       }
       if ($user_email_verify_trigger) {
-        _user_mail_notify('register_no_approval_required', $account);
+        _hybridauth_mail_notify('hybridauth_email_verification', $account);
         drupal_set_message(t('A welcome message with further instructions has been sent to your e-mail address.'));
       }
 
