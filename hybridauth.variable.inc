@@ -10,7 +10,7 @@
 function hybridauth_variable_info($options = array()) {
   $variables['hybridauth_widget_title'] = array(
     'title' => t('HybridAuth widget title', array(), $options),
-    'description' => t('This is the text title placed above the icons list', array(), $options),
+    'description' => t('This is the title of the HybridAuth login widget.', array(), $options),
     'type' => 'string',
     'default' => 'Or log in with...',
     'localize' => TRUE,
