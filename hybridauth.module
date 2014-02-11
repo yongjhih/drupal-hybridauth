@@ -273,6 +273,7 @@ function hybridauth_element_info() {
     '#hybridauth_widget_icon_pack' => variable_get('hybridauth_widget_icon_pack', 'hybridauth_32'),
     '#hybridauth_destination' => variable_get('hybridauth_destination', ''),
     //'#hybridauth_destination_error' => '',
+    '#hybridauth_query' => array(),
     '#hybridauth_onclick' => '',
     '#attached' => array(
       // Add cookie library for last used provider feature.
