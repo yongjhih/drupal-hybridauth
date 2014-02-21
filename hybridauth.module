@@ -128,6 +128,16 @@ function hybridauth_provider_load($requested_provider_id) {
 }
 
 /**
+ * Implements hook_menu_site_status_alter().
+ */
+function hybridauth_menu_site_status_alter(&$menu_site_status, $path) {
+  // Allow access to ulogin path even if site is in offline mode.
+  if ($menu_site_status == MENU_SITE_OFFLINE && user_is_anonymous() && substr($path, 0, 10) == 'hybridauth') {
+    $menu_site_status = MENU_SITE_ONLINE;
+  }
+}
+
+/**
  * Implements hook_block_info().
  */
 function hybridauth_block_info() {
