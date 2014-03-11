@@ -134,7 +134,7 @@ function hybridauth_admin_settings() {
   $form['vtabs']['fset_widget']['hybridauth_widget_weight'] = array(
     '#type' => 'weight',
     '#title' => t('Widget weight'),
-    '#delta' => 100,
+    '#delta' => 200,
     '#description' => t('Determines the order of the elements on the form - heavier elements get positioned later.'),
     '#default_value' => variable_get('hybridauth_widget_weight', 100),
   );
