@@ -135,7 +135,14 @@ function hybridauth_bonus_form_hybridauth_additional_info_form_alter(&$form, &$f
 
 function hybridauth_bonus_form_hybridauth_additional_info_form_submit($form, &$form_state) {
   if (isset($form_state['values']['roles'])) {
-    $form_state['values']['data']['roles'] = $form_state['values']['roles'];
+    if (is_array($form_state['values']['roles'])) {
+      $form_state['values']['data']['roles'] = $form_state['values']['roles'];
+    }
+    else {
+      $form_state['values']['data']['roles'] = array(
+        $form_state['values']['roles'] => $form_state['values']['roles'],
+      );
+    }
     if (!isset($form_state['values']['data']['manual']) || is_array($form_state['values']['data']['manual'])) {
       $form_state['values']['data']['manual'][] = 'roles';
     }
