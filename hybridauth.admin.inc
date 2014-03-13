@@ -24,6 +24,7 @@ function hybridauth_admin_settings() {
     '#theme' => 'hybridauth_admin_settings_providers_table',
   );
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
+    $available = array_key_exists($provider_id, hybridauth_providers_files());
     $form['vtabs']['fset_providers'][$provider_id]['icon'] = array(
       '#theme' => 'hybridauth_provider_icon',
       '#provider_id' => $provider_id,
@@ -33,9 +34,10 @@ function hybridauth_admin_settings() {
       '#type' => 'checkbox',
       '#title' => drupal_placeholder($provider_name),
       '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0),
+      '#disabled' => $available ? FALSE : TRUE,
     );
     $form['vtabs']['fset_providers'][$provider_id]['file'] = array(
-      '#markup' => array_key_exists($provider_id, hybridauth_providers_files()) ? t('Yes') : t('No'),
+      '#markup' => $available ? t('Yes') : t('No'),
     );
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
