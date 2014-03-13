@@ -418,6 +418,7 @@ function hybridauth_user_view($account, $view_mode, $langcode) {
 function hybridauth_ctools_plugin_type() {
   return array(
     'icon_pack' => array(
+      'cache' => TRUE,
       // Themes can offer this plugin.
       'load themes' => TRUE,
     ),
@@ -752,6 +753,9 @@ function _hybridauth_add_icon_pack_files($name) {
     }
     if (!empty($icon_pack['js'])) {
       drupal_add_js($icon_pack['path'] . '/' . $icon_pack['js']);
+    }
+    if ($function = ctools_plugin_get_function($icon_pack, 'initialize_callback')) {
+      $function();
     }
   }
 }

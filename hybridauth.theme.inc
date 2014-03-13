@@ -180,9 +180,13 @@ function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
   }
   $icon_pack_classes = array(
     'hybridauth-icon',
+    drupal_html_class($vars['provider_id']),
     drupal_html_class('hybridauth-icon-' . $vars['icon_pack']),
     drupal_html_class('hybridauth-' . $vars['provider_id']),
     drupal_html_class('hybridauth-' . $vars['provider_id'] . '-' . $vars['icon_pack']),
   );
+  if ($function = ctools_plugin_load_function('hybridauth', 'icon_pack', $vars['icon_pack'], 'icon_classes_callback')) {
+    $function($icon_pack_classes);
+  }
   $vars['icon_pack_classes'] = implode(' ', $icon_pack_classes);
 }
