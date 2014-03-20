@@ -42,8 +42,9 @@ function hybridauth_admin_settings() {
     $form['vtabs']['fset_providers'][$provider_id]['hybridauth_provider_' . $provider_id . '_weight'] = array(
       '#type' => 'weight',
       // '#title' => t('Weight'),
-      '#delta' => 20,
-      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_weight', 0),
+      '#delta' => 50,
+      // Use a high default weight for disabled providers so that they sink down.
+      '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_weight', 50),
       '#attributes' => array('class' => array('hybridauth-provider-weight')),
     );
     $form['vtabs']['fset_providers'][$provider_id]['settings'] = array(

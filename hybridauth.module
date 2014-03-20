@@ -529,7 +529,7 @@ function hybridauth_providers_list() {
     $weights = array();
 
     foreach ($raw_providers as $provider_id => $provider_name) {
-      $weights[$provider_id] = variable_get('hybridauth_provider_' . $provider_id . '_weight', 0);
+      $weights[$provider_id] = variable_get('hybridauth_provider_' . $provider_id . '_weight', 50);
     }
     asort($weights);
 
