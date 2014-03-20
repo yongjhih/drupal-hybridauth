@@ -11,6 +11,7 @@ define('HYBRIDAUTH_HASH_SALT', 'hybridauth_hash_salt');
  */
 function hybridauth_hook_info() {
   $hooks = array(
+    'hybridauth_provider_config_alter',
     'hybridauth_username_alter',
     'hybridauth_profile_alter',
     'hybridauth_userinfo_alter',
@@ -700,6 +701,9 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
     if (is_array($config['scope'])) {
       $config['scope'] = array_filter($config['scope']);
     }
+
+    // Allow other modules to alter the provider config.
+    drupal_alter('hybridauth_provider_config', $config, $provider_id);
   }
 
   return $config;
