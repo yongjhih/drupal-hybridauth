@@ -4,13 +4,19 @@
  * Administrative pages forms and functions for the HybridAuth module.
  */
 
-function hybridauth_admin_settings() {
+/**
+ * Form constructor for the hybridauth admin settings form.
+ *
+ * @see hybridauth_admin_settings_validate()
+ *
+ * @ingroup forms
+ */
+function hybridauth_admin_settings($form, &$form_state) {
   if (!variable_get('hybridauth_register', 0) && variable_get('user_register', USER_REGISTER_VISITORS_ADMINISTRATIVE_APPROVAL) == USER_REGISTER_ADMINISTRATORS_ONLY) {
     drupal_set_message(t('Currently only administrators can create new user accounts. Either change the "Who can register accounts?" option under "Account settings" tab or at the core <a href="!link">Account settings</a>.',
       array('!link' => url('admin/config/people/accounts'))), 'warning');
   }
 
-  $form = array();
   $form['vtabs'] = array(
     '#type' => 'vertical_tabs',
     '#attached' => array(
@@ -352,6 +358,18 @@ function hybridauth_admin_settings() {
 }
 
 /**
+ * Form validation handler for the hybridauth admin settings form.
+ */
+function hybridauth_admin_settings_validate($form, &$form_state) {
+  foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
+    if (empty($form_state['values']['hybridauth_provider_' . $provider_id . '_enabled'])) {
+      unset($form_state['values']['hybridauth_provider_' . $provider_id . '_enabled']);
+      unset($form_state['values']['hybridauth_provider_' . $provider_id . '_weight']);
+    }
+  }
+}
+
+/**
  * Theme function for hybridauth_admin_settings() to render providers table.
  */
 function theme_hybridauth_admin_settings_providers_table($vars) {
@@ -395,6 +413,13 @@ function theme_hybridauth_admin_settings_providers_table($vars) {
   return $output;
 }
 
+/**
+ * Form constructor for the hybridauth provider admin settings form.
+ *
+ * @see hybridauth_admin_provider_settings_validate()
+ *
+ * @ingroup forms
+ */
 function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = NULL) {
   $form = array();
   $form['vtabs'] = array(
@@ -612,6 +637,17 @@ function hybridauth_admin_provider_settings($form, &$form_state, $provider_id = 
   }
 
   return system_settings_form($form);
+}
+
+/**
+ * Form validation handler for the hybridauth provider admin settings form.
+ */
+function hybridauth_admin_provider_settings_validate($form, &$form_state) {
+  foreach ($form_state['values'] as $variable_name => $value) {
+    if (empty($value) && strpos($variable_name, 'hybridauth_provider_') === 0) {
+      unset($form_state['values'][$variable_name]);
+    }
+  }
 }
 
 /**
