@@ -175,6 +175,12 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
  */
 function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
   _hybridauth_add_icon_pack_files($vars['icon_pack']);
+  if ($provider = hybridauth_get_provider($vars['provider_id'])) {
+    if (array_key_exists('css', $provider)) {
+      drupal_add_css($provider['path'] . '/' . $provider['css']);
+    }
+  }
+
   if (!isset($vars['provider_name'])) {
     $vars['provider_name'] = hybridauth_get_provider_name($vars['provider_id']);
   }
