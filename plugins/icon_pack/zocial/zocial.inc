@@ -21,6 +21,10 @@ function hybridauth_zocial_initialize_callback() {
   drupal_add_css($path . '/css/zocial.css');
 }
 
-function hybridauth_zocial_icon_classes_callback(&$classes) {
-  $classes = array_merge($classes, array('zocial', 'icon'));
+function hybridauth_zocial_icon_classes_callback(&$classes, $provider_id) {
+  $additional_classes = array('zocial', 'icon');
+  if ($provider_id == 'Vkontakte') {
+    $additional_classes[] = 'vk';
+  }
+  $classes = array_merge($classes, $additional_classes);
 }

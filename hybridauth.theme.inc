@@ -174,13 +174,6 @@ function template_preprocess_hybridauth_widget(&$vars, $hook) {
  * Template preprocess function for hybridauth_provider_icon.
  */
 function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
-  _hybridauth_add_icon_pack_files($vars['icon_pack']);
-  if ($provider = hybridauth_get_provider($vars['provider_id'])) {
-    if (array_key_exists('css', $provider)) {
-      drupal_add_css($provider['path'] . '/' . $provider['css']);
-    }
-  }
-
   if (!isset($vars['provider_name'])) {
     $vars['provider_name'] = hybridauth_get_provider_name($vars['provider_id']);
   }
@@ -191,8 +184,21 @@ function template_preprocess_hybridauth_provider_icon(&$vars, $hook) {
     drupal_html_class('hybridauth-' . $vars['provider_id']),
     drupal_html_class('hybridauth-' . $vars['provider_id'] . '-' . $vars['icon_pack']),
   );
+
+  // Icon pack modifications.
+  _hybridauth_add_icon_pack_files($vars['icon_pack']);
   if ($function = ctools_plugin_load_function('hybridauth', 'icon_pack', $vars['icon_pack'], 'icon_classes_callback')) {
-    $function($icon_pack_classes);
+    $function($icon_pack_classes, $vars['provider_id']);
   }
+  // Provider modifications.
+  if ($provider = hybridauth_get_provider($vars['provider_id'])) {
+    if (array_key_exists('css', $provider)) {
+      drupal_add_css($provider['path'] . '/' . $provider['css']);
+    }
+    if ($function = ctools_plugin_get_function($provider, 'icon_classes_callback')) {
+      $function($icon_pack_classes);
+    }
+  }
+
   $vars['icon_pack_classes'] = implode(' ', $icon_pack_classes);
 }
