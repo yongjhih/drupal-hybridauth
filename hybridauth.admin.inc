@@ -365,6 +365,7 @@ function hybridauth_admin_settings_validate($form, &$form_state) {
     if (empty($form_state['values']['hybridauth_provider_' . $provider_id . '_enabled'])) {
       unset($form_state['values']['hybridauth_provider_' . $provider_id . '_enabled']);
       unset($form_state['values']['hybridauth_provider_' . $provider_id . '_weight']);
+      variable_del('hybridauth_provider_' . $provider_id . '_enabled');
     }
   }
 }
