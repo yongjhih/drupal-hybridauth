@@ -75,14 +75,14 @@ function hybridauth_menu() {
 
   $items['hybridauth/endpoint'] = array(
     'page callback' => 'hybridauth_endpoint',
-    'access callback' => TRUE,
+    'access arguments' => array('use hybridauth'),
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
   );
   $items['hybridauth/window/%hybridauth_provider'] = array(
     'page callback' => 'hybridauth_window_start',
     'page arguments' => array(2),
-    'access callback' => TRUE,
+    'access arguments' => array('use hybridauth'),
     'file' => 'hybridauth.pages.inc',
     'type' => MENU_CALLBACK,
   );
