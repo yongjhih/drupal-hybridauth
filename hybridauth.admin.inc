@@ -520,6 +520,7 @@ function hybridauth_admin_provider_settings_validate($form, &$form_state) {
   foreach ($form_state['values'] as $variable_name => $value) {
     if (empty($value) && strpos($variable_name, 'hybridauth_provider_') === 0) {
       unset($form_state['values'][$variable_name]);
+      variable_del($variable_name);
     }
   }
 }
