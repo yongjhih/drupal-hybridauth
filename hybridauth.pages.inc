@@ -6,7 +6,7 @@
 
 function hybridauth_endpoint() {
   // Make sure the session is started, HybridAuth library needs it.
-  drupal_session_start();
+  hybridauth_session_start();
 
   if ($lib_path = _hybridauth_library_path()) {
     try {
@@ -18,6 +18,29 @@ function hybridauth_endpoint() {
   }
 
   return MENU_ACCESS_DENIED;
+}
+
+/**
+ * Initialize the user session before using the HybridAuth library.
+ */
+function hybridauth_session_start() {
+  // Make sure that a user session exists.
+  drupal_session_start();
+  // Special handling for HTTPS with normal session IDs and secure session IDs.
+  // Duplicated sessions are created, so we need to pull out the correct session
+  // data.
+  global $is_https;
+  if ($is_https && variable_get('https', FALSE)) {
+    // If there is an existing session with the same secure session ID we need
+    // to replace the $_SESSION contents with that.
+    $session = db_query('SELECT session FROM {sessions} WHERE sid = :sid AND ssid = :sid', array('sid' => session_id()))->fetchField();
+    if ($session) {
+      // Overwrite $_SESSION with the data.
+      session_decode($session);
+      // Remove the duplicate session from the database.
+      db_delete('sessions')->condition('sid', session_id())->execute();
+    }
+  }
 }
 
 /**
@@ -49,7 +72,7 @@ function hybridauth_window_start($provider_id) {
   }
 
   // Make sure the session is started, HybridAuth library needs it.
-  drupal_session_start();
+  hybridauth_session_start();
 
   // Try to get HybridAuth instance.
   if ($hybridauth = hybridauth_get_instance()) {
