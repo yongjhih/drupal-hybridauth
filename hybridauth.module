@@ -348,6 +348,9 @@ function hybridauth_username_alter(&$name, $account) {
       $hybridauth_name = token_replace($pattern, array('user' => $account2), array('clear' => TRUE));
       $name = trim(strip_tags($hybridauth_name));
     }
+    if (empty($name)) {
+      $name = $account2->name;
+    }
   }
 }
 
