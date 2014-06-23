@@ -142,9 +142,10 @@ function hybridauth_menu_site_status_alter(&$menu_site_status, $path) {
  * Implements hook_block_info().
  */
 function hybridauth_block_info() {
-  $blocks['hybridauth']['info'] = t('User login - HybridAuth widget only');
-  // Shouldn't be cached.
-  $blocks['hybridauth']['cache'] = DRUPAL_NO_CACHE;
+  $blocks['hybridauth'] = array(
+    'info' => t('User login - HybridAuth widget only'),
+    'cache' => DRUPAL_CACHE_GLOBAL,
+  );
 
   return $blocks;
 }
@@ -156,8 +157,11 @@ function hybridauth_block_view($delta = '') {
   if ($delta == 'hybridauth' && !user_is_logged_in() && user_access('use hybridauth')) {
     $block = array();
     $block['subject'] = t('User login');
-    $element['#type'] = 'hybridauth_widget';
-    $block['content'] = drupal_render($element);
+    $block['content'] = array(
+      'hybridauth' => array(
+        '#type' => 'hybridauth_widget',
+      ),
+    );
     return $block;
   }
 }
