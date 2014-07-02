@@ -700,10 +700,12 @@ function hybridauth_get_config() {
 /**
  * Returns provider config.
  */
-function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
+function hybridauth_get_provider_config($provider_id) {
   $config = NULL;
   $enabled = variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0);
-  if (!$enabled_only || $enabled) {
+  if ($enabled) {
+    $language_default = language_default();
+    $language_default->prefix = '';
     $config = array(
       'enabled' => $enabled,
       'keys' => array(
@@ -713,7 +715,7 @@ function hybridauth_get_provider_config($provider_id, $enabled_only = TRUE) {
       ),
       'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
       'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', ''),
-      'hauth_return_to' => url('hybridauth/endpoint'),
+      'hauth_return_to' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => $language_default)),
     );
     if (is_array($config['scope'])) {
       $config['scope'] = array_filter($config['scope']);
