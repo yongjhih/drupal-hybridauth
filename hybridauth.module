@@ -755,7 +755,24 @@ function _hybridauth_library_path() {
   $library_path = &drupal_static(__FUNCTION__, NULL);
 
   if (!isset($library_path)) {
-    $library_path = variable_get('hybridauth_library_path', module_exists('libraries') ? libraries_get_path('hybridauth') : 'sites/all/libraries/hybridauth');
+    // Check if the variable is set.
+    $library_path = variable_get('hybridauth_library_path', '');
+
+    if (empty($library_path)) {
+      // Use libraries module or profile directory, fallback to standard directory.
+      if (module_exists('libraries')) {
+        $library_path = libraries_get_path('hybridauth');
+      }
+      else {
+        $profile = drupal_get_path('profile', drupal_get_profile());
+        $library_path = $profile . '/libraries/hybridauth';
+        if (!file_exists($library_path)) {
+          $library_path = 'sites/all/libraries/hybridauth';
+        }
+      }
+    }
+
+    // Check for the /Hybrid/Auth.php file.
     if (file_exists($library_path . '/Hybrid/Auth.php')) {
     }
     elseif (file_exists($library_path . '/hybridauth/Hybrid/Auth.php')) {
