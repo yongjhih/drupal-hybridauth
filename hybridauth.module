@@ -680,10 +680,8 @@ function hybridauth_get_config() {
       }
     }
 
-    $language_default = language_default();
-    $language_default->prefix = '';
     $config = array(
-      'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => $language_default)),
+      'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => _hybridauth_language_default())),
       'providers' => array(),
       'debug_mode' => variable_get('hybridauth_debug', 0),
       'debug_file' => $logfile,
@@ -706,8 +704,6 @@ function hybridauth_get_provider_config($provider_id) {
   $config = NULL;
   $enabled = variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0);
   if ($enabled) {
-    $language_default = language_default();
-    $language_default->prefix = '';
     $config = array(
       'enabled' => $enabled,
       'keys' => array(
@@ -717,7 +713,7 @@ function hybridauth_get_provider_config($provider_id) {
       ),
       'scope' => variable_get('hybridauth_provider_' . $provider_id . '_scope', ''),
       'display' => variable_get('hybridauth_provider_' . $provider_id . '_display', ''),
-      'hauth_return_to' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => $language_default)),
+      'hauth_return_to' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => _hybridauth_language_default())),
     );
     if (is_array($config['scope'])) {
       $config['scope'] = array_filter($config['scope']);
@@ -1005,6 +1001,9 @@ function _hybridauth_registration_block($data) {
   return FALSE;
 }
 
+/**
+ * Helper function to invoke HybridAuth hooks and Rules events.
+ */
 function _hybridauth_invoke_hooks($hook, $account, $data) {
   // Boost module compatibility; see https://drupal.org/node/2095575.
   if ($hook == 'hybridauth_user_login') {
@@ -1020,4 +1019,13 @@ function _hybridauth_invoke_hooks($hook, $account, $data) {
   if (module_exists('rules')) {
     rules_invoke_event($hook, $account, $data);
   }
+}
+
+/**
+ * Helper function to get language object with empty language prefix.
+ */
+function _hybridauth_language_default() {
+  $language_default = language_default();
+  $language_default->prefix = '';
+  return $language_default;
 }
