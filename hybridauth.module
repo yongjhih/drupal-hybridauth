@@ -680,8 +680,10 @@ function hybridauth_get_config() {
       }
     }
 
+    $language_default = language_default();
+    $language_default->prefix = '';
     $config = array(
-      'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE)),
+      'base_url' => url('hybridauth/endpoint', array('absolute' => TRUE, 'language' => $language_default)),
       'providers' => array(),
       'debug_mode' => variable_get('hybridauth_debug', 0),
       'debug_file' => $logfile,
