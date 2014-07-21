@@ -10,8 +10,6 @@
 function hybridauth_uninstall() {
   module_load_include('module', 'hybridauth');
   foreach (hybridauth_providers_list() as $provider_id => $provider_name) {
-    variable_del('hybridauth_provider_' . $provider_id . '_enabled');
-    variable_del('hybridauth_provider_' . $provider_id . '_weight');
     variable_del('hybridauth_provider_' . $provider_id . '_keys_id');
     variable_del('hybridauth_provider_' . $provider_id . '_keys_key');
     variable_del('hybridauth_provider_' . $provider_id . '_keys_secret');
@@ -20,8 +18,12 @@ function hybridauth_uninstall() {
     variable_del('hybridauth_provider_' . $provider_id . '_window_height');
     variable_del('hybridauth_provider_' . $provider_id . '_display');
     variable_del('hybridauth_provider_' . $provider_id . '_scope');
+    // Not used anymore.
+    variable_del('hybridauth_provider_' . $provider_id . '_enabled');
+    variable_del('hybridauth_provider_' . $provider_id . '_weight');
   }
 
+  variable_del('hybridauth_providers');
   variable_del('hybridauth_library_path');
   variable_del('hybridauth_required_fields');
   variable_del('hybridauth_widget_title');
@@ -210,4 +212,25 @@ function hybridauth_update_7002(&$sandbox) {
       variable_del('hybridauth_provider_' . $provider_id . '_weight');
     }
   }
+}
+
+/**
+ * Remove plenty of variables (2 per provider).
+ */
+function hybridauth_update_7003(&$sandbox) {
+  $weights = array();
+  $hybridauth_providers = array();
+
+  foreach (array_keys(hybridauth_providers_list()) as $provider_id) {
+    $weights[$provider_id] = variable_get('hybridauth_provider_' . $provider_id . '_weight', 50);
+    variable_del('hybridauth_provider_' . $provider_id . '_weight');
+  }
+  asort($weights);
+
+  foreach (array_keys($weights) as $provider_id) {
+    $hybridauth_providers[$provider_id] = variable_get('hybridauth_provider_' . $provider_id . '_enabled', 0) ? $provider_id : 0;
+    variable_del('hybridauth_provider_' . $provider_id . '_enabled');
+  }
+
+  variable_set('hybridauth_providers', $hybridauth_providers);
 }
