@@ -28,7 +28,6 @@ function hybridauth_admin_settings($form, &$form_state) {
     '#type' => 'fieldset',
     '#title' => t('Authentication providers'),
   );
-
   $header = array(
     'name' => t('Name'),
     'icon' => t('Icon'),
