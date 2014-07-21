@@ -85,8 +85,13 @@
       vals.push(label + ': ' + value);
 
       label = '<span style="font-weight:bold;">' + $.trim($('label[for="edit-hybridauth-widget-weight"]', context).text()) + '</span>';
-      value = $('#edit-hybridauth-widget-weight', context).find('option:selected').text();
-      vals.push(label + ': ' + value);
+      value = $('#edit-hybridauth-widget-weight', context).attr('value');
+      if (value) {
+        vals.push(label + ': ' + value);
+      }
+      else {
+        vals.push(label + ': ' + Drupal.t('None'));
+      }
 
       return vals.join('<br />');
     });
