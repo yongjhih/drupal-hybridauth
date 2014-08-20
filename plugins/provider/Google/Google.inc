@@ -9,6 +9,7 @@
  */
 $plugin = array(
   'configuration_form_callback' => 'hybridauth_provider_google_configuration_form_callback',
+  'configuration_callback' => 'hybridauth_provider_google_configuration_callback',
 );
 
 function hybridauth_provider_google_configuration_form_callback(&$form, $provider_id) {
@@ -32,7 +33,17 @@ function hybridauth_provider_google_configuration_form_callback(&$form, $provide
   $form['vtabs']['advanced']['hybridauth_provider_' . $provider_id . '_scope'] = array(
     '#type' => 'textfield',
     '#title' => t('Scope'),
-    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email'),
+    '#default_value' => variable_get('hybridauth_provider_' . $provider_id . '_scope', hybridauth_provider_google_scope_default()),
     '#size' => 150,
   );
+}
+
+function hybridauth_provider_google_configuration_callback(&$config, $provider_id) {
+  if (empty($config['scope'])) {
+    $config['scope'] = hybridauth_provider_google_scope_default();
+  }
+}
+
+function hybridauth_provider_google_scope_default() {
+  return 'https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email';
 }
