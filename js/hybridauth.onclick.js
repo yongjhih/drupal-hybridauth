@@ -6,7 +6,7 @@
   Drupal.behaviors.hybridauth_onclick = {};
   Drupal.behaviors.hybridauth_onclick.attach = function(context, settings) {
     $('.hybridauth-onclick-current:not(.hybridauth-onclick-processed)', context).addClass('hybridauth-onclick-processed').bind('click', function() {
-      $(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting') + ' ' + this.title + '...</div>');
+      $(this).parents('.hybridauth-widget').after('<div>' + Drupal.t('Contacting @title...', {'@title': this.title}) + '</div>');
     });
     $('.hybridauth-onclick-popup:not(.hybridauth-onclick-processed)', context).addClass('hybridauth-onclick-processed').bind('click', function() {
       var width = $(this).attr('data-hybridauth-width'), height = $(this).attr('data-hybridauth-height');
