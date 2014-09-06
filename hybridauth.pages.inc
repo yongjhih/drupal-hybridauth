@@ -456,7 +456,7 @@ function hybridauth_additional_info_form($form, &$form_state, $data) {
         . t('Spaces are allowed; punctuation is not allowed except for periods, hyphens, apostrophes, and underscores.'),
     );
     if (module_exists('username_check')) {
-      _username_check_load_resources();
+      _username_check_load_resources('auto');
       $form['fset']['username']['#field_suffix'] = '<span id="username-check-informer">&nbsp;</span>';
       $form['fset']['username']['#suffix'] = '<div id="username-check-message"></div>';
     }
