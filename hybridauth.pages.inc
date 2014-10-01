@@ -128,6 +128,11 @@ function _hybridauth_window_auth($hybridauth, $provider_id) {
       $params['openid_identifier'] = $_GET['openid_identifier'];
     }
     try {
+      if (isset($_GET['access_token'])) {
+        $access_token = $_GET['access_token'];
+        $hybridauth->storage()->set( "hauth_session." . $provider_id . ".is_logged_in", 1 );
+        $hybridauth->storage()->set( "hauth_session." . $provider_id . ".token.access_token", $access_token);
+      }
       $adapter = $hybridauth->authenticate($provider_id, $params);
       $profile = (array) ($adapter->getUserProfile());
     }
