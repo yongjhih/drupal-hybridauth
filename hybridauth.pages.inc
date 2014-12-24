@@ -248,6 +248,15 @@ function _hybridauth_window_process_auth($data) {
       $form_state['uid'] = $account->uid;
       user_login_submit(array(), $form_state);
       _hybridauth_invoke_hooks('hybridauth_user_login', $user, $data);
+
+      $userinfo = array(
+        'access' => REQUEST_TIME,
+        'data' => array('hybridauth' => $data),
+      );
+      // Invoke hook_hybridauth_userinfo_alter().
+      drupal_alter('hybridauth_userinfo', $userinfo, $data);
+
+      user_save($account, $userinfo);
     }
     // Block registration - if (variable_get('hybridauth_duplicate_emails', 1) == 1) or
     // (variable_get('hybridauth_duplicate_emails', 1) == 2 && $data['email'] != $data['emailVerified'])
